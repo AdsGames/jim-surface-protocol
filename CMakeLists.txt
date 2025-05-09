@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.22)
 
 project(Tojam2025 VERSION 0.1.0 LANGUAGES CXX)
 
@@ -12,7 +12,7 @@ include(cmake/get_cpm.cmake)
 CPMAddPackage(
   NAME asw
   GITHUB_REPOSITORY adsgames/asw
-  GIT_TAG 3baba79feb8c2fa3786b584f67322de34579d885
+  GIT_TAG 8b8806468f13c5ec07f2329a4e6c2449c648ce6f
 )
 CPMAddPackage("gh:nlohmann/json@3.11.3")
 
