@@ -20,8 +20,9 @@ WorkerStatus Worker::getStatus() const {
 
 void Worker::draw(const asw::Vec2<float>& offset) {
   // Calc screen position
-  auto iso_x = isoX(position.x, position.y);
-  auto iso_y = isoY(position.x, position.y, position.z);
+  auto iso_x = isoX(position);
+  auto iso_y = isoY(position);
+
   auto screen_pos = asw::Vec2<float>(iso_x, iso_y) * 32 - offset;
 
   // Draw of top of tile

@@ -31,7 +31,7 @@ void TileMap::generate() {
     for (int j = 0; j < MAP_DEPTH; ++j) {
       for (int k = 0; k < MAP_HEIGHT; ++k) {
         mapTiles[i][j][k] = Tile();
-        auto position = asw::Vec3<float>(i, j, k);
+        auto position = asw::Vec3<int>(i, j, k);
         mapTiles[i][j][k].setPosition(position);
       }
     }
@@ -49,7 +49,8 @@ void TileMap::generate() {
 
       for (int k = 0; k < MAP_HEIGHT; ++k) {
         if (k < height_val) {
-          if (k + 1 >= height_val) {
+          // Grass if at top of ground, unless water
+          if (k + 1 >= height_val && k >= 3) {
             mapTiles[i][j][k].setType("ground_grass");
           } else if (k + 3 >= height_val) {
             mapTiles[i][j][k].setType("ground");
@@ -58,8 +59,12 @@ void TileMap::generate() {
           }
         }
 
+        else if (k < 4) {
+          mapTiles[i][j][k].setType("water");
+        }
+
         else if (k - 1 < height_val) {
-          if (asw::random::chance(0.5F)) {
+          if (asw::random::chance(0.2F)) {
             mapTiles[i][j][k].setType("plant_1");
           }
         }
@@ -103,7 +108,7 @@ void TileMap::draw(const asw::Quad<float>& camera) {
 
 // Draw a layer
 void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
-  if (layer > z_focus) {
+  if (layer > z_focus || layer < z_focus - 4) {
     return;
   }
 
@@ -111,7 +116,15 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
     for (int j = 0; j < MAP_DEPTH; ++j) {
       auto tile = mapTiles[i][j][layer];
 
-      if (tile.getType() != nullptr) {
+      if (tile.getType() == nullptr) {
+        continue;
+      }
+
+      if (layer < MAP_HEIGHT - 1 &&
+          mapTiles[i][j][layer + 1].getType() != nullptr &&
+          mapTiles[i][j][layer + 1].getType()->isOpaque()) {
+        tile.drawHidden(camera.position);
+      } else {
         tile.draw(camera.position);
       }
     }

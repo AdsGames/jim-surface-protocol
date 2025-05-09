@@ -13,6 +13,7 @@ constexpr float TILE_WIDTH = TILE_SIZE;
 constexpr float TILE_HEIGHT = TILE_SIZE / 2.0f;
 
 enum class TileRenderMode {
+  NONE,
   CUBE,
   CUBE_UNIQUE_TOP,
   FLAT,
@@ -22,8 +23,10 @@ class TileType {
  public:
   TileType(short id, const std::string& name, const std::string& id_str);
 
-  void draw(const asw::Vec3<float>& position, const asw::Vec2<float>& offset);
-  void drawWireframe(const asw::Vec3<float>& position,
+  void draw(const asw::Vec3<int>& position,
+            const asw::Vec2<float>& offset,
+            bool hidden);
+  void drawWireframe(const asw::Vec3<int>& position,
                      const asw::Vec2<float>& offset);
 
   short getId() const;
@@ -36,12 +39,15 @@ class TileType {
 
   void addImage(asw::Texture image);
   void addAttribute(int attribute);
-  void setRenderMode(TileRenderMode mode);
 
-  void bakeTexture();
+  void bakeTexture(TileRenderMode mode, float alpha);
+  bool isOpaque() const {
+    return render_mode == TileRenderMode::CUBE ||
+           render_mode == TileRenderMode::CUBE_UNIQUE_TOP;
+  }
 
  private:
-  void renderCube();
+  void renderCube(bool unique_top);
   void renderFlat();
 
   /// Project a 3D vector to 2D screen coordinates
@@ -49,10 +55,10 @@ class TileType {
   /// @param out The output 2D point.
   /// @note The output point is in screen coordinates. The offset is so that
   /// this can be rendered on a texture of TILE_SIZE.
-  SDL_FPoint project(const asw::Vec3<float>& v) {
+  SDL_FPoint project(const asw::Vec3<int>& v) {
     SDL_FPoint out;
-    out.x = isoX(v.x, v.y) * (TILE_SIZE / 2.0F) + TILE_SIZE / 2.0F;
-    out.y = isoY(v.x, v.y, v.z) * (TILE_SIZE / 2.0F) + TILE_SIZE / 2.0F;
+    out.x = isoX(v) * (TILE_SIZE / 2.0F) + TILE_SIZE / 2.0F;
+    out.y = isoY(v) * (TILE_SIZE / 2.0F) + TILE_SIZE / 2.0F;
     return out;
   }
 
@@ -64,6 +70,5 @@ class TileType {
   std::bitset<ATTRIBUTE_MAX> attributes;
   std::vector<asw::Texture> images;
   asw::Texture image;
-
-  TileRenderMode render_mode{TileRenderMode::CUBE};
+  TileRenderMode render_mode{TileRenderMode::NONE};
 };

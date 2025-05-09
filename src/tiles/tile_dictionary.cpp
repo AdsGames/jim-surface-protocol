@@ -69,21 +69,28 @@ void TileDictionary::loadTypes(const std::string& path) {
     }
 
     // Render mode
+    TileRenderMode render_mode = TileRenderMode::CUBE;
     if (cTile.contains("render_mode")) {
-      auto render_mode = cTile["render_mode"];
-      if (render_mode == "flat") {
-        tile->setRenderMode(TileRenderMode::FLAT);
-      } else if (render_mode == "cube") {
-        tile->setRenderMode(TileRenderMode::CUBE);
-      } else if (render_mode == "cube_unique_top") {
-        tile->setRenderMode(TileRenderMode::CUBE_UNIQUE_TOP);
+      auto mode = cTile["render_mode"];
+      if (mode == "flat") {
+        render_mode = TileRenderMode::FLAT;
+      } else if (mode == "cube") {
+        render_mode = TileRenderMode::CUBE;
+      } else if (mode == "cube_unique_top") {
+        render_mode = TileRenderMode::CUBE_UNIQUE_TOP;
       } else {
-        std::cerr << "Error: Unknown render mode " << render_mode << '\n';
+        std::cerr << "Error: Unknown render mode " << mode << '\n';
       }
     }
 
+    // Alpha
+    float alpha = 1.0F;
+    if (cTile.contains("alpha")) {
+      alpha = cTile["alpha"];
+    }
+
     // Bake texture
-    tile->bakeTexture();
+    tile->bakeTexture(render_mode, alpha);
 
     // Add to types
     types.push_back(tile);

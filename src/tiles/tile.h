@@ -12,7 +12,7 @@ class Tile {
 
   explicit Tile(short type);
 
-  void setPosition(const asw::Vec3<float>& position);
+  void setPosition(const asw::Vec3<int>& position);
 
   std::shared_ptr<TileType> getType() const;
 
@@ -22,10 +22,11 @@ class Tile {
   void setType(std::string type);
 
   void draw(const asw::Vec2<float>& offset);
+  void drawHidden(const asw::Vec2<float>& offset);
   void drawWireframe(const asw::Vec2<float>& offset);
 
  private:
-  asw::Vec3<float> position{0.0F, 0.0F, 0.0F};
+  asw::Vec3<int> position{0, 0, 0};
 
   std::shared_ptr<TileType> t_type{};
 };

@@ -6,7 +6,7 @@ Tile::Tile(short type) {
   setType(type);
 }
 
-void Tile::setPosition(const asw::Vec3<float>& position) {
+void Tile::setPosition(const asw::Vec3<int>& position) {
   this->position = position;
 }
 
@@ -38,7 +38,15 @@ void Tile::draw(const asw::Vec2<float>& offset) {
     return;
   }
 
-  t_type->draw(position, offset);
+  t_type->draw(position, offset, false);
+}
+
+void Tile::drawHidden(const asw::Vec2<float>& offset) {
+  if (t_type == nullptr) {
+    return;
+  }
+
+  t_type->draw(position, offset, true);
 }
 
 void Tile::drawWireframe(const asw::Vec2<float>& offset) {

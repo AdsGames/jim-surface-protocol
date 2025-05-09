@@ -26,13 +26,9 @@
   },
   {
     "id": 16,
-    "images": ["assets/images/tiles/water_1.png"],
-    "name": "Water"
-  },
-  {
-    "id": 17,
     "images": ["assets/images/tiles/water_deep.png"],
-    "name": "Deep Water"
+    "name": "Water",
+    "alpha": 0.5
   },
   {
     "id": 19,
