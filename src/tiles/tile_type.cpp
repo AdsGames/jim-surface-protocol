@@ -135,7 +135,7 @@ void TileType::draw(const asw::Vec3<int>& position,
     SDL_SetTextureColorMod(image.get(), 255, 255, 255);
   }
 
-  asw::draw::sprite(image, asw::Vec2<float>(iso_x, iso_y));
+  asw::draw::sprite(image, asw::Vec2(iso_x, iso_y));
 }
 
 void TileType::drawWireframe(const asw::Vec3<int>& position,
@@ -143,23 +143,23 @@ void TileType::drawWireframe(const asw::Vec3<int>& position,
   // Calc screen position
   auto iso_x = isoX(position);
   auto iso_y = isoY(position);
-  auto screen_pos = asw::Vec2<float>(iso_x, iso_y) * TILE_HEIGHT - offset;
+  auto screen_pos = asw::Vec2(iso_x, iso_y) * TILE_HEIGHT - offset;
 
   // Draw of top of tile
-  asw::draw::line(screen_pos + asw::Vec2<float>(0, TILE_HEIGHT / 2),
-                  screen_pos + asw::Vec2<float>(TILE_WIDTH / 2, 0),
+  asw::draw::line(screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
+                  screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
                   asw::util::makeColor(255, 255, 0));
 
-  asw::draw::line(screen_pos + asw::Vec2<float>(TILE_WIDTH / 2, 0),
-                  screen_pos + asw::Vec2<float>(TILE_WIDTH, TILE_HEIGHT / 2),
+  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
+                  screen_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
                   asw::util::makeColor(255, 0, 255));
 
-  asw::draw::line(screen_pos + asw::Vec2<float>(TILE_WIDTH, TILE_HEIGHT / 2),
-                  screen_pos + asw::Vec2<float>(TILE_WIDTH / 2, TILE_HEIGHT),
+  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
+                  screen_pos + asw::Vec2(TILE_WIDTH_F / 2, TILE_HEIGHT_F),
                   asw::util::makeColor(0, 255, 0));
 
-  asw::draw::line(screen_pos + asw::Vec2<float>(TILE_WIDTH / 2, TILE_HEIGHT),
-                  screen_pos + asw::Vec2<float>(0, TILE_HEIGHT / 2),
+  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F / 2, TILE_HEIGHT_F),
+                  screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
                   asw::util::makeColor(0, 255, 255));
 }
 

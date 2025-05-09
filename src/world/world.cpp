@@ -24,20 +24,20 @@ void World::update(float dt) {
   }
 
   // Mouse movement
-  auto screen_size = asw::display::getLogicalSize();
+  // auto screen_size = asw::display::getLogicalSize();
 
-  if (asw::input::mouse.x > screen_size.x * 0.9) {
-    camera.position.x += 10;
-  }
-  if (asw::input::mouse.x < screen_size.x * 0.1) {
-    camera.position.x -= 10;
-  }
-  if (asw::input::mouse.y > screen_size.y * 0.9) {
-    camera.position.y += 10;
-  }
-  if (asw::input::mouse.y < screen_size.y * 0.1) {
-    camera.position.y -= 10;
-  }
+  // if (asw::input::mouse.x > screen_size.x * 0.9) {
+  //   camera.position.x += 10;
+  // }
+  // if (asw::input::mouse.x < screen_size.x * 0.1) {
+  //   camera.position.x -= 10;
+  // }
+  // if (asw::input::mouse.y > screen_size.y * 0.9) {
+  //   camera.position.y += 10;
+  // }
+  // if (asw::input::mouse.y < screen_size.y * 0.1) {
+  //   camera.position.y -= 10;
+  // }
 
   // Regenerate map
   if (asw::input::wasKeyPressed(asw::input::Key::G)) {
@@ -48,7 +48,7 @@ void World::update(float dt) {
 }
 
 void World::draw() {
-  asw::draw::rectFill(asw::Quad<float>(0, 0, camera.size.x, camera.size.y),
+  asw::draw::rectFill(asw::Quad(0.0F, 0.0F, camera.size.x, camera.size.y),
                       asw::util::makeColor(0, 64, 128));
 
   tile_map.draw(camera);

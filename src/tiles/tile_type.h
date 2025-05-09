@@ -8,9 +8,12 @@
 #include "../lib/project.h"
 
 constexpr int ATTRIBUTE_MAX = 8;
+
 constexpr int TILE_SIZE = 64;
-constexpr float TILE_WIDTH = TILE_SIZE;
-constexpr float TILE_HEIGHT = TILE_SIZE / 2.0f;
+constexpr int TILE_WIDTH = TILE_SIZE;
+constexpr int TILE_HEIGHT = TILE_SIZE / 2;
+constexpr float TILE_WIDTH_F = static_cast<float>(TILE_WIDTH);
+constexpr float TILE_HEIGHT_F = static_cast<float>(TILE_HEIGHT);
 
 enum class TileRenderMode {
   NONE,

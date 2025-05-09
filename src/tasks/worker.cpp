@@ -23,22 +23,22 @@ void Worker::draw(const asw::Vec2<float>& offset) {
   auto iso_x = isoX(position);
   auto iso_y = isoY(position);
 
-  auto screen_pos = asw::Vec2<float>(iso_x, iso_y) * 32 - offset;
+  auto screen_pos = asw::Vec2(iso_x, iso_y) * 32 - offset;
 
   // Draw of top of tile
-  asw::draw::line(screen_pos + asw::Vec2<float>(0, 32 / 2),
-                  screen_pos + asw::Vec2<float>(32 / 2, 0),
+  asw::draw::line(screen_pos + asw::Vec2(0.0F, 32.0F / 2.0F),
+                  screen_pos + asw::Vec2(32.0F / 2.0F, 0.0F),
                   asw::util::makeColor(255, 255, 0));
 
-  asw::draw::line(screen_pos + asw::Vec2<float>(32 / 2, 0),
-                  screen_pos + asw::Vec2<float>(32, 32 / 2),
+  asw::draw::line(screen_pos + asw::Vec2(32.0F / 2.0F, 0.0F),
+                  screen_pos + asw::Vec2(32.0F, 32.0F / 2.0F),
                   asw::util::makeColor(255, 0, 255));
 
-  asw::draw::line(screen_pos + asw::Vec2<float>(32, 32 / 2),
-                  screen_pos + asw::Vec2<float>(32 / 2, 32),
+  asw::draw::line(screen_pos + asw::Vec2(32.0F, 32.0F / 2.0F),
+                  screen_pos + asw::Vec2(32.0F / 2.0F, 32.0F),
                   asw::util::makeColor(0, 255, 0));
 
-  asw::draw::line(screen_pos + asw::Vec2<float>(32 / 2, 32),
-                  screen_pos + asw::Vec2<float>(0, 32 / 2),
+  asw::draw::line(screen_pos + asw::Vec2(32.0F / 2.0F, 32.0F),
+                  screen_pos + asw::Vec2(0.0F, 32.0F / 2.0F),
                   asw::util::makeColor(0, 255, 255));
 }
