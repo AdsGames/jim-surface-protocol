@@ -110,7 +110,7 @@ void TileMap::draw(const asw::Quad<float>& camera) {
 
 // Draw a layer
 void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
-  if (layer > z_focus || layer < z_focus - 4) {
+  if (layer > z_focus) {
     return;
   }
 
@@ -122,20 +122,25 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
         continue;
       }
 
-      if (layer == z_focus && layer < MAP_HEIGHT - 1 &&
-          mapTiles[i][j][layer + 1].getType() != nullptr &&
-          mapTiles[i][j][layer + 1].getType()->isOpaque()) {
-        tile.drawHidden(camera.position);
-      } else {
-        tile.draw(camera.position);
-      }
+      auto hidden = layer == z_focus && layer < MAP_HEIGHT - 1 &&
+                    mapTiles[i][j][layer + 1].getType() != nullptr &&
+                    mapTiles[i][j][layer + 1].getType()->isOpaque();
+
+      auto empty_left = i == 0 ||
+                        mapTiles[i - 1][j][layer].getType() == nullptr ||
+                        !mapTiles[i - 1][j][layer].getType()->isOpaque();
+
+      auto empty_right = j == 0 ||
+                         mapTiles[i][j - 1][layer].getType() == nullptr ||
+                         !mapTiles[i][j - 1][layer].getType()->isOpaque();
+
+      tile.draw(camera.position, hidden, empty_left, empty_right);
     }
   }
 
   // Draw depth layer
-  // Draw semi-transparent buffer
   SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_BLEND);
   asw::draw::rectFill(asw::Quad<float>(0, 0, camera.size.x, camera.size.y),
-                      asw::util::makeColor(0, 0, 0, (z_focus - layer) * 32));
+                      asw::util::makeColor(0, 0, 0, (z_focus - layer) * 4));
   SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_BLEND);
 }

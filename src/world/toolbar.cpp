@@ -86,6 +86,14 @@ void Toolbar::draw(World& world) {
                     asw::Vec2(10.0F, 80.0F),
                     asw::util::makeColor(255, 255, 255));
 
+    // X + Y
+    asw::draw::text(font, "X: " + std::to_string(cursor_idx.x),
+                    asw::Vec2(10.0F, 100.0F),
+                    asw::util::makeColor(255, 255, 255));
+    asw::draw::text(font, "Y: " + std::to_string(cursor_idx.y),
+                    asw::Vec2(10.0F, 120.0F),
+                    asw::util::makeColor(255, 255, 255));
+
     // if (mode == ToolMode::INSPECT) {
     //   selected_tile->getType()->draw(asw::Vec3(0, 0, 0), asw::Vec2(0, 0),
     //   true);
@@ -110,10 +118,10 @@ void Toolbar::draw(World& world) {
   }
 
   // Inspect View
-  if (mode == ToolMode::INSPECT) {
-    asw::draw::rectFill(asw::Quad(0.0F, 0.0F, 200.0F, 200.0F),
-                        asw::util::makeColor(128, 128, 0));
-  }
+  // if (mode == ToolMode::INSPECT) {
+  //   asw::draw::rectFill(asw::Quad(0.0F, 0.0F, 200.0F, 200.0F),
+  //                       asw::util::makeColor(128, 128, 0));
+  // }
 }
 
 void Toolbar::drawWireframe(const asw::Vec3<int>& position,
