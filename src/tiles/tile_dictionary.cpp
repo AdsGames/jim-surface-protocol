@@ -52,21 +52,27 @@ void TileDictionary::loadTypes(const std::string& path) {
     const short id = cTile["id"];
     std::string name = cTile["name"];
 
-    std::cout << "- " << name << '\n';
-
     // Parse name
     std::string id_str = name;
     std::transform(id_str.begin(), id_str.end(), id_str.begin(), ::tolower);
     std::replace(id_str.begin(), id_str.end(), ' ', '_');
 
+    std::cout << "~ ID: " << id << '\n';
+    std::cout << "  Name: " << name << '\n';
+    std::cout << "  ID String: " << id_str << '\n';
+
     // Create tile
     auto tile = std::make_shared<TileType>(id, name, id_str);
 
     // Images
+    int image_count = 0;
     for (auto const& image : cTile["images"]) {
       auto tex = asw::assets::loadTexture(image);
       tile->addImage(tex);
+      image_count++;
     }
+
+    std::cout << "  Images: " << image_count << '\n';
 
     // Render mode
     TileRenderMode render_mode = TileRenderMode::CUBE;
@@ -83,6 +89,8 @@ void TileDictionary::loadTypes(const std::string& path) {
       }
     }
 
+    std::cout << "  Render Mode: " << static_cast<int>(render_mode) << '\n';
+
     // Alpha
     float alpha = 1.0F;
     if (cTile.contains("alpha")) {
@@ -95,6 +103,8 @@ void TileDictionary::loadTypes(const std::string& path) {
     // Add to types
     types.push_back(tile);
   }
+
+  std::cout << "Loaded " << types.size() << " tiles" << '\n';
 
   // Close
   file.close();

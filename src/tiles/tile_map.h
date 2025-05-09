@@ -25,6 +25,7 @@ class TileMap {
   void generate();
 
   Tile* getTileAt(const asw::Vec2<float>& position);
+  Tile* getTileAtIndex(const asw::Vec3<int>& index);
 
   asw::Vec3<int> getIndexAt(const asw::Vec2<float>& position);
 

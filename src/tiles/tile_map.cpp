@@ -12,6 +12,7 @@ asw::Vec3<int> TileMap::getSize() const {
 }
 
 void TileMap::update(float deltaTime) {
+  // Z Layering
   z_focus += asw::input::mouse.z;
 
   if (asw::input::wasKeyPressed(asw::input::Key::KP_MINUS)) {
@@ -44,7 +45,7 @@ void TileMap::generate() {
   // Dirt grass and rocks
   for (int i = 0; i < MAP_WIDTH; ++i) {
     for (int j = 0; j < MAP_DEPTH; ++j) {
-      auto frac = height_map.fractal(100, seed + i, seed + j);
+      auto frac = height_map.fractal(10, seed + i, seed + j);
       auto height_val = static_cast<int>(MAP_HEIGHT * (frac + 1.0F) / 2.0F);
 
       for (int k = 0; k < MAP_HEIGHT; ++k) {
@@ -74,15 +75,16 @@ void TileMap::generate() {
 }
 
 Tile* TileMap::getTileAt(const asw::Vec2<float>& position) {
-  auto index = getIndexAt(position);
+  return getTileAtIndex(getIndexAt(position));
+}
 
+Tile* TileMap::getTileAtIndex(const asw::Vec3<int>& index) {
   // Check bounds
   if (index.x < 0 || index.x >= MAP_WIDTH || index.y < 0 ||
       index.y >= MAP_DEPTH) {
     return nullptr;
   }
 
-  // Return pointer
   return &mapTiles[index.x][index.y][index.z];
 }
 
@@ -120,7 +122,7 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
         continue;
       }
 
-      if (layer < MAP_HEIGHT - 1 &&
+      if (layer == z_focus && layer < MAP_HEIGHT - 1 &&
           mapTiles[i][j][layer + 1].getType() != nullptr &&
           mapTiles[i][j][layer + 1].getType()->isOpaque()) {
         tile.drawHidden(camera.position);

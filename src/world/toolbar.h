@@ -21,8 +21,13 @@ class Toolbar {
   void draw(World& world);
 
  private:
+  void action(World& world);
+
+  void drawWireframe(const asw::Vec3<int>& position,
+                     const asw::Vec2<float>& offset);
+
   asw::Font font;
-  Tile* selected_tile{nullptr};
+  asw::Vec3<int> cursor_idx{0, 0, 0};
 
   asw::Texture inspect_button;
   asw::Texture trash_button;

@@ -122,7 +122,7 @@ void TileType::draw(const asw::Vec3<int>& position,
 
   auto iso_y = (isoY(position) * TILE_HEIGHT) - offset.y;
   if (hidden) {
-    iso_y -= TILE_HEIGHT / 4;
+    iso_y += TILE_HEIGHT / 4;
   }
 
   if (iso_y < -TILE_SIZE || iso_y > 960) {
@@ -136,31 +136,6 @@ void TileType::draw(const asw::Vec3<int>& position,
   }
 
   asw::draw::sprite(image, asw::Vec2(iso_x, iso_y));
-}
-
-void TileType::drawWireframe(const asw::Vec3<int>& position,
-                             const asw::Vec2<float>& offset) {
-  // Calc screen position
-  auto iso_x = isoX(position);
-  auto iso_y = isoY(position);
-  auto screen_pos = asw::Vec2(iso_x, iso_y) * TILE_HEIGHT - offset;
-
-  // Draw of top of tile
-  asw::draw::line(screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
-                  screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
-                  asw::util::makeColor(255, 255, 0));
-
-  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
-                  screen_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
-                  asw::util::makeColor(255, 0, 255));
-
-  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
-                  screen_pos + asw::Vec2(TILE_WIDTH_F / 2, TILE_HEIGHT_F),
-                  asw::util::makeColor(0, 255, 0));
-
-  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F / 2, TILE_HEIGHT_F),
-                  screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
-                  asw::util::makeColor(0, 255, 255));
 }
 
 void TileType::bakeTexture(TileRenderMode mode, float alpha) {
@@ -219,7 +194,7 @@ void TileType::renderCube(bool unique_top) {
     verts[3].tex_coord = {0.0f, 1.0f};  // bottom-left
 
     // Special top face
-    if (unique_top && images.size() > 1) {
+    if (f == 0 && unique_top && images.size() > 1) {
       SDL_RenderGeometry(asw::display::renderer, images.at(1).get(), verts, 4,
                          RENDER_ORDER, 6);
     }

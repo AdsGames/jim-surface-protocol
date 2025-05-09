@@ -48,11 +48,3 @@ void Tile::drawHidden(const asw::Vec2<float>& offset) {
 
   t_type->draw(position, offset, true);
 }
-
-void Tile::drawWireframe(const asw::Vec2<float>& offset) {
-  if (t_type == nullptr) {
-    return;
-  }
-
-  t_type->drawWireframe(position, offset);
-}

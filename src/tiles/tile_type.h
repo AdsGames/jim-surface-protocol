@@ -29,8 +29,6 @@ class TileType {
   void draw(const asw::Vec3<int>& position,
             const asw::Vec2<float>& offset,
             bool hidden);
-  void drawWireframe(const asw::Vec3<int>& position,
-                     const asw::Vec2<float>& offset);
 
   short getId() const;
   std::string getName() const;

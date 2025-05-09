@@ -84,6 +84,21 @@
     "name": "Ground"
   },
   {
+    "id": 70,
+    "images": [
+      "assets/images/tiles/black_metal.png",
+      "assets/images/tiles/diamond_plate.png"
+    ],
+    "name": "Machine",
+    "render_mode": "cube_unique_top"
+  },
+  {
+    "id": 71,
+    "images": ["assets/images/tiles/rocks_rough.png"],
+    "name": "Rocks Rough",
+    "render_mode": "cube"
+  },
+  {
     "id": 231,
     "images": ["assets/images/tiles/plant_1.png"],
     "name": "Plant 1",

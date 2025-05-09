@@ -23,7 +23,6 @@ class Tile {
 
   void draw(const asw::Vec2<float>& offset);
   void drawHidden(const asw::Vec2<float>& offset);
-  void drawWireframe(const asw::Vec2<float>& offset);
 
  private:
   asw::Vec3<int> position{0, 0, 0};
