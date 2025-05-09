@@ -142,11 +142,16 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   // Render image
   // 2x is because the texture is 2x the size of the world space of the tile
   image = asw::assets::createTexture(TILE_SIZE, TILE_SIZE);
+
   SDL_SetTextureBlendMode(image.get(), SDL_BLENDMODE_BLEND);
   SDL_SetTextureScaleMode(image.get(), SDL_SCALEMODE_NEAREST);
 
   // Set the render target to the image
   asw::display::setRenderTarget(image);
+
+  // Fill transparent
+  asw::draw::rectFill(asw::Quad<float>(0.0F, 0.0F, TILE_SIZE, TILE_SIZE),
+                      asw::util::makeColor(0, 0, 0, 0));
 
   // Render cube
   if (mode == TileRenderMode::CUBE) {
