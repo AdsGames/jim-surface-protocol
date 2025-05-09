@@ -86,15 +86,15 @@
   {
     "id": 70,
     "images": [
-      "assets/images/tiles/black_metal.png",
-      "assets/images/tiles/diamond_plate.png"
+      "assets/images/tiles/black_metal.jpg",
+      "assets/images/tiles/diamond_plate.jpg"
     ],
     "name": "Machine",
     "render_mode": "cube_unique_top"
   },
   {
     "id": 71,
-    "images": ["assets/images/tiles/rocks_rough.png"],
+    "images": ["assets/images/tiles/rocks_rough.jpg"],
     "name": "Rocks Rough",
     "render_mode": "cube"
   },
