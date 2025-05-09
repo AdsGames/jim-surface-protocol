@@ -7,7 +7,7 @@
 // Main function
 int main() {
   // Load allegro library
-  asw::core::init(800, 600, 2);
+  asw::core::init(1280, 960);
 
   auto app = asw::scene::SceneManager<ProgramState>();
   app.registerScene<Init>(ProgramState::Init, app);

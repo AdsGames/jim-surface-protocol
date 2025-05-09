@@ -24,7 +24,9 @@ class TileMap {
 
   void generate();
 
-  Tile* tileAt(asw::Vec2<float> position);
+  Tile* getTileAt(const asw::Vec2<float>& position);
+
+  asw::Vec3<int> getIndexAt(const asw::Vec2<float>& position);
 
  private:
   void draw_layer(const asw::Quad<float>& camera, int layer);

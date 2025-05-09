@@ -68,7 +68,20 @@ void TileMap::generate() {
   }
 }
 
-Tile* TileMap::tileAt(asw::Vec2<float> position) {
+Tile* TileMap::getTileAt(const asw::Vec2<float>& position) {
+  auto index = getIndexAt(position);
+
+  // Check bounds
+  if (index.x < 0 || index.x >= MAP_WIDTH || index.y < 0 ||
+      index.y >= MAP_DEPTH) {
+    return nullptr;
+  }
+
+  // Return pointer
+  return &mapTiles[index.x][index.y][index.z];
+}
+
+asw::Vec3<int> TileMap::getIndexAt(const asw::Vec2<float>& position) {
   // "Clamp" position coords to tile coords
   auto sx = position.x / (TILE_SIZE / 2.0F) - 0.5F;
   auto sy = position.y / (TILE_SIZE / 2.0F) - 0.5F;
@@ -77,13 +90,8 @@ Tile* TileMap::tileAt(asw::Vec2<float> position) {
   auto iso_y = static_cast<int>(std::round((2 * (sy + z_focus) - sx) / 2.0F));
   auto iso_x = static_cast<int>(std::round(iso_y + sx));
 
-  // Check bounds
-  if (iso_x < 0 || iso_x >= MAP_WIDTH || iso_y < 0 || iso_y >= MAP_DEPTH) {
-    return nullptr;
-  }
-
-  // Return pointer
-  return &mapTiles[iso_x][iso_y][z_focus];
+  // Return vec
+  return {iso_x, iso_y, z_focus};
 }
 
 // Draw at position
@@ -114,5 +122,5 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
   SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_BLEND);
   asw::draw::rectFill(asw::Quad<float>(0, 0, camera.size.x, camera.size.y),
                       asw::util::makeColor(0, 0, 0, (z_focus - layer) * 32));
-  SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_NONE);
+  SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_BLEND);
 }
