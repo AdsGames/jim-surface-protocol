@@ -1,0 +1,96 @@
+[
+  {
+    "id": 20,
+    "images": ["assets/images/tiles/glass.png"],
+    "name": "Stained Glass"
+  },
+  {
+    "id": 10,
+    "images": ["assets/images/tiles/cement.png"],
+    "name": "Cement"
+  },
+  {
+    "id": 65,
+    "images": ["assets/images/tiles/cement_full.png"],
+    "name": "Cement Full"
+  },
+  {
+    "id": 11,
+    "images": ["assets/images/tiles/dice.png"],
+    "name": "Dice"
+  },
+  {
+    "id": 12,
+    "images": ["assets/images/tiles/tile.png"],
+    "name": "Tile"
+  },
+  {
+    "id": 16,
+    "images": ["assets/images/tiles/water_1.png"],
+    "name": "Water"
+  },
+  {
+    "id": 17,
+    "images": ["assets/images/tiles/water_deep.png"],
+    "name": "Deep Water"
+  },
+  {
+    "id": 19,
+    "images": ["assets/images/tiles/wood.png"],
+    "name": "Wood"
+  },
+  {
+    "id": 22,
+    "images": ["assets/images/tiles/blue_wallpaper.png"],
+    "name": "Blue Wallpaper"
+  },
+  {
+    "id": 41,
+    "images": ["assets/images/tiles/fire_0.png"],
+    "name": "Fire"
+  },
+  {
+    "id": 49,
+    "images": ["assets/images/tiles/dirt.png"],
+    "name": "Dirt"
+  },
+  {
+    "id": 50,
+    "images": [
+      "assets/images/tiles/grass.png",
+      "assets/images/tiles/grass_top.png"
+    ],
+    "name": "Grass",
+    "render_mode": "cube_unique_top"
+  },
+  {
+    "id": 66,
+    "images": ["assets/images/tiles/wall.png"],
+    "name": "Wall"
+  },
+  {
+    "id": 67,
+    "images": ["assets/images/tiles/rocks.png"],
+    "name": "Rocks"
+  },
+  {
+    "id": 68,
+    "images": [
+      "assets/images/tiles/ground.png",
+      "assets/images/tiles/ground_top.png"
+    ],
+    "name": "Ground Grass",
+    "render_mode": "cube_unique_top"
+  },
+  {
+    "id": 69,
+    "images": ["assets/images/tiles/ground.png"],
+    "name": "Ground"
+  },
+  {
+    "id": 231,
+    "images": ["assets/images/tiles/plant_1.png"],
+    "name": "Plant 1",
+    "render_mode": "flat"
+  }
+]
