@@ -108,7 +108,9 @@ void TileType::addAttribute(int attribute) {
 ///
 void TileType::draw(const asw::Vec3<int>& position,
                     const asw::Vec2<float>& offset,
-                    bool hidden) {
+                    bool hidden,
+                    bool left_border,
+                    bool right_border) {
   // Render image
   if (image == nullptr) {
     return;
@@ -122,7 +124,7 @@ void TileType::draw(const asw::Vec3<int>& position,
 
   auto iso_y = (isoY(position) * TILE_HEIGHT) - offset.y;
   if (hidden) {
-    iso_y += TILE_HEIGHT / 4;
+    iso_y -= TILE_HEIGHT / 4;
   }
 
   if (iso_y < -TILE_SIZE || iso_y > 960) {
@@ -135,7 +137,21 @@ void TileType::draw(const asw::Vec3<int>& position,
     SDL_SetTextureColorMod(image.get(), 255, 255, 255);
   }
 
-  asw::draw::sprite(image, asw::Vec2(iso_x, iso_y));
+  auto iso_pos = asw::Vec2(iso_x, iso_y);
+
+  asw::draw::sprite(image, iso_pos);
+
+  if (left_border && render_mode != TileRenderMode::FLAT) {
+    asw::draw::line(iso_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
+                    iso_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
+                    asw::util::makeColor(0, 0, 0, 128));
+  }
+
+  if (right_border && render_mode != TileRenderMode::FLAT) {
+    asw::draw::line(iso_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
+                    iso_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
+                    asw::util::makeColor(0, 0, 0, 128));
+  }
 }
 
 void TileType::bakeTexture(TileRenderMode mode, float alpha) {
@@ -155,11 +171,16 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
 
   // Render cube
   if (mode == TileRenderMode::CUBE) {
-    renderCube(false);
+    renderCube(1, 3);
   }
 
   else if (mode == TileRenderMode::CUBE_UNIQUE_TOP) {
-    renderCube(true);
+    renderCube(2, 3);
+  }
+
+  // Render cube top only
+  else if (mode == TileRenderMode::CUBE_TOP_ONLY) {
+    renderCube(1, 1);
   }
 
   // Render flat
@@ -178,9 +199,13 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   }
 }
 
-void TileType::renderCube(bool unique_top) {
+void TileType::renderCube(int texture_count, int face_count) {
+  if (face_count > 3 || face_count < 1) {
+    face_count = 3;
+  }
+
   // Iterate over the faces
-  for (int f = 0; f < 3; f++) {
+  for (int f = 0; f < face_count; f++) {
     SDL_Vertex verts[4];
 
     for (int i = 0; i < 4; i++) {
@@ -199,7 +224,7 @@ void TileType::renderCube(bool unique_top) {
     verts[3].tex_coord = {0.0f, 1.0f};  // bottom-left
 
     // Special top face
-    if (f == 0 && unique_top && images.size() > 1) {
+    if (f == 0 && texture_count == 2 && images.size() > 1) {
       SDL_RenderGeometry(asw::display::renderer, images.at(1).get(), verts, 4,
                          RENDER_ORDER, 6);
     }

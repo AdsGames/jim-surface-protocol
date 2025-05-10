@@ -21,8 +21,10 @@ class Tile {
   void setType(short type);
   void setType(std::string type);
 
-  void draw(const asw::Vec2<float>& offset);
-  void drawHidden(const asw::Vec2<float>& offset);
+  void draw(const asw::Vec2<float>& offset,
+            bool hidden,
+            bool left_border,
+            bool right_border);
 
  private:
   asw::Vec3<int> position{0, 0, 0};

@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 
+#include "../tiles/structure_dictionary.h"
 #include "../vendor/simplex_noise.h"
 
 asw::Vec3<int> TileMap::getSize() const {
@@ -49,26 +50,63 @@ void TileMap::generate() {
       auto height_val = static_cast<int>(MAP_HEIGHT * (frac + 1.0F) / 2.0F);
 
       for (int k = 0; k < MAP_HEIGHT; ++k) {
+        if (mapTiles[i][j][k].getType() != nullptr) {
+          continue;
+        }
+
         if (k < height_val) {
           // Grass if at top of ground, unless water
           if (k + 1 >= height_val && k >= 3) {
-            mapTiles[i][j][k].setType("ground_grass");
+            mapTiles[i][j][k].setType("toxic_grass");
           } else if (k + 3 >= height_val) {
-            mapTiles[i][j][k].setType("ground");
+            mapTiles[i][j][k].setType("toxic_soil");
           } else {
             mapTiles[i][j][k].setType("rocks");
           }
         }
 
         else if (k < 4) {
-          mapTiles[i][j][k].setType("water");
+          mapTiles[i][j][k].setType("toxic_water");
         }
 
+        // Structures
         else if (k - 1 < height_val) {
-          if (asw::random::chance(0.2F)) {
-            mapTiles[i][j][k].setType("plant_1");
+          if (asw::random::chance(0.001F)) {
+            generateStructure("house", {i, j, k});
           }
         }
+      }
+    }
+  }
+}
+
+void TileMap::generateStructure(const std::string& id_str,
+                                const asw::Vec3<int>& position) {
+  auto structure = StructureDictionary::getStructure(id_str);
+  if (structure == nullptr) {
+    return;
+  }
+
+  int index = 0;
+  auto tile_offset = asw::Vec3(0, 0, 0);
+
+  for (int i = 0; i < structure->dimensions.z; ++i) {
+    tile_offset.z = i;
+
+    for (int j = 0; j < structure->dimensions.y; ++j) {
+      tile_offset.y = j;
+
+      for (int k = 0; k < structure->dimensions.x; ++k) {
+        auto id = structure->tiles[index++];
+
+        tile_offset.x = k;
+
+        auto tile = getTileAtIndex(position + tile_offset);
+        if (tile == nullptr) {
+          continue;
+        }
+
+        tile->setType(id);
       }
     }
   }
@@ -110,7 +148,7 @@ void TileMap::draw(const asw::Quad<float>& camera) {
 
 // Draw a layer
 void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
-  if (layer > z_focus || layer < z_focus - 4) {
+  if (layer > z_focus) {
     return;
   }
 
@@ -122,20 +160,25 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
         continue;
       }
 
-      if (layer == z_focus && layer < MAP_HEIGHT - 1 &&
-          mapTiles[i][j][layer + 1].getType() != nullptr &&
-          mapTiles[i][j][layer + 1].getType()->isOpaque()) {
-        tile.drawHidden(camera.position);
-      } else {
-        tile.draw(camera.position);
-      }
+      auto hidden = layer == z_focus && layer < MAP_HEIGHT - 1 &&
+                    mapTiles[i][j][layer + 1].getType() != nullptr &&
+                    mapTiles[i][j][layer + 1].getType()->isOpaque();
+
+      auto empty_left = i == 0 ||
+                        mapTiles[i - 1][j][layer].getType() == nullptr ||
+                        !mapTiles[i - 1][j][layer].getType()->isOpaque();
+
+      auto empty_right = j == 0 ||
+                         mapTiles[i][j - 1][layer].getType() == nullptr ||
+                         !mapTiles[i][j - 1][layer].getType()->isOpaque();
+
+      tile.draw(camera.position, hidden, empty_left, empty_right);
     }
   }
 
   // Draw depth layer
-  // Draw semi-transparent buffer
   SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_BLEND);
   asw::draw::rectFill(asw::Quad<float>(0, 0, camera.size.x, camera.size.y),
-                      asw::util::makeColor(0, 0, 0, (z_focus - layer) * 32));
+                      asw::util::makeColor(0, 0, 0, (z_focus - layer) * 4));
   SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_BLEND);
 }
