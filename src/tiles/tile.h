@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "structure_dictionary.h"
 #include "tile_type.h"
 
 class Tile {
@@ -14,12 +15,16 @@ class Tile {
 
   void setPosition(const asw::Vec3<int>& position);
 
-  std::shared_ptr<TileType> getType() const;
-
   bool containsAttribute(int newAttribute);
 
+  // Type ref
   void setType(short type);
   void setType(std::string type);
+  std::shared_ptr<TileType> getType() const;
+
+  // Structure ref
+  void setStructure(std::shared_ptr<Structure> structure);
+  std::shared_ptr<Structure> getStructure() const;
 
   void draw(const asw::Vec2<float>& offset,
             bool hidden,
@@ -29,5 +34,7 @@ class Tile {
  private:
   asw::Vec3<int> position{0, 0, 0};
 
-  std::shared_ptr<TileType> t_type{};
+  std::shared_ptr<TileType> t_type{nullptr};
+
+  std::shared_ptr<Structure> structure{nullptr};
 };

@@ -45,6 +45,7 @@ class TileType {
   void addAttribute(int attribute);
 
   void bakeTexture(TileRenderMode mode, float alpha);
+
   bool isOpaque() const {
     return render_mode == TileRenderMode::CUBE ||
            render_mode == TileRenderMode::CUBE_UNIQUE_TOP ||

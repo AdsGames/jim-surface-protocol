@@ -118,6 +118,17 @@ void Toolbar::draw(World& world) {
                     asw::Vec2(10.0F, 80.0F),
                     asw::util::makeColor(255, 255, 255));
 
+    if (selected_tile->getStructure() != nullptr) {
+      asw::draw::text(
+          font, "Structure: " + selected_tile->getStructure()->getType()->name,
+          asw::Vec2(10.0F, 140.0F), asw::util::makeColor(255, 255, 255));
+
+      asw::draw::text(
+          font,
+          "Structure: " + selected_tile->getStructure()->getType()->description,
+          asw::Vec2(10.0F, 160.0F), asw::util::makeColor(255, 255, 255));
+    }
+
     // if (mode == ToolMode::INSPECT) {
     //   selected_tile->getType()->draw(asw::Vec3(0, 0, 0), asw::Vec2(0, 0),
     //   true);
