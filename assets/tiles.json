@@ -120,5 +120,28 @@
     "id": 20,
     "images": ["assets/images/tiles/willow_bark.jpg"],
     "name": "Trunk"
+  },
+    {
+    "id": 21,
+    "images": ["assets/images/tiles/truck.png"],
+    "name": "Truck",
+        "render_mode": "flat"
+
+  }
+  ,
+    {
+    "id": 22,
+    "images": ["assets/images/tiles/bike.png"],
+    "name": "Bike",
+        "render_mode": "flat"
+
+  }
+   ,
+    {
+    "id": 23,
+    "images": ["assets/images/tiles/barrel.png"],
+    "name": "Barrel",
+        "render_mode": "flat"
+
   }
 ]

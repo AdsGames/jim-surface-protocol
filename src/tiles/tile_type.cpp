@@ -33,21 +33,6 @@ const asw::Vec3<float> CUBE_FACE_COLOUR[3] = {
     {1.0F, 0.5F, 0.5F},  // right
 };
 
-// Cross faces
-const asw::Vec3<int> FLAT_FACE[4] = {
-    CUBE_VERTS[7],
-    CUBE_VERTS[5],
-    CUBE_VERTS[1],
-    CUBE_VERTS[3],
-};
-
-// Cross face colour bias
-const asw::Vec3<float> FLAT_FACE_COLOUR = {
-    0.5F,
-    0.5F,
-    1.0F,
-};
-
 // triangles: 0-1-2 and 2-3-0
 const int RENDER_ORDER[] = {0, 1, 2, 2, 3, 0};
 
@@ -138,6 +123,10 @@ void TileType::draw(const asw::Vec3<int>& position,
   }
 
   auto iso_pos = asw::Vec2(iso_x, iso_y);
+
+  if (render_mode == TileRenderMode::FLAT) {
+    iso_pos.y -= TILE_SIZE * 0.65F;
+  }
 
   asw::draw::sprite(image, iso_pos);
 
@@ -238,23 +227,6 @@ void TileType::renderCube(int texture_count, int face_count) {
 }
 
 void TileType::renderFlat() {
-  SDL_Vertex verts[4];
-
-  for (int i = 0; i < 4; i++) {
-    verts[i].position = project(FLAT_FACE[i]);
-
-    // Colour
-    verts[i].color.a = 1.0F;
-    verts[i].color.r = FLAT_FACE_COLOUR.x;
-    verts[i].color.g = FLAT_FACE_COLOUR.y;
-    verts[i].color.b = FLAT_FACE_COLOUR.z;
-  }
-
-  verts[0].tex_coord = {0.0f, 0.0f};  // top-left
-  verts[1].tex_coord = {1.0f, 0.0f};  // top-right
-  verts[2].tex_coord = {1.0f, 1.0f};  // bottom-right
-  verts[3].tex_coord = {0.0f, 1.0f};  // bottom-left
-
-  SDL_RenderGeometry(asw::display::renderer, images.at(0).get(), verts, 4,
-                     RENDER_ORDER, 6);
+  asw::draw::stretchSprite(images.at(0),
+                           asw::Quad<float>(0.0F, 0.0F, TILE_SIZE, TILE_SIZE));
 }

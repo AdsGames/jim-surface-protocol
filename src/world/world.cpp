@@ -47,7 +47,7 @@ void World::update(float dt) {
 
   tile_map.update(dt);
 
-  player.update(dt);
+  player.update(dt,*this);
 }
 
 void World::draw() {

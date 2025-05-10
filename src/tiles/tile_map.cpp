@@ -66,7 +66,7 @@ void TileMap::generate() {
         }
 
         else if (k < 4) {
-          mapTiles[i][j][k].setType("toxic_water");
+          mapTiles[i][j][k].setType("truck");
         }
 
         // Structures
@@ -75,6 +75,10 @@ void TileMap::generate() {
             generateStructure("house", {i, j, k});
           } else if (asw::random::chance(0.001F)) {
             generateStructure("dead_tree", {i, j, k});
+          } else if (asw::random::chance(0.01F)) {
+            mapTiles[i][j][k].setType("barrel");
+          } else if (asw::random::chance(0.01F)) {
+            mapTiles[i][j][k].setType("bike");
           }
         }
       }
