@@ -19,6 +19,7 @@ enum class TileRenderMode {
   NONE,
   CUBE,
   CUBE_UNIQUE_TOP,
+  CUBE_TOP_ONLY,
   FLAT,
 };
 
@@ -46,11 +47,12 @@ class TileType {
   void bakeTexture(TileRenderMode mode, float alpha);
   bool isOpaque() const {
     return render_mode == TileRenderMode::CUBE ||
-           render_mode == TileRenderMode::CUBE_UNIQUE_TOP;
+           render_mode == TileRenderMode::CUBE_UNIQUE_TOP ||
+           render_mode == TileRenderMode::CUBE_TOP_ONLY;
   }
 
  private:
-  void renderCube(bool unique_top);
+  void renderCube(int texture_count, int face_count);
   void renderFlat();
 
   /// Project a 3D vector to 2D screen coordinates

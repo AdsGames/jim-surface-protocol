@@ -36,7 +36,7 @@ std::shared_ptr<TileType> TileDictionary::getTile(const std::string& id_str) {
   return nullptr;
 }
 
-void TileDictionary::loadTypes(const std::string& path) {
+void TileDictionary::load(const std::string& path) {
   // Open file or abort if it does not exist
   std::ifstream file(path);
   if (!file.is_open()) {
@@ -84,6 +84,8 @@ void TileDictionary::loadTypes(const std::string& path) {
         render_mode = TileRenderMode::CUBE;
       } else if (mode == "cube_unique_top") {
         render_mode = TileRenderMode::CUBE_UNIQUE_TOP;
+      } else if (mode == "cube_top_only") {
+        render_mode = TileRenderMode::CUBE_TOP_ONLY;
       } else {
         std::cerr << "Error: Unknown render mode " << mode << '\n';
       }

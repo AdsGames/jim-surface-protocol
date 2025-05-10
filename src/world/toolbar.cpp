@@ -81,25 +81,6 @@ void Toolbar::draw(World& world) {
 
   drawWireframe(cursor_idx, camera.position);
 
-  if (selected_tile != nullptr && selected_tile->getType() != nullptr) {
-    asw::draw::text(font, "Info: " + selected_tile->getType()->getName(),
-                    asw::Vec2(10.0F, 80.0F),
-                    asw::util::makeColor(255, 255, 255));
-
-    // X + Y
-    asw::draw::text(font, "X: " + std::to_string(cursor_idx.x),
-                    asw::Vec2(10.0F, 100.0F),
-                    asw::util::makeColor(255, 255, 255));
-    asw::draw::text(font, "Y: " + std::to_string(cursor_idx.y),
-                    asw::Vec2(10.0F, 120.0F),
-                    asw::util::makeColor(255, 255, 255));
-
-    // if (mode == ToolMode::INSPECT) {
-    //   selected_tile->getType()->draw(asw::Vec3(0, 0, 0), asw::Vec2(0, 0),
-    //   true);
-    // }
-  }
-
   asw::draw::rectFill(
       asw::Quad(0.0F, camera.size.y - 80.0F, camera.size.x, camera.size.y),
       asw::util::makeColor(128, 128, 128));
@@ -111,6 +92,7 @@ void Toolbar::draw(World& world) {
 
   if (mode == ToolMode::INSPECT) {
     asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
+
   } else if (mode == ToolMode::TRASH) {
     asw::draw::rect(trash_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::WORKER) {
@@ -118,10 +100,29 @@ void Toolbar::draw(World& world) {
   }
 
   // Inspect View
-  // if (mode == ToolMode::INSPECT) {
-  //   asw::draw::rectFill(asw::Quad(0.0F, 0.0F, 200.0F, 200.0F),
-  //                       asw::util::makeColor(128, 128, 0));
-  // }
+  if (mode == ToolMode::INSPECT) {
+    asw::draw::rectFill(asw::Quad(0.0F, 0.0F, 200.0F, 200.0F),
+                        asw::util::makeColor(128, 128, 0));
+
+    // X + Y
+    asw::draw::text(font, "X: " + std::to_string(cursor_idx.x),
+                    asw::Vec2(10.0F, 100.0F),
+                    asw::util::makeColor(255, 255, 255));
+    asw::draw::text(font, "Y: " + std::to_string(cursor_idx.y),
+                    asw::Vec2(10.0F, 120.0F),
+                    asw::util::makeColor(255, 255, 255));
+  }
+
+  if (selected_tile != nullptr && selected_tile->getType() != nullptr) {
+    asw::draw::text(font, "Info: " + selected_tile->getType()->getName(),
+                    asw::Vec2(10.0F, 80.0F),
+                    asw::util::makeColor(255, 255, 255));
+
+    // if (mode == ToolMode::INSPECT) {
+    //   selected_tile->getType()->draw(asw::Vec3(0, 0, 0), asw::Vec2(0, 0),
+    //   true);
+    // }
+  }
 }
 
 void Toolbar::drawWireframe(const asw::Vec3<int>& position,

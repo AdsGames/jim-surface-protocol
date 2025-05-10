@@ -23,6 +23,8 @@ class TileMap {
   void draw(const asw::Quad<float>& camera);
 
   void generate();
+  void generateStructure(const std::string& id_str,
+                         const asw::Vec3<int>& position);
 
   Tile* getTileAt(const asw::Vec2<float>& position);
   Tile* getTileAtIndex(const asw::Vec3<int>& index);

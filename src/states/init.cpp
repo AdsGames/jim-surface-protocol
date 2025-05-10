@@ -2,12 +2,15 @@
 
 #include <asw/asw.h>
 
+#include "../tiles/structure_dictionary.h"
 #include "../tiles/tile_dictionary.h"
 
 void Init::init() {
   asw::display::setTitle("Setting up");
 
-  TileDictionary::loadTypes("assets/tiles.json");
+  TileDictionary::load("assets/tiles.json");
+  StructureDictionary::load("assets/structures.json");
+
   asw::display::setIcon("assets/icon.ico");
 
   asw::display::setTitle("Tojam 2025");

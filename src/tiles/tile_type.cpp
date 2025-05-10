@@ -171,11 +171,16 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
 
   // Render cube
   if (mode == TileRenderMode::CUBE) {
-    renderCube(false);
+    renderCube(1, 3);
   }
 
   else if (mode == TileRenderMode::CUBE_UNIQUE_TOP) {
-    renderCube(true);
+    renderCube(2, 3);
+  }
+
+  // Render cube top only
+  else if (mode == TileRenderMode::CUBE_TOP_ONLY) {
+    renderCube(1, 1);
   }
 
   // Render flat
@@ -194,9 +199,13 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   }
 }
 
-void TileType::renderCube(bool unique_top) {
+void TileType::renderCube(int texture_count, int face_count) {
+  if (face_count > 3 || face_count < 1) {
+    face_count = 3;
+  }
+
   // Iterate over the faces
-  for (int f = 0; f < 3; f++) {
+  for (int f = 0; f < face_count; f++) {
     SDL_Vertex verts[4];
 
     for (int i = 0; i < 4; i++) {
@@ -215,7 +224,7 @@ void TileType::renderCube(bool unique_top) {
     verts[3].tex_coord = {0.0f, 1.0f};  // bottom-left
 
     // Special top face
-    if (f == 0 && unique_top && images.size() > 1) {
+    if (f == 0 && texture_count == 2 && images.size() > 1) {
       SDL_RenderGeometry(asw::display::renderer, images.at(1).get(), verts, 4,
                          RENDER_ORDER, 6);
     }

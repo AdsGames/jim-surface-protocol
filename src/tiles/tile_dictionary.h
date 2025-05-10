@@ -7,7 +7,7 @@
 
 class TileDictionary {
  public:
-  static void loadTypes(const std::string& path);
+  static void load(const std::string& path);
   static std::shared_ptr<TileType> getTile(int id);
   static std::shared_ptr<TileType> getTile(const std::string& id_str);
 
