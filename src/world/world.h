@@ -26,7 +26,11 @@ class World {
   /// Tile Utils
   TileMap& getTileMap() { return tile_map; }
 
+
  private:
+
+  Worker player;
+
   TileMap tile_map;
 
   asw::Quad<float> camera{0, 0, 1280, 960};

@@ -2,23 +2,24 @@
 
 void World::init() {
   tile_map.generate();
+
 }
 
 void World::update(float dt) {
   // Keybo movement
-  if (asw::input::isKeyDown(asw::input::Key::LEFT) ||
+  if (
       asw::input::isKeyDown(asw::input::Key::A)) {
     camera.position.x -= 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::RIGHT) ||
+  if (
       asw::input::isKeyDown(asw::input::Key::D)) {
     camera.position.x += 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::UP) ||
+  if (
       asw::input::isKeyDown(asw::input::Key::W)) {
     camera.position.y -= 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::DOWN) ||
+  if (
       asw::input::isKeyDown(asw::input::Key::S)) {
     camera.position.y += 10;
   }
@@ -45,13 +46,17 @@ void World::update(float dt) {
   }
 
   tile_map.update(dt);
+
+  player.update(dt);
 }
 
 void World::draw() {
+
   asw::draw::rectFill(asw::Quad(0.0F, 0.0F, camera.size.x, camera.size.y),
                       asw::util::makeColor(0, 64, 128));
 
   tile_map.draw(camera);
+  player.draw(camera.position);
 
   // Draw workers
   for (auto& [id, worker] : workers) {
