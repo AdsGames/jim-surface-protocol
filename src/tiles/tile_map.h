@@ -37,6 +37,4 @@ class TileMap {
   // 3D Map
   std::array<std::array<std::array<Tile, MAP_HEIGHT>, MAP_DEPTH>, MAP_WIDTH>
       mapTiles;
-
-  int z_focus{0};
 };

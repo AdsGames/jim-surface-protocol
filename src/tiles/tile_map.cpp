@@ -12,22 +12,7 @@ asw::Vec3<int> TileMap::getSize() const {
   return {MAP_WIDTH, MAP_HEIGHT, MAP_DEPTH};
 }
 
-void TileMap::update(float dt) {
-  // Z Layering
-  z_focus += asw::input::mouse.z;
-
-  if (asw::input::wasKeyPressed(asw::input::Key::KP_MINUS) ||
-      asw::input::wasKeyPressed(asw::input::Key::LEFT_BRACKET)) {
-    z_focus -= 1;
-  }
-
-  if (asw::input::wasKeyPressed(asw::input::Key::KP_PLUS) ||
-      asw::input::wasKeyPressed(asw::input::Key::LEFT_BRACKET)) {
-    z_focus += 1;
-  }
-
-  z_focus = std::min(std::max(z_focus, 0), MAP_HEIGHT);
-}
+void TileMap::update(float dt) {}
 
 void TileMap::generate() {
   // Init map
@@ -145,12 +130,26 @@ asw::Vec3<int> TileMap::getIndexAt(const asw::Vec2<float>& position) {
   auto sx = position.x / (TILE_SIZE / 2.0F) - 0.5F;
   auto sy = position.y / (TILE_SIZE / 2.0F) - 0.5F;
 
+  // Start index
+  auto z_focus = MAP_HEIGHT - 1;
+
   // Calculate screen coordinates to world coordinates using iso coords
-  auto iso_y = static_cast<int>(std::round((2 * (sy + z_focus) - sx) / 2.0F));
-  auto iso_x = static_cast<int>(std::round(iso_y + sx));
+  while (z_focus >= 0) {
+    auto iso_y = static_cast<int>(std::round((2 * (sy + z_focus) - sx) / 2.0F));
+    auto iso_x = static_cast<int>(std::round(iso_y + sx));
+    auto tile = getTileAtIndex({iso_x, iso_y, z_focus});
+
+    // Check for top tile at index
+    if (tile != nullptr && tile->getType() != nullptr) {
+      return {iso_x, iso_y, z_focus};
+    }
+
+    // Decrease z_focus
+    z_focus -= 1;
+  }
 
   // Return vec
-  return {iso_x, iso_y, z_focus};
+  return {-1, -1, -1};
 }
 
 // Draw at position
@@ -162,10 +161,6 @@ void TileMap::draw(const asw::Quad<float>& camera) {
 
 // Draw a layer
 void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
-  if (layer > z_focus) {
-    return;
-  }
-
   for (int i = 0; i < MAP_WIDTH; ++i) {
     for (int j = 0; j < MAP_DEPTH; ++j) {
       auto tile = mapTiles[i][j][layer];
@@ -173,10 +168,6 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
       if (tile.getType() == nullptr) {
         continue;
       }
-
-      auto hidden = layer == z_focus && layer < MAP_HEIGHT - 1 &&
-                    mapTiles[i][j][layer + 1].getType() != nullptr &&
-                    mapTiles[i][j][layer + 1].getType()->isOpaque();
 
       auto empty_left = i == 0 ||
                         mapTiles[i - 1][j][layer].getType() == nullptr ||
@@ -186,13 +177,7 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
                          mapTiles[i][j - 1][layer].getType() == nullptr ||
                          !mapTiles[i][j - 1][layer].getType()->isOpaque();
 
-      tile.draw(camera.position, hidden, empty_left, empty_right);
+      tile.draw(camera.position, false, empty_left, empty_right);
     }
   }
-
-  // Draw depth layer
-  SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_BLEND);
-  asw::draw::rectFill(asw::Quad<float>(0, 0, camera.size.x, camera.size.y),
-                      asw::util::makeColor(0, 0, 0, (z_focus - layer) * 4));
-  SDL_SetRenderDrawBlendMode(asw::display::renderer, SDL_BLENDMODE_BLEND);
 }
