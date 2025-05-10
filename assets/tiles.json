@@ -248,5 +248,33 @@
         "drop_resource_id": "scrap"
       }
     ]
+  },
+  {
+    "id": 24,
+    "images": [
+      "assets/images/tiles/plants_1.png"
+    ],
+    "name": "Plants 1",
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "images": [
+      "assets/images/tiles/plants_2.png"
+    ],
+    "name": "Plants 2",
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      }
+    ]
   }
 ]

@@ -121,11 +121,13 @@ void Worker::draw(const asw::Vec2<float>& offset) {
   auto iso_x = isoXf(position);
   auto iso_y = isoYf(position);
 
-  auto screen_pos = asw::Vec2(iso_x, iso_y) * 32 - offset;
+  auto screen_size =
+      asw::Quad(iso_x * TILE_HEIGHT_F - offset.x,
+                iso_y * TILE_HEIGHT_F - offset.y, TILE_HEIGHT_F, TILE_HEIGHT_F);
 
-  asw::draw::sprite(shadow, screen_pos);
+  asw::draw::stretchSprite(shadow, screen_size);
+  asw::draw::stretchSprite(textures[direction], screen_size);
 
-  asw::draw::sprite(textures[direction], screen_pos);
   std::string l = left ? "True" : "False";
   std::string r = right ? "True" : "False";
   std::string u = up ? "True" : "False";
@@ -141,6 +143,5 @@ void Worker::draw(const asw::Vec2<float>& offset) {
                   asw::util::makeColor(255, 255, 255));
 
   asw::draw::text(font, "Angle:  " + angleStr, t_pos + asw::Vec2<float>(0, 80),
-
                   asw::util::makeColor(255, 255, 255));
 }
