@@ -29,11 +29,18 @@ class Worker {
  private:
   int direction{0};
 
+  bool up;
+  bool down;
+  bool left;
+  bool right;
+
+  asw::Font font;
+
   static WorkerId idCounter;
 
-  asw::Vec3<int> position;
+  asw::Vec3<float> position;
 
-  std::array<asw::Texture, 4> textures;
+  std::array<asw::Texture, 6> textures;
 
   asw::Texture shadow;
 

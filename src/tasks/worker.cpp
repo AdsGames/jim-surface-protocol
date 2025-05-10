@@ -8,12 +8,16 @@ Worker::Worker() : id(idCounter++) {
   textures[1] = asw::assets::loadTexture("assets/images/player/128/1.png");
   textures[2] = asw::assets::loadTexture("assets/images/player/128/2.png");
   textures[3] = asw::assets::loadTexture("assets/images/player/128/3.png");
+  textures[4] = asw::assets::loadTexture("assets/images/player/128/4.png");
+  textures[5] = asw::assets::loadTexture("assets/images/player/128/5.png");
 
   shadow = asw::assets::loadTexture("assets/images/player/128/shadow.png");
 }
 
 void Worker::setPosition(const asw::Vec3<int>& pos) {
-  position = pos;
+  asw::Vec3<float> posF(static_cast<float>(pos.x), static_cast<float>(pos.y),
+                        static_cast<float>(pos.z));
+  position = posF;
 }
 
 WorkerId Worker::getId() const {
@@ -39,19 +43,43 @@ void Worker::update(float dt, World& world) {
 
   auto waypoint = world.getPlayerWaypoint();
 
-  if (position.distance(waypoint) > 1) {
-    auto dir = asw::Vec3<int>(0, 0, 0);
+  asw::Vec3<float> waypointF(waypoint.x, waypoint.y, waypoint.z);
+
+  if (position.distance(waypointF) > 1) {
+    float speed = 0.01F;
+    float move = speed * dt;
+
+    bool up = false;
+    bool down = false;
+    bool left = false;
+    bool right = false;
+
+    auto dir = asw::Vec3<float>(0, 0, 0);
     if (position.x < waypoint.x) {
-      dir.x = 1;
-    } else if (position.x > waypoint.x) {
-      dir.x = -1;
+      dir.x = move;
+      right = true;
+
+    } else if (position.x > waypointF.x) {
+      dir.x = -move;
+      left = true;
     }
 
-    if (position.y < waypoint.y) {
-      dir.y = 1;
-    } else if (position.y > waypoint.y) {
-      dir.y = -1;
+    if (position.y < waypointF.y) {
+      dir.y = move;
+      up = true;
+    } else if (position.y > waypointF.y) {
+      dir.y = -move;
+      down = true;
     }
+
+    if (up && left)
+      direction = 3;
+    if (up && !left)
+      direction = 0;
+    if (!up && left)
+      direction = 2;
+    if (!up && !left)
+      direction = 1;
 
     position += dir;
   }
@@ -59,8 +87,13 @@ void Worker::update(float dt, World& world) {
 
 void Worker::draw(const asw::Vec2<float>& offset) {
   // Calc screen position
-  auto iso_x = isoX(position);
-  auto iso_y = isoY(position);
+
+  asw::Vec3<int> positionInt(static_cast<int>(position.x),
+                             static_cast<int>(position.y),
+                             static_cast<int>(position.z));
+
+  auto iso_x = isoX(positionInt);
+  auto iso_y = isoY(positionInt);
 
   auto screen_pos = asw::Vec2(iso_x, iso_y) * 32 - offset;
 
