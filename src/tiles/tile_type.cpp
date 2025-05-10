@@ -81,7 +81,6 @@ void TileType::addAction(const ActionResult& action) {
 ///
 void TileType::draw(const asw::Vec3<int>& position,
                     const asw::Vec2<float>& offset,
-                    bool hidden,
                     bool left_border,
                     bool right_border) {
   // Render image
@@ -96,24 +95,16 @@ void TileType::draw(const asw::Vec3<int>& position,
   }
 
   auto iso_y = (isoY(position) * TILE_HEIGHT) - offset.y;
-  if (hidden) {
-    // iso_y -= TILE_HEIGHT / 4;
-  }
-
   if (iso_y < -TILE_SIZE || iso_y > 960) {
     return;
-  }
-
-  if (hidden) {
-    SDL_SetTextureColorMod(image.get(), 128, 128, 128);
-  } else {
-    SDL_SetTextureColorMod(image.get(), 255, 255, 255);
   }
 
   auto iso_pos = asw::Vec2(iso_x, iso_y);
 
   if (render_mode == TileRenderMode::FLAT) {
     iso_pos.y -= TILE_SIZE * 0.5F;
+  } else if (render_mode == TileRenderMode::CUBE_TOP_ONLY) {
+    iso_pos.y += TILE_SIZE * 0.2F;
   }
 
   asw::draw::sprite(image, iso_pos);

@@ -27,7 +27,6 @@ class Tile {
   std::shared_ptr<Structure> getStructure() const;
 
   void draw(const asw::Vec2<float>& offset,
-            bool hidden,
             bool left_border,
             bool right_border);
 

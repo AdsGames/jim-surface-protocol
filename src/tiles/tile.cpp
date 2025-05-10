@@ -39,12 +39,11 @@ void Tile::setType(short type) {
 
 // Draw tile
 void Tile::draw(const asw::Vec2<float>& offset,
-                bool hidden,
                 bool left_border,
                 bool right_border) {
   if (t_type == nullptr) {
     return;
   }
 
-  t_type->draw(position, offset, hidden, left_border, right_border);
+  t_type->draw(position, offset, left_border, right_border);
 }

@@ -29,22 +29,18 @@ void World::update(float dt) {
 
   // Mouse movement
   auto screen_size = asw::display::getLogicalSize();
-  screen_size.y -= 80;  // Remove title bar height
 
-  if (asw::input::mouse.x >= 0 && asw::input::mouse.x <= screen_size.x &&
-      asw::input::mouse.y >= 0 && asw::input::mouse.y <= screen_size.y) {
-    if (asw::input::mouse.x > screen_size.x * 0.9) {
-      camera.position.x += 10;
-    }
-    if (asw::input::mouse.x < screen_size.x * 0.1) {
-      camera.position.x -= 10;
-    }
-    if (asw::input::mouse.y > screen_size.y * 0.9) {
-      camera.position.y += 10;
-    }
-    if (asw::input::mouse.y < screen_size.y * 0.1) {
-      camera.position.y -= 10;
-    }
+  if (asw::input::mouse.x >= screen_size.x - 2) {
+    camera.position.x += 10;
+  }
+  if (asw::input::mouse.x <= 2) {
+    camera.position.x -= 10;
+  }
+  if (asw::input::mouse.y >= screen_size.y - 2) {
+    camera.position.y += 10;
+  }
+  if (asw::input::mouse.y <= 2) {
+    camera.position.y -= 10;
   }
 
   // Regenerate map

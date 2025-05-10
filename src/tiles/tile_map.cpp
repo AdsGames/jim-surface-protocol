@@ -63,12 +63,6 @@ void TileMap::generate() {
           } else if (asw::random::chance(0.001F)) {
             generateStructure("dead_tree", {i, j, k});
           } else if (asw::random::chance(0.01F)) {
-            mapTiles[i][j][k].setType("barrel");
-          } else if (asw::random::chance(0.01F)) {
-            mapTiles[i][j][k].setType("bike");
-          } else if (asw::random::chance(0.01F)) {
-            mapTiles[i][j][k].setType("truck");
-          } else if (asw::random::chance(0.01F)) {
             mapTiles[i][j][k].setType("tire");
           } else if (asw::random::chance(0.01F)) {
             mapTiles[i][j][k].setType("junk");
@@ -76,10 +70,8 @@ void TileMap::generate() {
             mapTiles[i][j][k].setType("crate");
           } else if (asw::random::chance(0.001F)) {
             generateStructure("junk_pile_1", {i, j, k});
-
           } else if (asw::random::chance(0.001F)) {
             generateStructure("junk_pile_2", {i, j, k});
-
           } else if (asw::random::chance(0.001F)) {
             generateStructure("junk_pile_3", {i, j, k});
           } else if (asw::random::chance(0.001F)) {
@@ -193,7 +185,7 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
                          mapTiles[i][j - 1][layer].getType() == nullptr ||
                          !mapTiles[i][j - 1][layer].getType()->isOpaque();
 
-      tile.draw(camera.position, false, empty_left, empty_right);
+      tile.draw(camera.position, empty_left, empty_right);
     }
   }
 }
