@@ -86,24 +86,24 @@ void Worker::update(float dt, World& world) {
     up = false;
     down = false;
 
-    int margin = 1;
-
     auto dir = asw::Vec3<float>(0, 0, 0);
-    if (position.x < waypoint.x - margin) {
+    if (position.x < waypoint.x) {
       dir.x = move;
 
-    } else if (position.x > waypointF.x + margin) {
+    } else if (position.x > waypointF.x) {
       dir.x = -move;
     }
 
-    if (position.y < waypointF.y - margin) {
+    if (position.y < waypointF.y) {
       dir.y = move;
 
-    } else if (position.y > waypointF.y + margin) {
+    } else if (position.y > waypointF.y) {
       dir.y = -move;
     }
 
     position += dir;
+  } else {
+    world.setWaypointActive(false);
   }
 }
 

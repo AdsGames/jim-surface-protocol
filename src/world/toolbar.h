@@ -6,7 +6,7 @@
 
 constexpr float BUTTON_SIZE = 64.0F;
 
-enum class ToolMode { INSPECT, TRASH, WORKER, WAYPOINT };
+enum class ToolMode { INSPECT, TRASH, WORKER };
 
 class Toolbar {
  public:
@@ -18,6 +18,7 @@ class Toolbar {
 
  private:
   void action(World& world);
+  void rightClickAction(World& world);
 
   void drawWireframe(const asw::Vec3<int>& position,
                      const asw::Vec2<float>& offset);

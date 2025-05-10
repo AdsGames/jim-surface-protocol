@@ -1,5 +1,12 @@
 #include "world.h"
 
+World::World() {
+  waypointTexture =
+      asw::assets::loadTexture("assets/images/player/waypoint.png");
+  shadowTexture =
+      asw::assets::loadTexture("assets/images/player/128/shadow.png");
+}
+
 void World::init() {
   resource_manager.load("assets/resources.json");
   tile_map.generate();
@@ -62,20 +69,22 @@ void World::draw() {
     worker.draw(camera.position);
   }
 
-  // Draw player waypoint
-  auto player_waypoint = getPlayerWaypoint();
-  auto player_waypoint_screen =
-      asw::Vec2(isoX(player_waypoint), isoY(player_waypoint)) * TILE_HEIGHT -
-      camera.position;
-  asw::draw::rectFill(
-      asw::Quad(player_waypoint_screen.x, player_waypoint_screen.y,
-                TILE_WIDTH_F, TILE_HEIGHT_F),
-      asw::util::makeColor(255, 0, 0));
-  asw::draw::rect(asw::Quad(player_waypoint_screen.x, player_waypoint_screen.y,
-                            TILE_WIDTH_F, TILE_HEIGHT_F),
-                  asw::util::makeColor(255, 255, 0));
-}
+  if (waypointActive) {
+    // Draw player waypoint
+    auto player_waypoint = getPlayerWaypoint();
+    auto player_waypoint_screen =
+        asw::Vec2(isoX(player_waypoint), isoY(player_waypoint)) * TILE_HEIGHT -
+        camera.position;
 
+    asw::draw::sprite(waypointTexture,
+                      player_waypoint_screen + asw::Vec2<float>(0, -48));
+
+    auto loc = player_waypoint_screen + asw::Vec2<float>(6, -16);
+    auto shadow_transform = asw::Quad<float>(loc.x, loc.y, 48, 48);
+    asw::draw::stretchSprite(shadowTexture,
+                             shadow_transform);  // Shadow
+  }
+}
 WorkerId World::addWorker(const asw::Vec3<int>& position) {
   auto worker = Worker();
   worker.setPosition(position);

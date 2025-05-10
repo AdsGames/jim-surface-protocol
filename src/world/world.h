@@ -8,7 +8,7 @@
 
 class World {
  public:
-  World() = default;
+  World();
 
   /// Base
   void init();
@@ -35,8 +35,15 @@ class World {
   // Resource Utils
   ResourceManager& getResourceManager() { return resource_manager; }
 
+  bool getWaypointActive() const { return waypointActive; }
+  void setWaypointActive(bool active) { waypointActive = active; }
+
  private:
   asw::Vec3<int> playerWaypoint{0, 0, 0};
+
+  asw::Texture waypointTexture;
+  asw::Texture shadowTexture;
+  bool waypointActive{false};
 
   Worker player;
 
