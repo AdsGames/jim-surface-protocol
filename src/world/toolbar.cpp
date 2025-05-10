@@ -21,6 +21,11 @@ void Toolbar::update(float dt, World& world) {
   cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
 
   // Update transofmrs
+
+  // T R A N S O F M R S
+
+  // M O O G E T R O N
+
   inspect_button_trans.position.y = camera.size.y - 70;
   worker_button_trans.position.y = camera.size.y - 70;
   purifier_button_trans.position.y = camera.size.y - 70;
@@ -39,7 +44,15 @@ void Toolbar::update(float dt, World& world) {
 
   // Click buttons
   if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
-    action(world);
+    toolZoneAction(world);
+    actionProgress += dt * 0.5F;
+    if (actionProgress > 100.0F) {
+      action(world);
+      actionProgress = 0;
+    }
+
+  } else {
+    actionProgress = 0;
   }
 
   if (asw::input::isButtonDown(asw::input::MouseButton::RIGHT)) {
@@ -67,19 +80,11 @@ void Toolbar::rightClickAction(World& world) {
   world.setWaypointActive(true);
 }
 
-void Toolbar::action(World& world) {
+void Toolbar::toolZoneAction(World& world) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
   auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
-
-  // Find selected tile
-  auto selected_tile = tile_map.getTileAtIndex(cursor_idx);
-  std::shared_ptr<TileType> select_type = nullptr;
-  if (selected_tile != nullptr) {
-    select_type = selected_tile->getType();
-  }
-
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
   if (mouse_pos.y > camera.size.y - 80.0F) {
     if (inspect_button_trans.contains(mouse_pos)) {
@@ -94,9 +99,25 @@ void Toolbar::action(World& world) {
       mode = ToolMode::DRILL;
     }
   }
+}
+
+void Toolbar::action(World& world) {
+  auto& camera = world.getCamera();
+  auto& tile_map = world.getTileMap();
+  auto& resource_manager = world.getResourceManager();
+  auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
+
+  // Find selected tile
+  auto selected_tile = tile_map.getTileAtIndex(cursor_idx);
+  std::shared_ptr<TileType> select_type = nullptr;
+  if (selected_tile != nullptr) {
+    select_type = selected_tile->getType();
+  }
 
   // Tile zone
-  else if (cursor_in_range) {
+  if (mouse_pos.y > camera.size.y - 80.0F) {
+    // take a huge steaming stinky poo on the floor
+  } else if (cursor_in_range) {
     if (mode == ToolMode::DRILL && selected_tile != nullptr &&
         select_type != nullptr) {
       auto actions = select_type->getActionsOfType(ActionType::DESTROY);
@@ -198,6 +219,15 @@ void Toolbar::draw(World& world) {
   }
 
   drawResourceWindow(world);
+
+  if (actionProgress > 0) {
+    asw::draw::rectFill(asw::Quad(mouse_pos.x, mouse_pos.y, 204.0F, 34.0F),
+                        asw::util::makeColor(128, 128, 128));
+
+    asw::draw::rectFill(asw::Quad(mouse_pos.x + 2.0F, mouse_pos.y + 2,
+                                  actionProgress * 2, 30.0F),
+                        asw::util::makeColor(0, 255, 0));
+  }
 }
 
 void Toolbar::drawResourceWindow(World& world) {

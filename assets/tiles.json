@@ -302,5 +302,20 @@
         "drop_resource_id": "biomass"
       }
     ]
+  },
+   {
+    "id": 27,
+    "images": [
+      "assets/images/tiles/crate.png"
+    ],
+    "name": "Crate",
+    "actions": [
+      {
+        "type": "destroy",
+                "drop_resource_id": "biomass"
+
+       
+      }
+    ]
   }
 ]

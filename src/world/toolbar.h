@@ -17,9 +17,12 @@ class Toolbar {
   void draw(World& world);
 
  private:
+  float actionProgress{0.0F};
+
   void drawResourceWindow(World& world);
 
   void action(World& world);
+  void toolZoneAction(World& world);
   void rightClickAction(World& world);
 
   void drawWireframe(const asw::Vec3<int>& position,
