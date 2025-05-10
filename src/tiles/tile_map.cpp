@@ -68,10 +68,8 @@ void TileMap::generate() {
             mapTiles[i][j][k].setType("junk");
           } else if (asw::random::chance(0.001F)) {
             generateStructure("junk_pile_1", {i, j, k});
-
           } else if (asw::random::chance(0.001F)) {
             generateStructure("junk_pile_2", {i, j, k});
-
           } else if (asw::random::chance(0.001F)) {
             generateStructure("junk_pile_3", {i, j, k});
           } else if (asw::random::chance(0.001F)) {
