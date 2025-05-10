@@ -38,7 +38,7 @@ void Toolbar::update(float dt, World& world) {
   }
 
   // Click buttons
-  if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
+  if (asw::input::wasButtonPressed(asw::input::MouseButton::LEFT)) {
     action(world);
   }
 
