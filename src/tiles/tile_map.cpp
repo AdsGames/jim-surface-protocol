@@ -81,6 +81,8 @@ void TileMap::generate() {
             mapTiles[i][j][k].setType("barrel");
           } else if (asw::random::chance(0.01F)) {
             mapTiles[i][j][k].setType("bike");
+          } else if (asw::random::chance(0.01F)) {
+            mapTiles[i][j][k].setType("truck");
           }
         }
       }

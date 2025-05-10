@@ -85,6 +85,7 @@ class TileType {
   asw::Quad<float> bounds;
 
   std::vector<asw::Texture> images;
+  std::vector<asw::Texture> rendered_images;
   asw::Texture image;
   TileRenderMode render_mode{TileRenderMode::NONE};
   std::vector<ActionResult> actions;
