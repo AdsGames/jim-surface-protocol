@@ -248,5 +248,31 @@
         "drop_resource_id": "scrap"
       }
     ]
+  },
+      {
+    "id": 24,
+    "images": [
+      "assets/images/tiles/junk.png"
+    ],
+    "name": "Junk",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      }
+    ]
+  },
+   {
+    "id": 25,
+    "images": [
+      "assets/images/tiles/tire.png"
+    ],
+    "name": "Tire",
+    "actions": [
+      {
+        "type": "destroy"
+       
+      }
+    ]
   }
 ]

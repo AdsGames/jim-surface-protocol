@@ -64,5 +64,86 @@
         [0, 20]
       ]
     ]
+  },
+  {
+    "name": "Junk Pile 1",
+    "id": 3,
+    "description": "Timmy's old iPhone is in here.",
+    "layout": [
+      [
+        [24, 24],
+        [0, 24]
+      ],
+      [
+        [0, 24],
+        [0, 0]
+      ]
+
+    ]
+  },
+    {
+    "name": "Junk Pile 2",
+    "id": 4,
+    "description": "2132: Amazon had a record year.",
+    "layout": [
+      [
+        [24, 24,24],
+        [24, 24 ,24],
+        [0, 24, 24]
+      ],
+      [
+        [0, 24,24],
+        [24, 0,24],
+        [0,0,0]
+      ]
+
+    ]
+  },
+   {
+    "name": "Junk Pile 3",
+    "id": 5,
+    "description": "Amazon is having a record year this year.",
+    "layout": [
+      [
+        [24, 24,24],
+        [24,0 ,24],
+        [0, 0, 0]
+      ],
+      [
+        [0, 24,24],
+        [24, 0,24],
+        [0,0,0]
+      ],
+      [
+        [0, 0,24],
+        [0, 0,0],
+        [0,0,0]
+      ],
+       [
+        [0, 0,24],
+        [0, 0,0],
+        [0,0,0]
+      ]
+
+    ]
+  },
+   {
+    "name": "Junk Pyramid",
+    "id": 5,
+    "description": "The Egyptians were on to something.",
+    "layout": [
+      [
+        [24, 24,24],
+        [24,24 ,24],
+        [24, 24, 24]
+      ],
+      [
+        [0, 0,0],
+        [0, 24,0],
+        [0,0,0]
+      ]
+     
+
+    ]
   }
 ]
