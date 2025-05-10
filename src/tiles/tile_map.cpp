@@ -46,7 +46,7 @@ void TileMap::generate() {
   // Dirt grass and rocks
   for (int i = 0; i < MAP_WIDTH; ++i) {
     for (int j = 0; j < MAP_DEPTH; ++j) {
-      auto frac = height_map.fractal(10, seed + i, seed + j);
+      auto frac = height_map.fractal(100, seed + i, seed + j);
       auto height_val = static_cast<int>(MAP_HEIGHT * (frac + 1.0F) / 2.0F);
 
       for (int k = 0; k < MAP_HEIGHT; ++k) {

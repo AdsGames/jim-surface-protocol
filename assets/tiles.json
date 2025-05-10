@@ -95,26 +95,68 @@
       "assets/images/tiles/toxic_grass.png"
     ],
     "name": "Toxic Grass",
-    "render_mode": "cube_unique_top"
+    "render_mode": "cube_unique_top",
+    "actions": [
+      {
+        "id": "purify",
+        "transition": "grass"
+      },
+      {
+        "id": "destroy",
+        "resources": [
+          {
+            "id": "toxins",
+            "amount": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 17,
     "images": ["assets/images/tiles/toxic_soil.png"],
     "name": "Toxic Soil",
-    "render_mode": "cube"
+    "render_mode": "cube",
+    "actions": [
+      {
+        "id": "purify",
+        "transition": "soil"
+      },
+      {
+        "id": "destroy",
+        "resources": [
+          {
+            "id": "toxins",
+            "amount": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": 18,
     "images": ["assets/images/tiles/toxic_water.png"],
     "name": "Toxic Water",
     "render_mode": "cube_top_only",
-    "alpha": 0.8
+    "alpha": 0.8,
+    "actions": [
+      {
+        "id": "purify",
+        "transition": "water"
+      }
+    ]
   },
   {
     "id": 19,
     "images": ["assets/images/tiles/plant_1.png"],
     "name": "Plant 1",
-    "render_mode": "flat"
+    "render_mode": "flat",
+    "actions": [
+      {
+        "id": "destroy",
+        "transition": "biomass"
+      }
+    ]
   },
   {
     "id": 20,
