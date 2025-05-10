@@ -12,6 +12,8 @@ Worker::Worker() : id(idCounter++) {
   textures[5] = asw::assets::loadTexture("assets/images/player/128/5.png");
 
   shadow = asw::assets::loadTexture("assets/images/player/128/shadow.png");
+
+  font = asw::assets::loadFont("assets/fonts/ariblk.ttf", 16);
 }
 
 void Worker::setPosition(const asw::Vec3<int>& pos) {
@@ -45,41 +47,61 @@ void Worker::update(float dt, World& world) {
 
   asw::Vec3<float> waypointF(waypoint.x, waypoint.y, waypoint.z);
 
+  asw::Vec3<int> positionInt(static_cast<int>(position.x),
+                             static_cast<int>(position.y),
+                             static_cast<int>(position.z));
+  auto iso_x = isoX(positionInt);
+  auto iso_y = isoY(positionInt);
+
+  auto screen_pos = asw::Vec2(iso_x, iso_y) * 32;
+
+  auto waypoint_x = isoX(waypoint);
+  auto waypoint_y = isoY(waypoint);
+
+  auto waypoint_screen_pos = asw::Vec2(waypoint_x, waypoint_y) * 32;
+
+  angle = screen_pos.angle(waypoint_screen_pos);
+
+  float pi = 3.14159265358979323846F;
+
+  if (angle > 0 && angle < pi / 4)
+    direction = 3;
+  else if (angle > pi / 4 && angle < (3 * pi) / 4)
+    direction = 4;
+  else if (angle > (3 * pi) / 4)
+    direction = 2;
+  else if (angle < (-3 * pi) / 4)
+    direction = 1;
+  else if (angle > (-3 * pi) / 4 && angle < (-pi / 4))
+    direction = 5;
+  else if (angle < 0 && angle > -pi / 4)
+    direction = 0;
+
   if (position.distance(waypointF) > 1) {
     float speed = 0.01F;
     float move = speed * dt;
 
-    bool up = false;
-    bool down = false;
-    bool left = false;
-    bool right = false;
+    left = false;
+    right = false;
+    up = false;
+    down = false;
+
+    int margin = 1;
 
     auto dir = asw::Vec3<float>(0, 0, 0);
-    if (position.x < waypoint.x) {
+    if (position.x < waypoint.x - margin) {
       dir.x = move;
-      right = true;
 
-    } else if (position.x > waypointF.x) {
+    } else if (position.x > waypointF.x + margin) {
       dir.x = -move;
-      left = true;
     }
 
-    if (position.y < waypointF.y) {
+    if (position.y < waypointF.y - margin) {
       dir.y = move;
-      up = true;
-    } else if (position.y > waypointF.y) {
-      dir.y = -move;
-      down = true;
-    }
 
-    if (up && left)
-      direction = 3;
-    if (up && !left)
-      direction = 0;
-    if (!up && left)
-      direction = 2;
-    if (!up && !left)
-      direction = 1;
+    } else if (position.y > waypointF.y + margin) {
+      dir.y = -move;
+    }
 
     position += dir;
   }
@@ -100,4 +122,21 @@ void Worker::draw(const asw::Vec2<float>& offset) {
   asw::draw::sprite(shadow, screen_pos);
 
   asw::draw::sprite(textures[direction], screen_pos);
+  std::string l = left ? "True" : "False";
+  std::string r = right ? "True" : "False";
+  std::string u = up ? "True" : "False";
+  std::string d = down ? "True" : "False";
+
+  auto t_pos = asw::Vec2<float>(0, 104);
+
+  std::string angleStr = std::to_string(angle);
+  std::string directionStr = std::to_string(direction);
+
+  asw::draw::text(font, "Direction:  " + directionStr,
+                  t_pos + asw::Vec2<float>(0, 60),
+                  asw::util::makeColor(255, 255, 255));
+
+  asw::draw::text(font, "Angle:  " + angleStr, t_pos + asw::Vec2<float>(0, 80),
+
+                  asw::util::makeColor(255, 255, 255));
 }

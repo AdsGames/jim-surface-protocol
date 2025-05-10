@@ -34,6 +34,8 @@ class Worker {
   bool left;
   bool right;
 
+  float angle{0};
+
   asw::Font font;
 
   static WorkerId idCounter;
