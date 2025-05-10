@@ -10,10 +10,6 @@ void Tile::setPosition(const asw::Vec3<int>& position) {
   this->position = position;
 }
 
-std::shared_ptr<TileType> Tile::getType() const {
-  return t_type;
-}
-
 // Contains Attribute
 auto Tile::containsAttribute(int newAttribute) -> bool {
   if (t_type != nullptr) {
@@ -23,8 +19,22 @@ auto Tile::containsAttribute(int newAttribute) -> bool {
   return false;
 }
 
+// Types
 void Tile::setType(std::string type) {
   t_type = TileDictionary::getTile(type);
+}
+
+std::shared_ptr<TileType> Tile::getType() const {
+  return t_type;
+}
+
+// Structures
+void Tile::setStructure(std::shared_ptr<Structure> structure) {
+  this->structure = structure;
+}
+
+std::shared_ptr<Structure> Tile::getStructure() const {
+  return structure;
 }
 
 // Set type

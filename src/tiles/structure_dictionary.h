@@ -13,6 +13,29 @@ class StructureType {
   std::string description;
   asw::Vec3<int> dimensions;
   std::vector<int> tiles;
+  int tile_count;
+};
+
+class Structure {
+ public:
+  Structure();
+
+  void setPosition(const asw::Vec3<int>& position);
+
+  std::shared_ptr<StructureType> getType() const;
+
+  void setType(const std::string& type);
+
+  int getId() const;
+
+ private:
+  static int id_counter;
+
+  int id;
+
+  std::shared_ptr<StructureType> type{nullptr};
+
+  asw::Vec3<int> position{0, 0, 0};
 };
 
 class StructureDictionary {

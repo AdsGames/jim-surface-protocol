@@ -12,7 +12,7 @@ asw::Vec3<int> TileMap::getSize() const {
   return {MAP_WIDTH, MAP_HEIGHT, MAP_DEPTH};
 }
 
-void TileMap::update(float deltaTime) {
+void TileMap::update(float dt) {
   // Z Layering
   z_focus += asw::input::mouse.z;
 
@@ -73,6 +73,8 @@ void TileMap::generate() {
         else if (k - 1 < height_val) {
           if (asw::random::chance(0.001F)) {
             generateStructure("house", {i, j, k});
+          } else if (asw::random::chance(0.001F)) {
+            generateStructure("dead_tree", {i, j, k});
           }
         }
       }
@@ -82,23 +84,26 @@ void TileMap::generate() {
 
 void TileMap::generateStructure(const std::string& id_str,
                                 const asw::Vec3<int>& position) {
-  auto structure = StructureDictionary::getStructure(id_str);
-  if (structure == nullptr) {
+  auto structure_def = StructureDictionary::getStructure(id_str);
+  if (structure_def == nullptr) {
     return;
   }
+
+  auto structure = std::make_shared<Structure>();
+  structure->setType(id_str);
+  structure->setPosition(position);
 
   int index = 0;
   auto tile_offset = asw::Vec3(0, 0, 0);
 
-  for (int i = 0; i < structure->dimensions.z; ++i) {
+  for (int i = 0; i < structure_def->dimensions.z; ++i) {
     tile_offset.z = i;
 
-    for (int j = 0; j < structure->dimensions.y; ++j) {
+    for (int j = 0; j < structure_def->dimensions.y; ++j) {
       tile_offset.y = j;
 
-      for (int k = 0; k < structure->dimensions.x; ++k) {
-        auto id = structure->tiles[index++];
-
+      for (int k = 0; k < structure_def->dimensions.x; ++k) {
+        auto id = structure_def->tiles[index++];
         tile_offset.x = k;
 
         auto tile = getTileAtIndex(position + tile_offset);
@@ -107,6 +112,7 @@ void TileMap::generateStructure(const std::string& id_str,
         }
 
         tile->setType(id);
+        tile->setStructure(structure);
       }
     }
   }

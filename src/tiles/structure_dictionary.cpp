@@ -7,8 +7,34 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 
+/// Structure Instance
+///
+int Structure::id_counter = 0;
+
+Structure::Structure() : id(id_counter++) {}
+
+void Structure::setPosition(const asw::Vec3<int>& position) {
+  this->position = position;
+}
+
+std::shared_ptr<StructureType> Structure::getType() const {
+  return type;
+}
+
+void Structure::setType(const std::string& type) {
+  this->type = StructureDictionary::getStructure(type);
+}
+
+int Structure::getId() const {
+  return id;
+}
+
+/// Structure Type
+///
 std::vector<std::shared_ptr<StructureType>> StructureDictionary::structures;
 
+/// Structure Dictionary
+///
 std::shared_ptr<StructureType> StructureDictionary::getStructure(int id) {
   auto found = std::find_if(structures.begin(), structures.end(),
                             [&id](auto& t) { return t->id == id; });
@@ -79,6 +105,10 @@ void StructureDictionary::load(const std::string& path) {
 
         for (int const id : yLayer) {
           structure->tiles.push_back(id);
+
+          if (id != 0) {
+            structure->tile_count++;
+          }
         }
       }
     }

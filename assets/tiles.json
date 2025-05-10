@@ -115,5 +115,10 @@
     "images": ["assets/images/tiles/plant_1.png"],
     "name": "Plant 1",
     "render_mode": "flat"
+  },
+  {
+    "id": 20,
+    "images": ["assets/images/tiles/willow_bark.jpg"],
+    "name": "Trunk"
   }
 ]
