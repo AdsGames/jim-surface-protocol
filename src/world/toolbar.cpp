@@ -4,13 +4,12 @@ void Toolbar::init() {
   font = asw::assets::loadFont("assets/fonts/ariblk.ttf", 16);
   inspect_button =
       asw::assets::loadTexture("assets/images/ui/inspect-button.png");
-  trash_button = asw::assets::loadTexture("assets/images/ui/trash-button.png");
   worker_button =
       asw::assets::loadTexture("assets/images/ui/worker-button.png");
   purifier_button =
-      asw::assets::loadTexture("assets/images/ui/purifier-button.png");
+      asw::assets::loadTexture("assets/images/ui/purify-button.png");
   tree_button = asw::assets::loadTexture("assets/images/ui/tree-button.png");
-  mine_button = asw::assets::loadTexture("assets/images/ui/mine-button.png");
+  drill_button = asw::assets::loadTexture("assets/images/ui/drill-button.png");
 };
 
 void Toolbar::update(float dt, World& world) {
@@ -21,11 +20,10 @@ void Toolbar::update(float dt, World& world) {
 
   // Update transofmrs
   inspect_button_trans.position.y = camera.size.y - 70;
-  trash_button_trans.position.y = camera.size.y - 70;
   worker_button_trans.position.y = camera.size.y - 70;
   purifier_button_trans.position.y = camera.size.y - 70;
   tree_button_trans.position.y = camera.size.y - 70;
-  mine_button_trans.position.y = camera.size.y - 70;
+  drill_button_trans.position.y = camera.size.y - 70;
 
   // Click buttons
   if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
@@ -65,31 +63,31 @@ void Toolbar::action(World& world) {
 
   // Find selected tile
   auto selected_tile = tile_map.getTileAtIndex(cursor_idx);
+  std::shared_ptr<TileType> select_type = nullptr;
+  if (selected_tile != nullptr) {
+    select_type = selected_tile->getType();
+  }
 
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
   if (mouse_pos.y > camera.size.y - 80.0F) {
     if (inspect_button_trans.contains(mouse_pos)) {
       mode = ToolMode::INSPECT;
-    } else if (trash_button_trans.contains(mouse_pos)) {
-      mode = ToolMode::TRASH;
     } else if (worker_button_trans.contains(mouse_pos)) {
       mode = ToolMode::WORKER;
     } else if (purifier_button_trans.contains(mouse_pos)) {
       mode = ToolMode::PURIFIER;
     } else if (tree_button_trans.contains(mouse_pos)) {
       mode = ToolMode::TREE;
-    } else if (mine_button_trans.contains(mouse_pos)) {
-      mode = ToolMode::MINE;
+    } else if (drill_button_trans.contains(mouse_pos)) {
+      mode = ToolMode::DRILL;
     }
   }
 
   // Tile zone
   else {
-    if (mode == ToolMode::TRASH && selected_tile != nullptr &&
-        selected_tile->getType() != nullptr) {
-      // Ensure
-      auto actions =
-          selected_tile->getType()->getActionsOfType(ActionType::DESTROY);
+    if (mode == ToolMode::DRILL && selected_tile != nullptr &&
+        select_type != nullptr) {
+      auto actions = select_type->getActionsOfType(ActionType::DESTROY);
       for (const auto& action : actions) {
         if (action.drop_resource_id != "") {
           resource_manager.addResourceCount(action.drop_resource_id, 1);
@@ -101,13 +99,22 @@ void Toolbar::action(World& world) {
     if (mode == ToolMode::WORKER) {
       world.addWorker(cursor_idx);
     }
+
+    if (mode == ToolMode::PURIFIER && selected_tile != nullptr &&
+        select_type != nullptr) {
+      auto actions = select_type->getActionsOfType(ActionType::PURIFY);
+      for (const auto& action : actions) {
+        if (action.transition_tile_id != "") {
+          selected_tile->setType(action.transition_tile_id);
+        }
+      }
+    }
   }
 }
 
 void Toolbar::draw(World& world) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
-  auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
   auto world_pos = camera.position + mouse_pos;
   auto selected_tile = tile_map.getTileAt(world_pos);
@@ -121,16 +128,13 @@ void Toolbar::draw(World& world) {
 
   // Buttons
   asw::draw::stretchSprite(inspect_button, inspect_button_trans);
-  asw::draw::stretchSprite(trash_button, trash_button_trans);
   asw::draw::stretchSprite(worker_button, worker_button_trans);
   asw::draw::stretchSprite(purifier_button, purifier_button_trans);
   asw::draw::stretchSprite(tree_button, tree_button_trans);
-  asw::draw::stretchSprite(mine_button, mine_button_trans);
+  asw::draw::stretchSprite(drill_button, drill_button_trans);
 
   if (mode == ToolMode::INSPECT) {
     asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
-  } else if (mode == ToolMode::TRASH) {
-    asw::draw::rect(trash_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::WORKER) {
     asw::draw::rect(worker_button_trans, asw::util::makeColor(255, 255, 0));
 
@@ -138,8 +142,8 @@ void Toolbar::draw(World& world) {
     asw::draw::rect(purifier_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::TREE) {
     asw::draw ::rect(tree_button_trans, asw::util::makeColor(255, 255, 0));
-  } else if (mode == ToolMode::MINE) {
-    asw::draw::rect(mine_button_trans, asw::util::makeColor(255, 255, 0));
+  } else if (mode == ToolMode::DRILL) {
+    asw::draw::rect(drill_button_trans, asw::util::makeColor(255, 255, 0));
   }
 
   // Inspect View
@@ -154,28 +158,33 @@ void Toolbar::draw(World& world) {
                     asw::Vec2(10.0F, 120.0F), text_colour);
   }
 
-  if (selected_tile != nullptr && selected_tile->getType() != nullptr) {
-    asw::draw::text(font, "Info: " + selected_tile->getType()->getName(),
-                    asw::Vec2(10.0F, 80.0F), text_colour);
+  // Inspect mode
+  if (selected_tile != nullptr) {
+    auto tile_type = selected_tile->getType();
+    auto tile_structure = selected_tile->getStructure();
 
-    if (selected_tile->getStructure() != nullptr) {
-      asw::draw::text(
-          font, "Structure: " + selected_tile->getStructure()->getType()->name,
-          asw::Vec2(10.0F, 140.0F), text_colour);
-
-      asw::draw::text(
-          font,
-          "Structure: " + selected_tile->getStructure()->getType()->description,
-          asw::Vec2(10.0F, 160.0F), text_colour);
+    if (tile_type != nullptr) {
+      asw::draw::text(font, "Info: " + tile_type->getName(),
+                      asw::Vec2(10.0F, 80.0F), text_colour);
     }
 
-    // if (mode == ToolMode::INSPECT) {
-    //   selected_tile->getType()->draw(asw::Vec3(0, 0, 0), asw::Vec2(0, 0),
-    //   true);
-    // }
+    if (tile_structure != nullptr) {
+      asw::draw::text(font, "Structure: " + tile_structure->getType()->name,
+                      asw::Vec2(10.0F, 140.0F), text_colour);
+
+      asw::draw::text(font,
+                      "Structure: " + tile_structure->getType()->description,
+                      asw::Vec2(10.0F, 160.0F), text_colour);
+    }
   }
 
-  // Resource view
+  drawResourceWindow(world);
+}
+
+void Toolbar::drawResourceWindow(World& world) {
+  auto& resource_manager = world.getResourceManager();
+  auto& camera = world.getCamera();
+
   const int offset_x = -170.0F;
   auto& resources = resource_manager.getResources();
 
@@ -184,7 +193,7 @@ void Toolbar::draw(World& world) {
       asw::util::makeColor(64, 64, 0));
 
   asw::draw::text(font, "Resources", asw::Vec2(camera.size.x + offset_x, 10.0F),
-                  text_colour);
+                  asw::util::makeColor(255, 255, 255, 255));
 
   int index = 0;
   for (const auto& [key, resource] : resources) {
@@ -194,9 +203,10 @@ void Toolbar::draw(World& world) {
         resource->icon,
         asw::Quad(camera.size.x + offset_x, y_pos + 10.0F, 10.0F, 10.0F));
 
-    asw::draw::text(
-        font, resource->name + ": " + std::to_string(resource->amount),
-        asw::Vec2(camera.size.x + offset_x + 20.0F, y_pos), text_colour);
+    asw::draw::text(font,
+                    resource->name + ": " + std::to_string(resource->amount),
+                    asw::Vec2(camera.size.x + offset_x + 20.0F, y_pos),
+                    asw::util::makeColor(255, 255, 255, 255));
 
     index++;
   }

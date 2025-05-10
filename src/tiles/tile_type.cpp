@@ -97,7 +97,7 @@ void TileType::draw(const asw::Vec3<int>& position,
 
   auto iso_y = (isoY(position) * TILE_HEIGHT) - offset.y;
   if (hidden) {
-    iso_y -= TILE_HEIGHT / 4;
+    // iso_y -= TILE_HEIGHT / 4;
   }
 
   if (iso_y < -TILE_SIZE || iso_y > 960) {

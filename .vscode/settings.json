@@ -100,7 +100,8 @@
     "print": "cpp",
     "queue": "cpp",
     "stack": "cpp",
-    "regex": "cpp"
+    "regex": "cpp",
+    "__config": "cpp"
   },
   "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/debug/compile_commands.json"
 }
