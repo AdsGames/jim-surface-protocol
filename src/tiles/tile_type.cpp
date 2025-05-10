@@ -29,8 +29,8 @@ const asw::Vec3<int> CUBE_FACES[3][4] = {
 // Face Colour Bias
 const asw::Vec3<float> CUBE_FACE_COLOUR[3] = {
     {1.0F, 1.0F, 1.0F},  // top
-    {0.5F, 0.5F, 1.0F},  // left
-    {1.0F, 0.5F, 0.5F},  // right
+    {0.8F, 0.8F, 0.8F},  // left
+    {0.5F, 0.5F, 0.5F},  // right
 };
 
 // triangles: 0-1-2 and 2-3-0
@@ -44,7 +44,7 @@ const int RENDER_ORDER[] = {0, 1, 2, 2, 3, 0};
 TileType::TileType(short id, const std::string& name, const std::string& id_str)
     : id(id), name(name), id_str(id_str) {}
 
-auto TileType::getId() const -> short {
+short TileType::getId() const {
   return id;
 }
 
@@ -113,7 +113,7 @@ void TileType::draw(const asw::Vec3<int>& position,
   auto iso_pos = asw::Vec2(iso_x, iso_y);
 
   if (render_mode == TileRenderMode::FLAT) {
-    iso_pos.y -= TILE_SIZE * 0.65F;
+    iso_pos.y -= TILE_SIZE * 0.5F;
   }
 
   asw::draw::sprite(image, iso_pos);
@@ -132,9 +132,16 @@ void TileType::draw(const asw::Vec3<int>& position,
 }
 
 void TileType::bakeTexture(TileRenderMode mode, float alpha) {
+  auto width = TILE_SIZE;
+  auto height = TILE_SIZE;
+
+  if (mode == TileRenderMode::FLAT && images.size() > 0) {
+    width = asw::util::getTextureSize(images.at(0)).x;
+    height = asw::util::getTextureSize(images.at(0)).y;
+  }
+
   // Render image
-  // 2x is because the texture is 2x the size of the world space of the tile
-  image = asw::assets::createTexture(TILE_SIZE, TILE_SIZE);
+  image = asw::assets::createTexture(width, height);
 
   SDL_SetTextureBlendMode(image.get(), SDL_BLENDMODE_BLEND);
   SDL_SetTextureScaleMode(image.get(), SDL_SCALEMODE_NEAREST);
@@ -143,7 +150,7 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   asw::display::setRenderTarget(image);
 
   // Fill transparent
-  asw::draw::rectFill(asw::Quad<float>(0.0F, 0.0F, TILE_SIZE, TILE_SIZE),
+  asw::draw::rectFill(asw::Quad<float>(0.0F, 0.0F, height, width),
                       asw::util::makeColor(0, 0, 0, 0));
 
   // Render cube
@@ -215,6 +222,5 @@ void TileType::renderCube(int texture_count, int face_count) {
 }
 
 void TileType::renderFlat() {
-  asw::draw::stretchSprite(images.at(0),
-                           asw::Quad<float>(0.0F, 0.0F, TILE_SIZE, TILE_SIZE));
+  asw::draw::sprite(images.at(0), asw::Vec2(0.0F, 0.0F));
 }

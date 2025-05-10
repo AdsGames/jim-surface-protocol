@@ -7,6 +7,10 @@ void Toolbar::init() {
   trash_button = asw::assets::loadTexture("assets/images/ui/trash-button.png");
   worker_button =
       asw::assets::loadTexture("assets/images/ui/worker-button.png");
+  purifier_button =
+      asw::assets::loadTexture("assets/images/ui/purifier-button.png");
+  tree_button = asw::assets::loadTexture("assets/images/ui/tree-button.png");
+  mine_button = asw::assets::loadTexture("assets/images/ui/mine-button.png");
 };
 
 void Toolbar::update(float dt, World& world) {
@@ -19,6 +23,9 @@ void Toolbar::update(float dt, World& world) {
   inspect_button_trans.position.y = camera.size.y - 70;
   trash_button_trans.position.y = camera.size.y - 70;
   worker_button_trans.position.y = camera.size.y - 70;
+  purifier_button_trans.position.y = camera.size.y - 70;
+  tree_button_trans.position.y = camera.size.y - 70;
+  mine_button_trans.position.y = camera.size.y - 70;
 
   // Click buttons
   if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
@@ -67,6 +74,12 @@ void Toolbar::action(World& world) {
       mode = ToolMode::TRASH;
     } else if (worker_button_trans.contains(mouse_pos)) {
       mode = ToolMode::WORKER;
+    } else if (purifier_button_trans.contains(mouse_pos)) {
+      mode = ToolMode::PURIFIER;
+    } else if (tree_button_trans.contains(mouse_pos)) {
+      mode = ToolMode::TREE;
+    } else if (mine_button_trans.contains(mouse_pos)) {
+      mode = ToolMode::MINE;
     }
   }
 
@@ -110,6 +123,9 @@ void Toolbar::draw(World& world) {
   asw::draw::stretchSprite(inspect_button, inspect_button_trans);
   asw::draw::stretchSprite(trash_button, trash_button_trans);
   asw::draw::stretchSprite(worker_button, worker_button_trans);
+  asw::draw::stretchSprite(purifier_button, purifier_button_trans);
+  asw::draw::stretchSprite(tree_button, tree_button_trans);
+  asw::draw::stretchSprite(mine_button, mine_button_trans);
 
   if (mode == ToolMode::INSPECT) {
     asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
@@ -117,12 +133,19 @@ void Toolbar::draw(World& world) {
     asw::draw::rect(trash_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::WORKER) {
     asw::draw::rect(worker_button_trans, asw::util::makeColor(255, 255, 0));
+
+  } else if (mode == ToolMode::PURIFIER) {
+    asw::draw::rect(purifier_button_trans, asw::util::makeColor(255, 255, 0));
+  } else if (mode == ToolMode::TREE) {
+    asw::draw ::rect(tree_button_trans, asw::util::makeColor(255, 255, 0));
+  } else if (mode == ToolMode::MINE) {
+    asw::draw::rect(mine_button_trans, asw::util::makeColor(255, 255, 0));
   }
 
   // Inspect View
   if (mode == ToolMode::INSPECT) {
     asw::draw::rectFill(asw::Quad(0.0F, 0.0F, 200.0F, 200.0F),
-                        asw::util::makeColor(128, 128, 0));
+                        asw::util::makeColor(64, 64, 0));
 
     // X + Y
     asw::draw::text(font, "X: " + std::to_string(cursor_idx.x),
@@ -153,20 +176,27 @@ void Toolbar::draw(World& world) {
   }
 
   // Resource view
-  const int offset_x = -150.0F;
+  const int offset_x = -170.0F;
   auto& resources = resource_manager.getResources();
+
+  asw::draw::rectFill(
+      asw::Quad(camera.size.x + offset_x - 20.0F, 0.0F, 200.0F, 200.0F),
+      asw::util::makeColor(64, 64, 0));
+
   asw::draw::text(font, "Resources", asw::Vec2(camera.size.x + offset_x, 10.0F),
                   text_colour);
 
   int index = 0;
   for (const auto& [key, resource] : resources) {
     const auto y_pos = 50.0F + index * 20;
-    asw::draw::text(font,
-                    resource->name + ": " + std::to_string(resource->amount),
-                    asw::Vec2(camera.size.x + offset_x, y_pos), text_colour);
-    asw::draw::stretchSprite(resource->icon,
-                             asw::Quad(camera.size.x + offset_x - 20.0F,
-                                       y_pos + 10.0F, 10.0F, 10.0F));
+
+    asw::draw::stretchSprite(
+        resource->icon,
+        asw::Quad(camera.size.x + offset_x, y_pos + 10.0F, 10.0F, 10.0F));
+
+    asw::draw::text(
+        font, resource->name + ": " + std::to_string(resource->amount),
+        asw::Vec2(camera.size.x + offset_x + 20.0F, y_pos), text_colour);
 
     index++;
   }
