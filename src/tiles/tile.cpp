@@ -10,6 +10,10 @@ void Tile::setPosition(const asw::Vec3<int>& position) {
   this->position = position;
 }
 
+const asw::Vec3<int>& Tile::getPosition() const {
+  return position;
+}
+
 // Types
 void Tile::setType(std::string type) {
   t_type = TileDictionary::getTile(type);

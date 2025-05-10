@@ -23,10 +23,12 @@ class Toolbar {
   void rightClickAction(World& world);
 
   void drawWireframe(const asw::Vec3<int>& position,
-                     const asw::Vec2<float>& offset);
+                     const asw::Vec2<float>& offset,
+                     asw::Color colour);
 
   asw::Font font;
   asw::Vec3<int> cursor_idx{0, 0, 0};
+  bool cursor_in_range{false};
 
   asw::Texture inspect_button;
   asw::Texture worker_button;

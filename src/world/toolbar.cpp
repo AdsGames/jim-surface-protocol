@@ -1,5 +1,7 @@
 #include "toolbar.h"
 
+#include <cmath>
+
 void Toolbar::init() {
   font = asw::assets::loadFont("assets/fonts/ariblk.ttf", 16);
   inspect_button =
@@ -24,6 +26,16 @@ void Toolbar::update(float dt, World& world) {
   purifier_button_trans.position.y = camera.size.y - 70;
   tree_button_trans.position.y = camera.size.y - 70;
   drill_button_trans.position.y = camera.size.y - 70;
+
+  // Find distance to worker
+  auto selected_tile = tile_map.getTileAtIndex(cursor_idx);
+  auto worker = world.getPlayer();
+  if (worker != nullptr && selected_tile != nullptr) {
+    const auto tile_pos = selected_tile->getPosition();
+    const auto distance = asw::Vec3<float>(tile_pos.x, tile_pos.y, tile_pos.z)
+                              .distance(worker->getPosition());
+    cursor_in_range = distance < 10.0F;
+  }
 
   // Click buttons
   if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
@@ -84,7 +96,7 @@ void Toolbar::action(World& world) {
   }
 
   // Tile zone
-  else {
+  else if (cursor_in_range) {
     if (mode == ToolMode::DRILL && selected_tile != nullptr &&
         select_type != nullptr) {
       auto actions = select_type->getActionsOfType(ActionType::DESTROY);
@@ -120,7 +132,12 @@ void Toolbar::draw(World& world) {
   auto selected_tile = tile_map.getTileAt(world_pos);
   auto text_colour = asw::util::makeColor(255, 255, 255, 255);  // White
 
-  drawWireframe(cursor_idx, camera.position);
+  // Outline
+  if (cursor_in_range) {
+    drawWireframe(cursor_idx, camera.position, asw::util::makeColor(0, 255, 0));
+  } else {
+    drawWireframe(cursor_idx, camera.position, asw::util::makeColor(255, 0, 0));
+  }
 
   asw::draw::rectFill(
       asw::Quad(0.0F, camera.size.y - 80.0F, camera.size.x, camera.size.y),
@@ -213,7 +230,8 @@ void Toolbar::drawResourceWindow(World& world) {
 }
 
 void Toolbar::drawWireframe(const asw::Vec3<int>& position,
-                            const asw::Vec2<float>& offset) {
+                            const asw::Vec2<float>& offset,
+                            asw::Color colour) {
   // Calc screen position
   auto iso_x = isoX(position);
   auto iso_y = isoY(position);
@@ -221,18 +239,16 @@ void Toolbar::drawWireframe(const asw::Vec3<int>& position,
 
   // Draw of top of tile
   asw::draw::line(screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
-                  screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
-                  asw::util::makeColor(255, 255, 0));
+                  screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F), colour);
 
   asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
                   screen_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
-                  asw::util::makeColor(255, 0, 255));
+                  colour);
 
   asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
                   screen_pos + asw::Vec2(TILE_WIDTH_F / 2, TILE_HEIGHT_F),
-                  asw::util::makeColor(0, 255, 0));
+                  colour);
 
   asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F / 2, TILE_HEIGHT_F),
-                  screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
-                  asw::util::makeColor(0, 255, 255));
+                  screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2), colour);
 }

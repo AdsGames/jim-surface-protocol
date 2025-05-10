@@ -13,9 +13,9 @@ class Tile {
 
   explicit Tile(short type);
 
+  // Position
   void setPosition(const asw::Vec3<int>& position);
-
-  bool containsAttribute(int newAttribute);
+  const asw::Vec3<int>& getPosition() const;
 
   // Type ref
   void setType(short type);

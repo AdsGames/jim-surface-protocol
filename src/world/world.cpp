@@ -100,3 +100,7 @@ Worker* World::getWorker(WorkerId id) {
   }
   return nullptr;
 }
+
+Worker* World::getPlayer() {
+  return &player;
+}

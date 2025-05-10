@@ -20,6 +20,7 @@ class World {
   /// Worker Utils
   WorkerId addWorker(const asw::Vec3<int>& position);
   Worker* getWorker(WorkerId id);
+  Worker* getPlayer();
 
   /// Camera Utils
   asw::Quad<float>& getCamera() { return camera; }

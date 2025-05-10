@@ -18,6 +18,7 @@ class Worker {
   Worker();
 
   void setPosition(const asw::Vec3<int>& pos);
+  const asw::Vec3<float>& getPosition() const;
 
   void update(float dt, World& world);
 

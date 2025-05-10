@@ -22,6 +22,10 @@ void Worker::setPosition(const asw::Vec3<int>& pos) {
   position = posF;
 }
 
+const asw::Vec3<float>& Worker::getPosition() const {
+  return position;
+}
+
 WorkerId Worker::getId() const {
   return id;
 }
@@ -89,16 +93,20 @@ void Worker::update(float dt, World& world) {
     auto dir = asw::Vec3<float>(0, 0, 0);
     if (position.x < waypoint.x) {
       dir.x = move;
-
     } else if (position.x > waypointF.x) {
       dir.x = -move;
     }
 
     if (position.y < waypointF.y) {
       dir.y = move;
-
     } else if (position.y > waypointF.y) {
       dir.y = -move;
+    }
+
+    if (position.z < waypointF.z) {
+      dir.z = move;
+    } else if (position.z > waypointF.z) {
+      dir.z = -move;
     }
 
     position += dir;
