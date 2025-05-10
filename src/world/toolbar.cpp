@@ -173,6 +173,8 @@ void Toolbar::draw(World& world) {
                     asw::Vec2(10.0F, 100.0F), text_colour);
     asw::draw::text(font, "Y: " + std::to_string(cursor_idx.y),
                     asw::Vec2(10.0F, 120.0F), text_colour);
+    asw::draw::text(font, "Z: " + std::to_string(cursor_idx.z),
+                    asw::Vec2(10.0F, 140.0F), text_colour);
   }
 
   // Inspect mode

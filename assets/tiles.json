@@ -271,7 +271,35 @@
     "actions": [
       {
         "type": "destroy"
+      }
+    ]
+  },
        
+  {
+    "id": 26,
+    "images": [
+      "assets/images/tiles/plants_1.png"
+    ],
+    "name": "Plants 1",
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "images": [
+      "assets/images/tiles/plants_2.png"
+    ],
+    "name": "Plants 2",
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
       }
     ]
   }
