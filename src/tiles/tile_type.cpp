@@ -29,8 +29,8 @@ const asw::Vec3<int> CUBE_FACES[3][4] = {
 // Face Colour Bias
 const asw::Vec3<float> CUBE_FACE_COLOUR[3] = {
     {1.0F, 1.0F, 1.0F},  // top
-    {0.5F, 0.5F, 1.0F},  // left
-    {1.0F, 0.5F, 0.5F},  // right
+    {0.8F, 0.8F, 0.8F},  // left
+    {0.5F, 0.5F, 0.5F},  // right
 };
 
 // triangles: 0-1-2 and 2-3-0

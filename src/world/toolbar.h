@@ -6,7 +6,7 @@
 
 constexpr float BUTTON_SIZE = 64.0F;
 
-enum class ToolMode { INSPECT, TRASH, WORKER, WAYPOINT };
+enum class ToolMode { INSPECT, TRASH, WORKER, WAYPOINT, PURIFIER, TREE, MINE };
 
 class Toolbar {
  public:
@@ -28,12 +28,19 @@ class Toolbar {
   asw::Texture inspect_button;
   asw::Texture trash_button;
   asw::Texture worker_button;
+  asw::Texture purifier_button;
+  asw::Texture tree_button;
+  asw::Texture mine_button;
 
   asw::Quad<float> inspect_button_trans{10.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> trash_button_trans{84.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> worker_button_trans{158.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> waypoint_button_trans{232.0F, 0.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};
+  asw::Quad<float> purifier_button_trans{306.0F, 0.0F, BUTTON_SIZE,
+                                         BUTTON_SIZE};
+  asw::Quad<float> tree_button_trans{380.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
+  asw::Quad<float> mine_button_trans{454.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
 
   ToolMode mode{ToolMode::INSPECT};
 };
