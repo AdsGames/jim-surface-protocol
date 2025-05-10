@@ -6,11 +6,7 @@
 
 constexpr float BUTTON_SIZE = 64.0F;
 
-enum class ToolMode {
-  INSPECT,
-  TRASH,
-  WORKER,
-};
+enum class ToolMode { INSPECT, TRASH, WORKER, WAYPOINT };
 
 class Toolbar {
  public:
@@ -36,6 +32,8 @@ class Toolbar {
   asw::Quad<float> inspect_button_trans{10.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> trash_button_trans{84.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> worker_button_trans{158.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
+  asw::Quad<float> waypoint_button_trans{232.0F, 0.0F, BUTTON_SIZE,
+                                         BUTTON_SIZE};
 
   ToolMode mode{ToolMode::INSPECT};
 };

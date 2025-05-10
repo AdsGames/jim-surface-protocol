@@ -46,7 +46,7 @@ void World::update(float dt) {
 
   tile_map.update(dt);
 
-  player.update(dt,*this);
+  player.update(dt, *this);
 }
 
 void World::draw() {
@@ -60,6 +60,19 @@ void World::draw() {
   for (auto& [id, worker] : workers) {
     worker.draw(camera.position);
   }
+
+  // Draw player waypoint
+  auto player_waypoint = getPlayerWaypoint();
+  auto player_waypoint_screen =
+      asw::Vec2(isoX(player_waypoint), isoY(player_waypoint)) * TILE_HEIGHT -
+      camera.position;
+  asw::draw::rectFill(
+      asw::Quad(player_waypoint_screen.x, player_waypoint_screen.y,
+                TILE_WIDTH_F, TILE_HEIGHT_F),
+      asw::util::makeColor(255, 0, 0));
+  asw::draw::rect(asw::Quad(player_waypoint_screen.x, player_waypoint_screen.y,
+                            TILE_WIDTH_F, TILE_HEIGHT_F),
+                  asw::util::makeColor(255, 255, 0));
 }
 
 WorkerId World::addWorker(const asw::Vec3<int>& position) {

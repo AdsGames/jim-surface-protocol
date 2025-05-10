@@ -36,6 +36,25 @@ void Worker::update(float dt, World& world) {
   if (asw::input::wasKeyPressed(asw::input::Key::UP)) {
     direction = 3;
   }
+
+  auto waypoint = world.getPlayerWaypoint();
+
+  if (position.distance(waypoint) > 1) {
+    auto dir = asw::Vec3<int>(0, 0, 0);
+    if (position.x < waypoint.x) {
+      dir.x = 1;
+    } else if (position.x > waypoint.x) {
+      dir.x = -1;
+    }
+
+    if (position.y < waypoint.y) {
+      dir.y = 1;
+    } else if (position.y > waypoint.y) {
+      dir.y = -1;
+    }
+
+    position += dir;
+  }
 }
 
 void Worker::draw(const asw::Vec2<float>& offset) {

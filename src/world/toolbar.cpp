@@ -19,6 +19,7 @@ void Toolbar::update(float dt, World& world) {
   inspect_button_trans.position.y = camera.size.y - 70;
   trash_button_trans.position.y = camera.size.y - 70;
   worker_button_trans.position.y = camera.size.y - 70;
+  waypoint_button_trans.position.y = camera.size.y - 70;
 
   // Click buttons
   if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
@@ -49,7 +50,7 @@ void Toolbar::action(World& world) {
   // Find selected tile
   auto selected_tile = tile_map.getTileAtIndex(cursor_idx);
 
-  // Tool zone (I didn't know danny had a zone)
+  // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
   if (mouse_pos.y > camera.size.y - 80.0F) {
     if (inspect_button_trans.contains(mouse_pos)) {
       mode = ToolMode::INSPECT;
@@ -57,6 +58,8 @@ void Toolbar::action(World& world) {
       mode = ToolMode::TRASH;
     } else if (worker_button_trans.contains(mouse_pos)) {
       mode = ToolMode::WORKER;
+    } else if (waypoint_button_trans.contains(mouse_pos)) {
+      mode = ToolMode::WAYPOINT;
     }
   }
 
@@ -68,6 +71,9 @@ void Toolbar::action(World& world) {
 
     if (mode == ToolMode::WORKER) {
       world.addWorker(cursor_idx);
+    }
+    if (mode == ToolMode::WAYPOINT) {
+      world.setPlayerWaypoint(cursor_idx);
     }
   }
 }
@@ -89,6 +95,7 @@ void Toolbar::draw(World& world) {
   asw::draw::stretchSprite(inspect_button, inspect_button_trans);
   asw::draw::stretchSprite(trash_button, trash_button_trans);
   asw::draw::stretchSprite(worker_button, worker_button_trans);
+  asw::draw::stretchSprite(worker_button, waypoint_button_trans);
 
   if (mode == ToolMode::INSPECT) {
     asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
@@ -97,6 +104,8 @@ void Toolbar::draw(World& world) {
     asw::draw::rect(trash_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::WORKER) {
     asw::draw::rect(worker_button_trans, asw::util::makeColor(255, 255, 0));
+  } else if (mode == ToolMode::WAYPOINT) {
+    asw::draw::rect(waypoint_button_trans, asw::util::makeColor(255, 255, 0));
   }
 
   // Inspect View
