@@ -81,10 +81,9 @@ void Worker::update(float dt, World& world) {
   else if (angle < 0 && angle > -pi / 4)
     direction = 0;
 
-  if (position.distance(waypointF) > 1) {
-    float speed = 0.01F;
-    float move = speed * dt;
-
+  float speed = 0.01F;
+  float move = speed * dt;
+  if (position.distance(waypointF) > move) {
     left = false;
     right = false;
     up = false;
@@ -111,6 +110,7 @@ void Worker::update(float dt, World& world) {
 
     position += dir;
   } else {
+    position = waypointF;
     world.setWaypointActive(false);
   }
 }
@@ -123,7 +123,8 @@ void Worker::draw(const asw::Vec2<float>& offset) {
 
   auto screen_size =
       asw::Quad(iso_x * TILE_HEIGHT_F - offset.x,
-                iso_y * TILE_HEIGHT_F - offset.y, TILE_HEIGHT_F, TILE_HEIGHT_F);
+                iso_y * TILE_HEIGHT_F - offset.y - TILE_HEIGHT_F * 0.75F,
+                TILE_WIDTH_F, TILE_WIDTH_F);
 
   asw::draw::stretchSprite(shadow, screen_size);
   asw::draw::stretchSprite(textures[direction], screen_size);
