@@ -7,25 +7,25 @@
   },
   {
     "id": 2,
-    "name": "stone",
-    "description": "Stone is a natural resource used in construction and manufacturing. It can be quarried and processed into various forms, such as gravel, sand, and crushed stone.",
-    "icon": "assets/images/icons/stone.png"
-  },
-  {
-    "id": 3,
     "name": "water",
     "description": "Water is a vital resource for all living organisms. It is used for drinking, irrigation, and industrial processes. Freshwater resources are limited and need to be managed sustainably.",
     "icon": "assets/images/icons/water.png"
   },
   {
-    "id": 4,
+    "id": 3,
     "name": "toxins",
     "description": "Toxins are harmful substances that can cause damage to living organisms and the environment. They can be found in various forms, including chemicals, heavy metals, and biological agents.",
     "icon": "assets/images/icons/toxins.png"
   },
   {
-    "id": 5,
+    "id": 4,
     "name": "minerals",
+    "description": "Minerals are naturally occurring inorganic substances that are essential for various biological processes. They can be found in rocks, soil, and water.",
+    "icon": "assets/images/icons/minerals.png"
+  },
+  {
+    "id": 5,
+    "name": "scrap",
     "description": "Minerals are naturally occurring inorganic substances that are essential for various biological processes. They can be found in rocks, soil, and water.",
     "icon": "assets/images/icons/minerals.png"
   }

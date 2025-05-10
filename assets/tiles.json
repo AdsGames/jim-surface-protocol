@@ -191,7 +191,13 @@
     "images": [
       "assets/images/tiles/willow_bark.jpg"
     ],
-    "name": "Trunk"
+    "name": "Trunk",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      }
+    ]
   },
   {
     "id": 21,
@@ -199,7 +205,21 @@
       "assets/images/tiles/truck.png"
     ],
     "name": "Truck",
-    "render_mode": "flat"
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      },
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      },
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      }
+    ]
   },
   {
     "id": 22,
@@ -207,7 +227,13 @@
       "assets/images/tiles/bike.png"
     ],
     "name": "Bike",
-    "render_mode": "flat"
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      }
+    ]
   },
   {
     "id": 23,
@@ -215,6 +241,12 @@
       "assets/images/tiles/barrel.png"
     ],
     "name": "Barrel",
-    "render_mode": "flat"
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      }
+    ]
   }
 ]
