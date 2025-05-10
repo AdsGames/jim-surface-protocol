@@ -4,6 +4,7 @@
 
 #include "../tasks/worker.h"
 #include "../tiles/tile_map.h"
+#include "./resource_manager.h"
 
 class World {
  public:
@@ -31,12 +32,17 @@ class World {
     playerWaypoint = waypoint;
   }
 
+  // Resource Utils
+  ResourceManager& getResourceManager() { return resource_manager; }
+
  private:
   asw::Vec3<int> playerWaypoint{0, 0, 0};
 
   Worker player;
 
   TileMap tile_map;
+
+  ResourceManager resource_manager;
 
   asw::Quad<float> camera{0, 0, 1280, 960};
 

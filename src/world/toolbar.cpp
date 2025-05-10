@@ -45,6 +45,7 @@ void Toolbar::update(float dt, World& world) {
 void Toolbar::action(World& world) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
+  auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
 
   // Find selected tile
@@ -65,7 +66,16 @@ void Toolbar::action(World& world) {
 
   // Tile zone
   else {
-    if (mode == ToolMode::TRASH && selected_tile != nullptr) {
+    if (mode == ToolMode::TRASH && selected_tile != nullptr &&
+        selected_tile->getType() != nullptr) {
+      // Ensure
+      auto actions =
+          selected_tile->getType()->getActionsOfType(ActionType::DESTROY);
+      for (const auto& action : actions) {
+        if (action.drop_resource_id != "") {
+          resource_manager.addResourceCount(action.drop_resource_id, 1);
+        }
+      }
       selected_tile->setType(0);
     }
 
@@ -81,9 +91,11 @@ void Toolbar::action(World& world) {
 void Toolbar::draw(World& world) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
+  auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
   auto world_pos = camera.position + mouse_pos;
   auto selected_tile = tile_map.getTileAt(world_pos);
+  auto text_colour = asw::util::makeColor(255, 255, 255, 255);  // White
 
   drawWireframe(cursor_idx, camera.position);
 
@@ -99,7 +111,6 @@ void Toolbar::draw(World& world) {
 
   if (mode == ToolMode::INSPECT) {
     asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
-
   } else if (mode == ToolMode::TRASH) {
     asw::draw::rect(trash_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::WORKER) {
@@ -115,33 +126,49 @@ void Toolbar::draw(World& world) {
 
     // X + Y
     asw::draw::text(font, "X: " + std::to_string(cursor_idx.x),
-                    asw::Vec2(10.0F, 100.0F),
-                    asw::util::makeColor(255, 255, 255));
+                    asw::Vec2(10.0F, 100.0F), text_colour);
     asw::draw::text(font, "Y: " + std::to_string(cursor_idx.y),
-                    asw::Vec2(10.0F, 120.0F),
-                    asw::util::makeColor(255, 255, 255));
+                    asw::Vec2(10.0F, 120.0F), text_colour);
   }
 
   if (selected_tile != nullptr && selected_tile->getType() != nullptr) {
     asw::draw::text(font, "Info: " + selected_tile->getType()->getName(),
-                    asw::Vec2(10.0F, 80.0F),
-                    asw::util::makeColor(255, 255, 255));
+                    asw::Vec2(10.0F, 80.0F), text_colour);
 
     if (selected_tile->getStructure() != nullptr) {
       asw::draw::text(
           font, "Structure: " + selected_tile->getStructure()->getType()->name,
-          asw::Vec2(10.0F, 140.0F), asw::util::makeColor(255, 255, 255));
+          asw::Vec2(10.0F, 140.0F), text_colour);
 
       asw::draw::text(
           font,
           "Structure: " + selected_tile->getStructure()->getType()->description,
-          asw::Vec2(10.0F, 160.0F), asw::util::makeColor(255, 255, 255));
+          asw::Vec2(10.0F, 160.0F), text_colour);
     }
 
     // if (mode == ToolMode::INSPECT) {
     //   selected_tile->getType()->draw(asw::Vec3(0, 0, 0), asw::Vec2(0, 0),
     //   true);
     // }
+  }
+
+  // Resource view
+  const int offset_x = -150.0F;
+  auto& resources = resource_manager.getResources();
+  asw::draw::text(font, "Resources", asw::Vec2(camera.size.x + offset_x, 10.0F),
+                  text_colour);
+
+  int index = 0;
+  for (const auto& [key, resource] : resources) {
+    const auto y_pos = 50.0F + index * 20;
+    asw::draw::text(font,
+                    resource->name + ": " + std::to_string(resource->amount),
+                    asw::Vec2(camera.size.x + offset_x, y_pos), text_colour);
+    asw::draw::stretchSprite(resource->icon,
+                             asw::Quad(camera.size.x + offset_x - 20.0F,
+                                       y_pos + 10.0F, 10.0F, 10.0F));
+
+    index++;
   }
 }
 

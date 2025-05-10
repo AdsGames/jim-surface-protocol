@@ -1,43 +1,59 @@
 [
   {
     "id": 1,
-    "images": ["assets/images/tiles/glass.png"],
+    "images": [
+      "assets/images/tiles/glass.png"
+    ],
     "name": "Stained Glass"
   },
   {
     "id": 2,
-    "images": ["assets/images/tiles/cement.png"],
+    "images": [
+      "assets/images/tiles/cement.png"
+    ],
     "name": "Cement"
   },
   {
     "id": 3,
-    "images": ["assets/images/tiles/cement_full.png"],
+    "images": [
+      "assets/images/tiles/cement_full.png"
+    ],
     "name": "Cement Full"
   },
   {
     "id": 4,
-    "images": ["assets/images/tiles/tile.png"],
+    "images": [
+      "assets/images/tiles/tile.png"
+    ],
     "name": "Tile"
   },
   {
     "id": 5,
-    "images": ["assets/images/tiles/water_deep.png"],
+    "images": [
+      "assets/images/tiles/water_deep.png"
+    ],
     "name": "Water",
     "alpha": 0.5
   },
   {
     "id": 6,
-    "images": ["assets/images/tiles/wood.png"],
+    "images": [
+      "assets/images/tiles/wood.png"
+    ],
     "name": "Wood"
   },
   {
     "id": 7,
-    "images": ["assets/images/tiles/fire_0.png"],
+    "images": [
+      "assets/images/tiles/fire_0.png"
+    ],
     "name": "Fire"
   },
   {
     "id": 8,
-    "images": ["assets/images/tiles/dirt.png"],
+    "images": [
+      "assets/images/tiles/dirt.png"
+    ],
     "name": "Dirt"
   },
   {
@@ -51,12 +67,16 @@
   },
   {
     "id": 10,
-    "images": ["assets/images/tiles/wall.png"],
+    "images": [
+      "assets/images/tiles/wall.png"
+    ],
     "name": "Wall"
   },
   {
     "id": 11,
-    "images": ["assets/images/tiles/rocks.png"],
+    "images": [
+      "assets/images/tiles/rocks.png"
+    ],
     "name": "Rocks"
   },
   {
@@ -70,7 +90,9 @@
   },
   {
     "id": 13,
-    "images": ["assets/images/tiles/ground.png"],
+    "images": [
+      "assets/images/tiles/ground.png"
+    ],
     "name": "Ground"
   },
   {
@@ -84,7 +106,9 @@
   },
   {
     "id": 15,
-    "images": ["assets/images/tiles/rocks_rough.jpg"],
+    "images": [
+      "assets/images/tiles/rocks_rough.jpg"
+    ],
     "name": "Rocks Rough",
     "render_mode": "cube"
   },
@@ -98,92 +122,131 @@
     "render_mode": "cube_unique_top",
     "actions": [
       {
-        "id": "purify",
-        "transition": "grass"
+        "type": "purify",
+        "transition_tile_id": "grass"
       },
       {
-        "id": "destroy",
-        "resources": [
-          {
-            "id": "toxins",
-            "amount": 1
-          }
-        ]
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      },
+      {
+        "type": "destroy",
+        "drop_resource_id": "toxins"
       }
     ]
   },
   {
     "id": 17,
-    "images": ["assets/images/tiles/toxic_soil.png"],
+    "images": [
+      "assets/images/tiles/toxic_soil.png"
+    ],
     "name": "Toxic Soil",
     "render_mode": "cube",
     "actions": [
       {
-        "id": "purify",
-        "transition": "soil"
+        "type": "purify",
+        "transition_tile_id": "soil"
       },
       {
-        "id": "destroy",
-        "resources": [
-          {
-            "id": "toxins",
-            "amount": 1
-          }
-        ]
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      },
+      {
+        "type": "destroy",
+        "drop_resource_id": "toxins"
       }
     ]
   },
   {
     "id": 18,
-    "images": ["assets/images/tiles/toxic_water.png"],
+    "images": [
+      "assets/images/tiles/toxic_water.png"
+    ],
     "name": "Toxic Water",
     "render_mode": "cube_top_only",
     "alpha": 0.8,
     "actions": [
       {
-        "id": "purify",
-        "transition": "water"
+        "type": "purify",
+        "transition_tile_id": "water"
       }
     ]
   },
   {
     "id": 19,
-    "images": ["assets/images/tiles/plant_1.png"],
+    "images": [
+      "assets/images/tiles/plant_1.png"
+    ],
     "name": "Plant 1",
     "render_mode": "flat",
     "actions": [
       {
-        "id": "destroy",
-        "transition": "biomass"
+        "type": "destroy",
+        "drop_resource_id": "biomass"
       }
     ]
   },
   {
     "id": 20,
-    "images": ["assets/images/tiles/willow_bark.jpg"],
-    "name": "Trunk"
+    "images": [
+      "assets/images/tiles/willow_bark.jpg"
+    ],
+    "name": "Trunk",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      }
+    ]
   },
-    {
+  {
     "id": 21,
-    "images": ["assets/images/tiles/truck.png"],
+    "images": [
+      "assets/images/tiles/truck.png"
+    ],
     "name": "Truck",
-        "render_mode": "flat"
-
-  }
-  ,
-    {
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      },
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      },
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      }
+    ]
+  },
+  {
     "id": 22,
-    "images": ["assets/images/tiles/bike.png"],
+    "images": [
+      "assets/images/tiles/bike.png"
+    ],
     "name": "Bike",
-        "render_mode": "flat"
-
-  }
-   ,
-    {
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      }
+    ]
+  },
+  {
     "id": 23,
-    "images": ["assets/images/tiles/barrel.png"],
+    "images": [
+      "assets/images/tiles/barrel.png"
+    ],
     "name": "Barrel",
-        "render_mode": "flat"
-
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
+      }
+    ]
   }
 ]

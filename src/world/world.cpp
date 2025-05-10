@@ -1,6 +1,7 @@
 #include "world.h"
 
 void World::init() {
+  resource_manager.load("assets/resources.json");
   tile_map.generate();
 }
 

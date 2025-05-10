@@ -10,6 +10,7 @@ void Init::init() {
 
   TileDictionary::load("assets/tiles.json");
   StructureDictionary::load("assets/structures.json");
+  StructureDictionary::load("assets/structures.json");
 
   asw::display::setIcon("assets/icon.ico");
 

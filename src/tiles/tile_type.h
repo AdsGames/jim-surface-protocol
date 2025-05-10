@@ -6,8 +6,7 @@
 #include <vector>
 
 #include "../lib/project.h"
-
-constexpr int ATTRIBUTE_MAX = 8;
+#include "../tasks/action.h"
 
 constexpr int TILE_SIZE = 64;
 constexpr int TILE_WIDTH = TILE_SIZE;
@@ -39,10 +38,22 @@ class TileType {
 
   const asw::Quad<float>& getBoundingBox() const;
 
-  bool hasAttribute(int attribute);
-
   void addImage(asw::Texture image);
-  void addAttribute(int attribute);
+
+  // Action Zone
+  void addAction(const ActionResult& action);
+
+  const std::vector<ActionResult>& getActions() const { return actions; }
+
+  std::vector<ActionResult> getActionsOfType(ActionType type) const {
+    std::vector<ActionResult> results;
+    for (const auto& action : actions) {
+      if (action.type == type) {
+        results.push_back(action);
+      }
+    }
+    return results;
+  }
 
   void bakeTexture(TileRenderMode mode, float alpha);
 
@@ -73,8 +84,8 @@ class TileType {
   std::string id_str;
   asw::Quad<float> bounds;
 
-  std::bitset<ATTRIBUTE_MAX> attributes;
   std::vector<asw::Texture> images;
   asw::Texture image;
   TileRenderMode render_mode{TileRenderMode::NONE};
+  std::vector<ActionResult> actions;
 };

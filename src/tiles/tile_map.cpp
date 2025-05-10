@@ -16,11 +16,13 @@ void TileMap::update(float dt) {
   // Z Layering
   z_focus += asw::input::mouse.z;
 
-  if (asw::input::wasKeyPressed(asw::input::Key::KP_MINUS)) {
+  if (asw::input::wasKeyPressed(asw::input::Key::KP_MINUS) ||
+      asw::input::wasKeyPressed(asw::input::Key::LEFT_BRACKET)) {
     z_focus -= 1;
   }
 
-  if (asw::input::wasKeyPressed(asw::input::Key::KP_PLUS)) {
+  if (asw::input::wasKeyPressed(asw::input::Key::KP_PLUS) ||
+      asw::input::wasKeyPressed(asw::input::Key::LEFT_BRACKET)) {
     z_focus += 1;
   }
 
@@ -66,7 +68,7 @@ void TileMap::generate() {
         }
 
         else if (k < 4) {
-          mapTiles[i][j][k].setType("truck");
+          mapTiles[i][j][k].setType("toxic_water");
         }
 
         // Structures

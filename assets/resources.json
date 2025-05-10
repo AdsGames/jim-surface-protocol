@@ -1,14 +1,32 @@
 [
   {
-    "name": "biomass"
+    "id": 1,
+    "name": "biomass",
+    "description": "Biomass is a renewable energy source derived from organic materials, such as plants and animal waste. It can be used to produce heat, electricity, and biofuels.",
+    "icon": "assets/images/icons/biomass.png"
   },
   {
-    "name": "stone"
+    "id": 2,
+    "name": "water",
+    "description": "Water is a vital resource for all living organisms. It is used for drinking, irrigation, and industrial processes. Freshwater resources are limited and need to be managed sustainably.",
+    "icon": "assets/images/icons/water.png"
   },
   {
-    "name": "water"
+    "id": 3,
+    "name": "toxins",
+    "description": "Toxins are harmful substances that can cause damage to living organisms and the environment. They can be found in various forms, including chemicals, heavy metals, and biological agents.",
+    "icon": "assets/images/icons/toxins.png"
   },
   {
-    "name": "toxins"
+    "id": 4,
+    "name": "minerals",
+    "description": "Minerals are naturally occurring inorganic substances that are essential for various biological processes. They can be found in rocks, soil, and water.",
+    "icon": "assets/images/icons/minerals.png"
+  },
+  {
+    "id": 5,
+    "name": "scrap",
+    "description": "Minerals are naturally occurring inorganic substances that are essential for various biological processes. They can be found in rocks, soil, and water.",
+    "icon": "assets/images/icons/minerals.png"
   }
 ]

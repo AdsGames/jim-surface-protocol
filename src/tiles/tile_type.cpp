@@ -60,26 +60,14 @@ const asw::Quad<float>& TileType::getBoundingBox() const {
   return bounds;
 }
 
-auto TileType::hasAttribute(int attribute) -> bool {
-  if (attribute < 0 || attribute >= ATTRIBUTE_MAX) {
-    return false;
-  }
-
-  return attributes.test(attribute);
-}
-
 void TileType::addImage(asw::Texture image) {
   if (image) {
     images.push_back(image);
   }
 }
 
-void TileType::addAttribute(int attribute) {
-  if (attribute < 0 || attribute >= ATTRIBUTE_MAX) {
-    return;
-  }
-
-  attributes.set(attribute);
+void TileType::addAction(const ActionResult& action) {
+  actions.push_back(action);
 }
 
 /// Its cubin' time

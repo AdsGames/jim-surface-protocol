@@ -10,6 +10,10 @@
 std::vector<std::shared_ptr<TileType>> TileDictionary::types;
 
 std::shared_ptr<TileType> TileDictionary::getTile(int id) {
+  if (id == 0) {
+    return nullptr;
+  }
+
   auto found = std::find_if(types.begin(), types.end(),
                             [&id](auto& t) { return t->getId() == id; });
 
@@ -97,6 +101,37 @@ void TileDictionary::load(const std::string& path) {
     float alpha = 1.0F;
     if (cTile.contains("alpha")) {
       alpha = cTile["alpha"];
+    }
+
+    // Actions
+    if (cTile.contains("actions")) {
+      for (auto const& action : cTile["actions"]) {
+        ActionResult result;
+
+        if (!action.contains("type")) {
+          std::cerr << "Error: Action type not found" << '\n';
+          continue;
+        }
+
+        if (action["type"] == "destroy") {
+          result.type = ActionType::DESTROY;
+        } else if (action["type"] == "purify") {
+          result.type = ActionType::PURIFY;
+        } else {
+          std::cerr << "Error: Unknown action type " << action["type"] << '\n';
+          continue;
+        }
+
+        if (action.contains("transition_tile_id")) {
+          result.transition_tile_id = action["transition_tile_id"];
+        }
+
+        if (action.contains("drop_resource_id")) {
+          result.drop_resource_id = action["drop_resource_id"];
+        }
+
+        tile->addAction(result);
+      }
     }
 
     // Bake texture

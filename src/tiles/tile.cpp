@@ -10,15 +10,6 @@ void Tile::setPosition(const asw::Vec3<int>& position) {
   this->position = position;
 }
 
-// Contains Attribute
-auto Tile::containsAttribute(int newAttribute) -> bool {
-  if (t_type != nullptr) {
-    return t_type->hasAttribute(newAttribute);
-  }
-
-  return false;
-}
-
 // Types
 void Tile::setType(std::string type) {
   t_type = TileDictionary::getTile(type);
