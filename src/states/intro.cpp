@@ -9,7 +9,7 @@ void Intro::init() {
   world.init();
   toolbar.init();
 
-  font = asw::assets::loadFont("assets/fonts/ariblk.ttf", 16);
+  font = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 32);
 }
 
 void Intro::update(float dt) {

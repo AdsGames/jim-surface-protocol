@@ -13,7 +13,7 @@ Worker::Worker() : id(idCounter++) {
 
   shadow = asw::assets::loadTexture("assets/images/player/128/shadow.png");
 
-  font = asw::assets::loadFont("assets/fonts/ariblk.ttf", 16);
+  font = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 16);
 }
 
 void Worker::setPosition(const asw::Vec3<int>& pos) {
@@ -83,7 +83,7 @@ void Worker::update(float dt, World& world) {
 
   float speed = 0.01F;
   float move = speed * dt;
-  if (position.distance(waypointF) > move) {
+  if (position.distance(waypointF) >= move) {
     left = false;
     right = false;
     up = false;
@@ -129,20 +129,21 @@ void Worker::draw(const asw::Vec2<float>& offset) {
   asw::draw::stretchSprite(shadow, screen_size);
   asw::draw::stretchSprite(textures[direction], screen_size);
 
-  std::string l = left ? "True" : "False";
-  std::string r = right ? "True" : "False";
-  std::string u = up ? "True" : "False";
-  std::string d = down ? "True" : "False";
+  // std::string l = left ? "True" : "False";
+  // std::string r = right ? "True" : "False";
+  // std::string u = up ? "True" : "False";
+  // std::string d = down ? "True" : "False";
 
-  auto t_pos = asw::Vec2<float>(0, 104);
+  // auto t_pos = asw::Vec2<float>(0, 104);
 
-  std::string angleStr = std::to_string(angle);
-  std::string directionStr = std::to_string(direction);
+  // std::string angleStr = std::to_string(angle);
+  // std::string directionStr = std::to_string(direction);
 
-  asw::draw::text(font, "Direction:  " + directionStr,
-                  t_pos + asw::Vec2<float>(0, 60),
-                  asw::util::makeColor(255, 255, 255));
+  // asw::draw::text(font, "Direction:  " + directionStr,
+  //                 t_pos + asw::Vec2<float>(0, 60),
+  //                 asw::util::makeColor(255, 255, 255));
 
-  asw::draw::text(font, "Angle:  " + angleStr, t_pos + asw::Vec2<float>(0, 80),
-                  asw::util::makeColor(255, 255, 255));
+  // asw::draw::text(font, "Angle:  " + angleStr, t_pos + asw::Vec2<float>(0,
+  // 80),
+  //                 asw::util::makeColor(255, 255, 255));
 }

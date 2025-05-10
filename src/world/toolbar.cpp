@@ -3,7 +3,7 @@
 #include <cmath>
 
 void Toolbar::init() {
-  font = asw::assets::loadFont("assets/fonts/ariblk.ttf", 16);
+  font = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 18);
   inspect_button =
       asw::assets::loadTexture("assets/images/ui/inspect-button.png");
   worker_button =
@@ -139,9 +139,17 @@ void Toolbar::draw(World& world) {
     drawWireframe(cursor_idx, camera.position, asw::util::makeColor(255, 0, 0));
   }
 
+  // Border
   asw::draw::rectFill(
       asw::Quad(0.0F, camera.size.y - 80.0F, camera.size.x, camera.size.y),
       asw::util::makeColor(128, 128, 128));
+
+  // X + Y
+  asw::draw::text(font,
+                  "Pos: " + std::to_string(cursor_idx.x) + ", " +
+                      std::to_string(cursor_idx.y) + ", " +
+                      std::to_string(cursor_idx.z),
+                  asw::Vec2(10.0F, 100.0F), text_colour);
 
   // Buttons
   asw::draw::stretchSprite(inspect_button, inspect_button_trans);
@@ -154,7 +162,6 @@ void Toolbar::draw(World& world) {
     asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::WORKER) {
     asw::draw::rect(worker_button_trans, asw::util::makeColor(255, 255, 0));
-
   } else if (mode == ToolMode::PURIFIER) {
     asw::draw::rect(purifier_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::TREE) {
@@ -165,35 +172,26 @@ void Toolbar::draw(World& world) {
 
   // Inspect View
   if (mode == ToolMode::INSPECT) {
-    asw::draw::rectFill(asw::Quad(0.0F, 0.0F, 200.0F, 200.0F),
-                        asw::util::makeColor(64, 64, 0));
+    asw::draw::rectFill(asw::Quad(mouse_pos.x, mouse_pos.y, 500.0F, 150.0F),
+                        asw::util::makeColor(0, 0, 0));
 
-    // X + Y
-    asw::draw::text(font, "X: " + std::to_string(cursor_idx.x),
-                    asw::Vec2(10.0F, 100.0F), text_colour);
-    asw::draw::text(font, "Y: " + std::to_string(cursor_idx.y),
-                    asw::Vec2(10.0F, 120.0F), text_colour);
-    asw::draw::text(font, "Z: " + std::to_string(cursor_idx.z),
-                    asw::Vec2(10.0F, 140.0F), text_colour);
-  }
+    // Inspect mode
+    if (selected_tile != nullptr) {
+      auto tile_type = selected_tile->getType();
+      auto tile_structure = selected_tile->getStructure();
 
-  // Inspect mode
-  if (selected_tile != nullptr) {
-    auto tile_type = selected_tile->getType();
-    auto tile_structure = selected_tile->getStructure();
+      if (tile_type != nullptr) {
+        asw::draw::text(font, "Info: " + tile_type->getName(),
+                        mouse_pos + asw::Vec2(10.0F, 10.0F), text_colour);
+      }
 
-    if (tile_type != nullptr) {
-      asw::draw::text(font, "Info: " + tile_type->getName(),
-                      asw::Vec2(10.0F, 80.0F), text_colour);
-    }
+      if (tile_structure != nullptr) {
+        asw::draw::text(font, tile_structure->getType()->name,
+                        mouse_pos + asw::Vec2(10.0F, 30.0F), text_colour);
 
-    if (tile_structure != nullptr) {
-      asw::draw::text(font, "Structure: " + tile_structure->getType()->name,
-                      asw::Vec2(10.0F, 140.0F), text_colour);
-
-      asw::draw::text(font,
-                      "Structure: " + tile_structure->getType()->description,
-                      asw::Vec2(10.0F, 160.0F), text_colour);
+        asw::draw::text(font, tile_structure->getType()->description,
+                        mouse_pos + asw::Vec2(10.0F, 60.0F), text_colour);
+      }
     }
   }
 

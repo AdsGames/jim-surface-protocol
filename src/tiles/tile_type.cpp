@@ -95,7 +95,6 @@ void TileType::draw(const asw::Vec3<int>& position,
   }
 
   auto iso_y = (isoY(position) * TILE_HEIGHT) - offset.y;
-
   if (iso_y < -TILE_SIZE || iso_y > 960) {
     return;
   }
@@ -104,6 +103,8 @@ void TileType::draw(const asw::Vec3<int>& position,
 
   if (render_mode == TileRenderMode::FLAT) {
     iso_pos.y -= TILE_SIZE * 0.5F;
+  } else if (render_mode == TileRenderMode::CUBE_TOP_ONLY) {
+    iso_pos.y += TILE_SIZE * 0.2F;
   }
 
   asw::draw::sprite(image, iso_pos);
