@@ -110,12 +110,8 @@ void Worker::update(float dt, World& world) {
 void Worker::draw(const asw::Vec2<float>& offset) {
   // Calc screen position
 
-  asw::Vec3<int> positionInt(static_cast<int>(position.x),
-                             static_cast<int>(position.y),
-                             static_cast<int>(position.z));
-
-  auto iso_x = isoX(positionInt);
-  auto iso_y = isoY(positionInt);
+  auto iso_x = isoXf(position);
+  auto iso_y = isoYf(position);
 
   auto screen_pos = asw::Vec2(iso_x, iso_y) * 32 - offset;
 
