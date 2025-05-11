@@ -4,7 +4,7 @@ The year is 2099, after decades of mistreatment, the planet has decayed to an un
 
 ## Demo
 
-[Web Demo](https://adsgames.github.io/tojam-2025/)
+[Web Demo](https://adsgames.github.io/jim-surface-protocol/)
 
 
 ## Gameplay
