@@ -299,9 +299,31 @@ void Toolbar::draw(World& world) {
   asw::draw::sprite(upgrade, asw::Vec2<float>(upgrade_move_trans.position.x,
                                               upgrade_move_trans.position.y));
 
+  // Debuggo
+  if (asw::input::isKeyDown(asw::input::Key::Q)) {
+    // X + Y
+    asw::draw::text(font,
+                    "Pos: " + std::to_string(cursor_idx.x) + ", " +
+                        std::to_string(cursor_idx.y) + ", " +
+                        std::to_string(cursor_idx.z),
+                    asw::Vec2(183.0F, 845.0F), green);
+
+    // Camera pos
+    asw::draw::text(font,
+                    "Cam: " + std::to_string(camera.position.x) + ", " +
+                        std::to_string(camera.position.y),
+                    asw::Vec2(183.0F, 865.0F), green);
+
+    // Mouse pos
+    asw::draw::text(font,
+                    "Mouse: " + std::to_string(mouse_pos.x) + ", " +
+                        std::to_string(mouse_pos.y),
+                    asw::Vec2(183.0F, 885.0F), green);
+  }
+
   // Inspect window
-  if (mouse_pos.y < camera.size.y - TOOLBAR_HEIGHT &&
-      selected_tile != nullptr) {
+  else if (mouse_pos.y < camera.size.y - TOOLBAR_HEIGHT &&
+           selected_tile != nullptr) {
     auto tile_type = selected_tile->getType();
     auto tile_structure = selected_tile->getStructure();
 
@@ -330,28 +352,6 @@ void Toolbar::draw(World& world) {
                       asw::Vec2(183.0F, 885.0F + (i * 20)), green);
       i++;
     }
-  }
-
-  // Debuggo
-  else if (asw::input::isKeyDown(asw::input::Key::Q)) {
-    // X + Y
-    asw::draw::text(font,
-                    "Pos: " + std::to_string(cursor_idx.x) + ", " +
-                        std::to_string(cursor_idx.y) + ", " +
-                        std::to_string(cursor_idx.z),
-                    asw::Vec2(183.0F, 845.0F), green);
-
-    // Camera pos
-    asw::draw::text(font,
-                    "Cam: " + std::to_string(camera.position.x) + ", " +
-                        std::to_string(camera.position.y),
-                    asw::Vec2(183.0F, 865.0F), green);
-
-    // Mouse pos
-    asw::draw::text(font,
-                    "Mouse: " + std::to_string(mouse_pos.x) + ", " +
-                        std::to_string(mouse_pos.y),
-                    asw::Vec2(183.0F, 885.0F), green);
   }
 
   // Monkey head
