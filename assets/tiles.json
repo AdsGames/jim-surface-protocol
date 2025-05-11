@@ -73,7 +73,9 @@
     "images": ["assets/images/tiles/purifier.png"],
     "name": "Purifier",
     "render_mode": "cube_unique_top",
+    "density": 1,
     "actions": [
+
       {
         "type": "tick",
         "action": "purify",
