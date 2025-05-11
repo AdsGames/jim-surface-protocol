@@ -8,8 +8,8 @@
 
 #include "tile.h"
 
-constexpr int MAP_WIDTH = 20;
-constexpr int MAP_DEPTH = 20;
+constexpr int MAX_MAP_WIDTH = 100;
+constexpr int MAX_MAP_DEPTH = 100;
 constexpr int MAP_HEIGHT = 16;
 
 constexpr float TICK_TIME = 100.0F;
@@ -17,8 +17,6 @@ constexpr float TICK_TIME = 100.0F;
 class TileMap {
  public:
   TileMap() = default;
-
-  asw::Vec3<int> getSize() const;
 
   void update(float dt);
 
@@ -37,13 +35,18 @@ class TileMap {
 
   int countByType(int type) const;
 
+  static int MAP_WIDTH;
+  static int MAP_DEPTH;
+  static float SEED;
+
  private:
   void draw_layer(const asw::Quad<float>& camera, int layer);
 
   void tick_tile(const asw::Vec3<int>& index);
 
   // 3D Map
-  std::array<std::array<std::array<Tile, MAP_HEIGHT>, MAP_DEPTH>, MAP_WIDTH>
+  std::array<std::array<std::array<Tile, MAP_HEIGHT>, MAX_MAP_DEPTH>,
+             MAX_MAP_WIDTH>
       mapTiles;
 
   // Tile count
