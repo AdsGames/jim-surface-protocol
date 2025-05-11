@@ -194,11 +194,27 @@ void Toolbar::draw(World& world) {
   auto* selected_tile = tile_map.getTileAt(world_pos);
   auto text_colour = asw::util::makeColor(255, 255, 255, 255);  // White
 
+  bool drillable = false;
   // Outline
-  if (cursor_in_range) {
-    drawWireframe(cursor_idx, camera.position, asw::util::makeColor(0, 255, 0));
-  } else {
-    drawWireframe(cursor_idx, camera.position, asw::util::makeColor(255, 0, 0));
+  if (selected_tile != nullptr) {
+    auto select_type = selected_tile->getType();
+    if (select_type != nullptr) {
+      if (select_type->getDensity() > 0) {
+        drillable = true;
+      }
+      if (cursor_in_range) {
+        drawWireframe(cursor_idx, camera.position,
+                      asw::util::makeColor(0, 255, 0));
+      } else {
+        drawWireframe(cursor_idx, camera.position,
+                      asw::util::makeColor(255, 0, 0));
+      }
+    }
+  }
+
+  if (!drillable) {
+    drawWireframe(cursor_idx, camera.position,
+                  asw::util::makeColor(255, 255, 255));
   }
 
   // Border
