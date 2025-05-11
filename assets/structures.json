@@ -163,7 +163,7 @@
    {
     "name": "Statue",
     "id": 6,
-    "description": "''Must've been an ancient religious artifact''",
+    "description": "Mysterious artifact.",
     "layout": [
       [
         [36]
@@ -173,6 +173,29 @@
  
      
 
+    ]
+  },
+  {
+    "name": "Tire Pile",
+    "id": 7,
+    "description": "Maybe I'll use these one day.",
+    "layout": [
+      [
+        [30, 30, 30],
+        [30, 0, 0],
+        [0, 0, 30]
+      ],
+      [
+        [30, 30, 0],
+        [30, 0, 0],
+        [0, 0, 0]
+      ],
+      [
+        [30, 0, 0],
+        [30, 0, 0],
+        [0, 0, 0]
+      ]
+     
     ]
   }
 ]

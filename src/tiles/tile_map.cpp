@@ -166,7 +166,7 @@ void TileMap::generate() {
 
           } else if (asw::random::chance(0.01F)) {
             mapTiles[i][j][k].setType("scrap_pile");
-          } else if (asw::random::chance(0.01F)) {
+          } else if (asw::random::chance(0.03F)) {
             mapTiles[i][j][k].setType("dead_shrub");
           } else if (asw::random::chance(0.01F)) {
             mapTiles[i][j][k].setType("tire_stack");
@@ -189,8 +189,10 @@ void TileMap::generate() {
             generateStructure("junk_pyramid", {i, j, k});
           } else if (asw::random::chance(0.001F)) {
             generateStructure("bike_shop", {i, j, k});
-          } else if (asw::random::chance(0.0005F)) {
+          } else if (asw::random::chance(0.001F)) {
             generateStructure("statue", {i, j, k});
+          } else if (asw::random::chance(0.001F)) {
+            generateStructure("tire_pile", {i, j, k});
           }
         }
       }
