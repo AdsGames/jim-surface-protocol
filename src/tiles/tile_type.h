@@ -30,7 +30,8 @@ class TileType {
   void draw(const asw::Vec3<int>& position,
             const asw::Vec2<float>& offset,
             bool left_border,
-            bool right_border);
+            bool right_border,
+            bool selected);
 
   short getId() const;
   const std::string& getName() const;

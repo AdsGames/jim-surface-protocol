@@ -305,7 +305,12 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
                          mapTiles[i][j - 1][layer].getType() == nullptr ||
                          !mapTiles[i][j - 1][layer].getType()->isOpaque();
 
-      tile.draw(camera.position, empty_left, empty_right);
+      if (i == selected_index.x && j == selected_index.y &&
+          layer == selected_index.z) {
+        tile.draw(camera.position, empty_left, empty_right, true);
+      } else {
+        tile.draw(camera.position, empty_left, empty_right, false);
+      }
     }
   }
 }

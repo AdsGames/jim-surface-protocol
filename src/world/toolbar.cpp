@@ -34,6 +34,7 @@ void Toolbar::update(float dt, World& world) {
   auto& tile_map = world.getTileMap();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
   cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
+  tile_map.setSelectedIndex(cursor_idx);
 
   // Find distance to worker
   auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
