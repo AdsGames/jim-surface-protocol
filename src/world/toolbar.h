@@ -43,6 +43,8 @@ class Toolbar {
   asw::Texture upgrade;
   asw::Texture toolbar_ui;
 
+  asw::Texture overlay_1;
+
   asw::Quad<float> drill_button_trans{620.0F, 820.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> purifier_button_trans{700.0F, 820.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};

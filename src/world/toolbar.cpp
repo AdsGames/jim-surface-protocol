@@ -15,6 +15,8 @@ void Toolbar::init() {
   toolbar_ui = asw::assets::loadTexture("assets/images/ui/toolbar.png");
 
   upgrade = asw::assets::loadTexture("assets/images/ui/upgrade.png");
+
+  overlay_1 = asw::assets::loadTexture("assets/images/ui/overlay_1.png");
 };
 
 void Toolbar::update(float dt, World& world) {
@@ -433,6 +435,15 @@ void Toolbar::draw(World& world) {
     asw::draw::text(font, "Drilling...",
                     asw::Vec2(mouse_pos.x + 4.0F, mouse_pos.y - 60 + 4.0F),
                     asw::util::makeColor(255, 255, 255));
+  }
+  if (world.getProgression() < 0.33F) {
+    asw::draw::setAlpha(overlay_1, 1);
+    asw::draw::sprite(overlay_1, asw::Vec2<float>(0, 0));
+  }
+
+  if (world.getProgression() >= 0.33F && world.getProgression() < 0.66F) {
+    asw::draw::setAlpha(overlay_1, 0.5F);
+    asw::draw::sprite(overlay_1, asw::Vec2<float>(0, 0));
   }
 }
 
