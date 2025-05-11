@@ -46,8 +46,8 @@ void Menu::draw() {
 
   asw::draw::setBlendMode(jim, asw::BlendMode::MULTIPLY);
   asw::draw::stretchSprite(
-      jim, asw::Quad(-200.0F, (std::sinf(timer / 1000.0F) + 1) * 200.0F,
-                     2000.0F, 2000.0F));
+      jim, asw::Quad(-200.0F, (std::sin(timer / 1000.0F) + 1) * 200.0F, 2000.0F,
+                     2000.0F));
 
   asw::draw::stretchSprite(jims[frame],
                            asw::Quad(700.0F, 500.0F, 500.0F, 500.0F));

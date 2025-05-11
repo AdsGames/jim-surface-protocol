@@ -131,7 +131,7 @@
   },
   {
     "id": 19,
-    "images": ["assets/images/tiles/plant_1.png"],
+    "images": ["assets/images/tiles/plants_2.png"],
     "name": "Plant 1",
     "density": 1,
     "render_mode": "flat",
@@ -399,4 +399,18 @@
     "images": ["assets/images/tiles/goat.png"],
     "name": "Goat on a pole"
   }
+,
+   {
+    "id": 37,
+    "images": ["assets/images/tiles/leaves.png"],
+    "density": 1,
+    "name": "Leaves",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      }
+    ]
+  }
+  
 ]
