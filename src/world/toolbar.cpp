@@ -285,7 +285,7 @@ void Toolbar::draw(World& world) {
     auto tile_structure = selected_tile->getStructure();
 
     if (tile_type != nullptr) {
-      asw::draw::text(font, "Info: " + tile_type->getName(),
+      asw::draw::text(font, "Tile: " + tile_type->getName(),
                       asw::Vec2(183.0F, 825.0F), white);
     }
 
@@ -295,6 +295,19 @@ void Toolbar::draw(World& world) {
 
       asw::draw::text(font, tile_structure->getType()->description,
                       asw::Vec2(183.0F, 865.0F), white);
+    }
+
+    // Get resources from actions
+    std::map<std::string, int> resources;
+    int i = 0;
+    for (const auto& [res, count] : tile_type->getResources()) {
+      if (res.empty()) {
+        continue;
+      }
+
+      asw::draw::text(font, "Drop: " + res + " x " + std::to_string(count),
+                      asw::Vec2(183.0F, 885.0F + (i * 20)), white);
+      i++;
     }
   }
   // Monkey head

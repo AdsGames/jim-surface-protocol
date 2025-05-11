@@ -2,6 +2,7 @@
 
 #include <asw/asw.h>
 #include <bitset>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -43,6 +44,16 @@ class TileType {
   void addAction(const ActionResult& action);
 
   const std::vector<ActionResult>& getActions() const { return actions; }
+
+  const std::map<std::string, int> getResources() const {
+    std::map<std::string, int> resources;
+    for (const auto& action : actions) {
+      if (action.type == ActionType::DESTROY) {
+        resources[action.drop_resource_id] += 1;
+      }
+    }
+    return resources;
+  }
 
   std::vector<ActionResult> getActionsOfType(ActionType type) const {
     std::vector<ActionResult> results;

@@ -5,7 +5,7 @@
 #include "world.h"
 
 constexpr float BUTTON_SIZE = 64.0F;
-constexpr float TOOLBAR_HEIGHT = 120.0F;
+constexpr float TOOLBAR_HEIGHT = 160.0F;
 
 enum class ToolMode { PURIFIER, TREE, DRILL };
 
