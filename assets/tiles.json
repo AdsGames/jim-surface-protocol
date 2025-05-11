@@ -71,8 +71,7 @@
   {
     "id": 14,
     "images": [
-      "assets/images/tiles/black_metal.jpg",
-      "assets/images/tiles/diamond_plate.jpg"
+      "assets/images/tiles/purifier.png"
     ],
     "name": "Purifier",
     "render_mode": "cube_unique_top",
@@ -134,6 +133,7 @@
     "id": 19,
     "images": ["assets/images/tiles/plant_1.png"],
     "name": "Plant 1",
+    "density": 1,
     "render_mode": "flat",
     "actions": [
       {
@@ -146,8 +146,17 @@
     "id": 20,
     "images": ["assets/images/tiles/willow_bark.jpg"],
     "name": "Trunk",
+    "density": 3,
     "actions": [
       {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      },
+        {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      },
+        {
         "type": "destroy",
         "drop_resource_id": "biomass"
       }
@@ -229,6 +238,8 @@
     "images": ["assets/images/tiles/plants_1.png"],
     "name": "Plants 1",
     "render_mode": "flat",
+        "density": 1,
+
     "actions": [
       {
         "type": "destroy",
@@ -240,6 +251,7 @@
     "id": 27,
     "images": ["assets/images/tiles/plants_2.png"],
     "name": "Plants 2",
+    "density": 1,
     "render_mode": "flat",
     "actions": [
       {
@@ -251,15 +263,20 @@
 
   {
     "id": 28,
-    "images": ["assets/images/tiles/plants_2.png"],
+    "images": ["assets/images/tiles/sapling.png"],
     "name": "Sapling",
     "render_mode": "flat",
+    "density": 1,
     "actions": [
       {
         "type": "tick",
         "action": "structure",
         "spawn_structure_id": "tree",
         "chance": 0.001
+      },
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
       }
     ]
   },
@@ -267,8 +284,17 @@
     "id": 29,
     "images": ["assets/images/tiles/willow_bark.jpg"],
     "name": "Trunk Purifier",
+    "density": 3,
     "actions": [
       {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      },
+           {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      },
+           {
         "type": "destroy",
         "drop_resource_id": "biomass"
       },
@@ -353,6 +379,15 @@
     "name": "Crate",
     "actions": [
       {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      },
+            {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      }
+      ,
+            {
         "type": "destroy",
         "drop_resource_id": "biomass"
       }
