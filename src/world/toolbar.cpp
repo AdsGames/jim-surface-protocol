@@ -91,6 +91,7 @@ void Toolbar::rightClickAction(World& world) {
 
 void Toolbar::toolZoneAction(World& world) {
   auto& camera = world.getCamera();
+  auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
 
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM

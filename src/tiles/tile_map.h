@@ -8,9 +8,9 @@
 
 #include "tile.h"
 
-constexpr int MAP_WIDTH = 10;
-constexpr int MAP_DEPTH = 10;
-constexpr int MAP_HEIGHT = 1;
+constexpr int MAP_WIDTH = 100;
+constexpr int MAP_DEPTH = 100;
+constexpr int MAP_HEIGHT = 10;
 
 class TileMap {
  public:
