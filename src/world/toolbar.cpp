@@ -85,8 +85,16 @@ void Toolbar::update(float dt, World& world) {
 }
 
 void Toolbar::rightClickAction(World& world) {
-  world.setPlayerWaypoint(cursor_idx);
-  world.setWaypointActive(true);
+  auto& tile_map = world.getTileMap();
+
+  auto* tile = tile_map.getTileAtIndex(cursor_idx);
+  if (tile != nullptr) {
+    auto type = tile->getTypeId();
+    if (type != 18) {
+      world.setPlayerWaypoint(cursor_idx);
+      world.setWaypointActive(true);
+    }
+  }
 }
 
 void Toolbar::toolZoneAction(World& world) {
