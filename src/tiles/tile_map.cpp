@@ -8,9 +8,9 @@
 #include "../tiles/structure_dictionary.h"
 #include "../vendor/simplex_noise.h"
 
-asw::Vec3<int> TileMap::getSize() const {
-  return {MAP_WIDTH, MAP_HEIGHT, MAP_DEPTH};
-}
+int TileMap::MAP_WIDTH = MAX_MAP_WIDTH;
+int TileMap::MAP_DEPTH = MAX_MAP_DEPTH;
+float TileMap::SEED = 0.0F;
 
 void TileMap::update(float dt) {
   // Tick timer
@@ -115,8 +115,8 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
 
 void TileMap::generate() {
   // Init map
-  for (int i = 0; i < MAP_WIDTH; ++i) {
-    for (int j = 0; j < MAP_DEPTH; ++j) {
+  for (int i = 0; i < MAX_MAP_WIDTH; ++i) {
+    for (int j = 0; j < MAX_MAP_DEPTH; ++j) {
       for (int k = 0; k < MAP_HEIGHT; ++k) {
         mapTiles[i][j][k] = Tile();
         auto position = asw::Vec3<int>(i, j, k);
@@ -127,12 +127,11 @@ void TileMap::generate() {
 
   // Height
   auto height_map = SimplexNoise(0.01f, 0.01f, 2.0f, 0.47f);
-  auto seed = asw::random::between(0.0F, 10000.0F);
 
   // Dirt grass and rocks
   for (int i = 0; i < MAP_WIDTH; ++i) {
     for (int j = 0; j < MAP_DEPTH; ++j) {
-      auto frac = height_map.fractal(100, seed + i, seed + j);
+      auto frac = height_map.fractal(100, SEED + i, SEED + j);
       auto height_val =
           static_cast<int>((MAP_HEIGHT / 2.0F) * (frac + 1.0F) / 2.0F);
 

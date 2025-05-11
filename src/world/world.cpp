@@ -42,11 +42,13 @@ void World::update(float dt) {
   }
 
   // Topmost
-  const auto min_x = -(MAP_DEPTH / 2.0F) * TILE_SIZE;
-  const auto max_x = (MAP_WIDTH / 2.0F + 1) * TILE_SIZE;
+  const auto min_x = -(TileMap::MAP_DEPTH / 2.0F) * TILE_SIZE;
+  const auto max_x = (TileMap::MAP_WIDTH / 2.0F + 1) * TILE_SIZE;
   const auto min_y = -(MAP_HEIGHT / 2.0F) * TILE_SIZE;
   const auto max_y =
-      std::max(MAP_WIDTH / 2.0F + 1, MAP_DEPTH / 2.0F + 1) * TILE_SIZE + 160.0F;
+      std::max(TileMap::MAP_WIDTH / 2.0F + 1, TileMap::MAP_DEPTH / 2.0F + 1) *
+          TILE_SIZE +
+      160.0F;
 
   if (camera.position.y + camera.size.y > max_y) {
     camera.position.y = max_y - camera.size.y;

@@ -25,8 +25,10 @@ class Menu : public asw::scene::Scene<ProgramState> {
 
   asw::Quad<float> start_easy_transform{40.0F, 740.0F, 300.0F, 50.0F};
   asw::Quad<float> start_hard_transform{40.0F, 780.0F, 300.0F, 50.0F};
-  asw::Quad<float> exit_transform{40.0F, 820.0F, 300.0F, 50.0F};
+  asw::Quad<float> fullscreen_transform{40.0F, 820.0F, 300.0F, 50.0F};
+  asw::Quad<float> exit_transform{40.0F, 860.0F, 300.0F, 50.0F};
 
   float timer{0.0F};
   int frame{0};
+  bool fullscreen{false};
 };

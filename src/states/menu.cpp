@@ -4,6 +4,7 @@
 
 #include "../tiles/structure_dictionary.h"
 #include "../tiles/tile_dictionary.h"
+#include "../tiles/tile_map.h"
 
 void Menu::init() {
   background = asw::assets::loadTexture("assets/images/ui/menu.png");
@@ -32,11 +33,20 @@ void Menu::update(float dt) {
   if (asw::input::wasButtonPressed(asw::input::MouseButton::LEFT)) {
     auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
     if (start_easy_transform.contains(mouse_pos)) {
+      TileMap::MAP_WIDTH = 40;
+      TileMap::MAP_DEPTH = 40;
+      TileMap::SEED = 600.0F;
       sceneManager.setNextScene(ProgramState::Game);
     } else if (start_hard_transform.contains(mouse_pos)) {
+      TileMap::MAP_WIDTH = 80;
+      TileMap::MAP_DEPTH = 80;
+      TileMap::SEED = asw::random::between(0.0F, 10000.0F);
       sceneManager.setNextScene(ProgramState::Game);
     } else if (exit_transform.contains(mouse_pos)) {
       asw::core::exit = true;
+    } else if (fullscreen_transform.contains(mouse_pos)) {
+      fullscreen = !fullscreen;
+      asw::display::setFullscreen(fullscreen);
     }
   }
 }
@@ -59,11 +69,15 @@ void Menu::draw() {
                   asw::util::makeColor(255, 255, 255));
 
   // Start easy
-  asw::draw::text(font_button, "Start Easy", start_easy_transform.position,
+  asw::draw::text(font_button, "Quickplay", start_easy_transform.position,
                   asw::util::makeColor(255, 255, 255));
 
   // Start hard
-  asw::draw::text(font_button, "Start Hard", start_hard_transform.position,
+  asw::draw::text(font_button, "Full Game", start_hard_transform.position,
+                  asw::util::makeColor(255, 255, 255));
+
+  // Fullscreen
+  asw::draw::text(font_button, "Fullscreen", fullscreen_transform.position,
                   asw::util::makeColor(255, 255, 255));
 
   // Exit
