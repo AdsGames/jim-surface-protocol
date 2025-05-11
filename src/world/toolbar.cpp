@@ -140,8 +140,7 @@ void Toolbar::action(World& world, float dt) {
     if (density > 0) {
       // this is where the drilling begins
 
-      actionProgress +=
-          dt * (0.05F / density) * (1 + world.getDrillSpeed() * 1.5F);
+      actionProgress += dt * (0.03F / density) * (world.getDrillSpeed() * 3);
       if (actionProgress > 100.0F) {
         auto actions = select_type->getActionsOfType(ActionType::DESTROY);
         for (const auto& action : actions) {

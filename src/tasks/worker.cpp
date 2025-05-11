@@ -81,7 +81,7 @@ void Worker::update(float dt, World& world) {
   else if (angle < 0 && angle > -pi / 4)
     direction = 0;
 
-  float speed = 0.005F * world.getPlayerSpeed();
+  float speed = 0.003F * (world.getPlayerSpeed());
   float move = speed * dt;
   if (position.distance(waypointF) >= move) {
     left = false;
