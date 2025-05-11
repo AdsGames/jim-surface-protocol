@@ -59,7 +59,7 @@
         "type": "tick",
         "action": "growth",
         "transition_tile_id": "plant_1",
-        "chance": 0.08
+        "chance": 0.008
       }
     ]
   },
