@@ -18,6 +18,7 @@ class Game : public asw::scene::Scene<ProgramState> {
 
  private:
   asw::Font font;
+  asw::Font font_small;
 
   World world;
   Toolbar toolbar;
