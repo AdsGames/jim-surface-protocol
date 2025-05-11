@@ -5,6 +5,13 @@
 enum class ActionType {
   DESTROY,
   PURIFY,
+  TICK,
+};
+
+enum class TickType {
+  NONE,
+  PURIFY,
+  GROWTH,
 };
 
 class ActionResult {
@@ -12,4 +19,5 @@ class ActionResult {
   ActionType type;
   std::string transition_tile_id;
   std::string drop_resource_id;
+  TickType tick_type{TickType::NONE};
 };

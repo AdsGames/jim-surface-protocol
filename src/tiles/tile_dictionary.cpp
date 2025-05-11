@@ -117,6 +117,18 @@ void TileDictionary::load(const std::string& path) {
           result.type = ActionType::DESTROY;
         } else if (action["type"] == "purify") {
           result.type = ActionType::PURIFY;
+        } else if (action["type"] == "tick") {
+          result.type = ActionType::TICK;
+          if (action.contains("action")) {
+            const auto& tick_type = action["action"];
+            if (tick_type == "purify") {
+              result.tick_type = TickType::PURIFY;
+            } else if (tick_type == "growth") {
+              result.tick_type = TickType::GROWTH;
+            } else {
+              std::cerr << "Error: Unknown tick type " << tick_type << '\n';
+            }
+          }
         } else {
           std::cerr << "Error: Unknown action type " << action["type"] << '\n';
           continue;

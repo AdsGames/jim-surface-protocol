@@ -53,12 +53,12 @@ void World::update(float dt) {
 
   // Maybe this should go somewhere else :thonk:
   // Count toxins
-  const auto toxic_count = tile_map.countByType(18) + tile_map.countByType(16) +
-                           tile_map.countByType(17);
+  const float toxic_count = tile_map.countByType(18) +
+                            tile_map.countByType(16) + tile_map.countByType(17);
 
-  const auto non_toxic_count = tile_map.countByType(5) +
-                               tile_map.countByType(12) +
-                               tile_map.countByType(13);
+  const float non_toxic_count = tile_map.countByType(5) +
+                                tile_map.countByType(12) +
+                                tile_map.countByType(13);
 
   // Calculate progression
   progression = (non_toxic_count) / (toxic_count + non_toxic_count + 0.1F);

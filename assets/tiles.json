@@ -1,60 +1,44 @@
 [
   {
     "id": 1,
-    "images": [
-      "assets/images/tiles/glass.png"
-    ],
+    "images": ["assets/images/tiles/glass.png"],
     "name": "Stained Glass"
   },
   {
     "id": 2,
-    "images": [
-      "assets/images/tiles/cement.png"
-    ],
+    "images": ["assets/images/tiles/cement.png"],
     "name": "Cement"
   },
   {
     "id": 3,
-    "images": [
-      "assets/images/tiles/cement_full.png"
-    ],
+    "images": ["assets/images/tiles/cement_full.png"],
     "name": "Cement Full"
   },
   {
     "id": 4,
-    "images": [
-      "assets/images/tiles/tile.png"
-    ],
+    "images": ["assets/images/tiles/tile.png"],
     "name": "Tile"
   },
   {
     "id": 5,
-    "images": [
-      "assets/images/tiles/water_deep.png"
-    ],
+    "images": ["assets/images/tiles/water_deep.png"],
     "name": "Water",
     "alpha": 0.5,
     "render_mode": "cube_top_only"
   },
   {
     "id": 6,
-    "images": [
-      "assets/images/tiles/wood.png"
-    ],
+    "images": ["assets/images/tiles/wood.png"],
     "name": "Wood"
   },
   {
     "id": 7,
-    "images": [
-      "assets/images/tiles/fire_0.png"
-    ],
+    "images": ["assets/images/tiles/fire_0.png"],
     "name": "Fire"
   },
   {
     "id": 8,
-    "images": [
-      "assets/images/tiles/dirt.png"
-    ],
+    "images": ["assets/images/tiles/dirt.png"],
     "name": "Dirt"
   },
   {
@@ -64,20 +48,22 @@
       "assets/images/tiles/grass_top.png"
     ],
     "name": "Grass",
-    "render_mode": "cube_unique_top"
+    "render_mode": "cube_unique_top",
+    "actions": [
+      {
+        "type": "tick",
+        "action": "growth"
+      }
+    ]
   },
   {
     "id": 10,
-    "images": [
-      "assets/images/tiles/wall.png"
-    ],
+    "images": ["assets/images/tiles/wall.png"],
     "name": "Wall"
   },
   {
     "id": 11,
-    "images": [
-      "assets/images/tiles/rocks.png"
-    ],
+    "images": ["assets/images/tiles/rocks.png"],
     "name": "Rocks"
   },
   {
@@ -91,9 +77,7 @@
   },
   {
     "id": 13,
-    "images": [
-      "assets/images/tiles/ground.png"
-    ],
+    "images": ["assets/images/tiles/ground.png"],
     "name": "Ground"
   },
   {
@@ -103,13 +87,17 @@
       "assets/images/tiles/diamond_plate.jpg"
     ],
     "name": "Machine",
-    "render_mode": "cube_unique_top"
+    "render_mode": "cube_unique_top",
+    "actions": [
+      {
+        "type": "tick",
+        "action": "purify"
+      }
+    ]
   },
   {
     "id": 15,
-    "images": [
-      "assets/images/tiles/rocks_rough.jpg"
-    ],
+    "images": ["assets/images/tiles/rocks_rough.jpg"],
     "name": "Rocks Rough",
     "render_mode": "cube"
   },
@@ -138,9 +126,7 @@
   },
   {
     "id": 17,
-    "images": [
-      "assets/images/tiles/toxic_soil.png"
-    ],
+    "images": ["assets/images/tiles/toxic_soil.png"],
     "name": "Toxic Soil",
     "render_mode": "cube",
     "actions": [
@@ -160,9 +146,7 @@
   },
   {
     "id": 18,
-    "images": [
-      "assets/images/tiles/toxic_water.png"
-    ],
+    "images": ["assets/images/tiles/toxic_water.png"],
     "name": "Toxic Water",
     "render_mode": "cube_top_only",
     "alpha": 0.8,
@@ -175,9 +159,7 @@
   },
   {
     "id": 19,
-    "images": [
-      "assets/images/tiles/plant_1.png"
-    ],
+    "images": ["assets/images/tiles/plant_1.png"],
     "name": "Plant 1",
     "render_mode": "flat",
     "actions": [
@@ -189,9 +171,7 @@
   },
   {
     "id": 20,
-    "images": [
-      "assets/images/tiles/willow_bark.jpg"
-    ],
+    "images": ["assets/images/tiles/willow_bark.jpg"],
     "name": "Trunk",
     "actions": [
       {
@@ -202,9 +182,7 @@
   },
   {
     "id": 21,
-    "images": [
-      "assets/images/tiles/truck.png"
-    ],
+    "images": ["assets/images/tiles/truck.png"],
     "name": "Truck",
     "render_mode": "flat",
     "actions": [
@@ -224,9 +202,7 @@
   },
   {
     "id": 22,
-    "images": [
-      "assets/images/tiles/bike.png"
-    ],
+    "images": ["assets/images/tiles/bike.png"],
     "name": "Bike",
     "render_mode": "flat",
     "actions": [
@@ -238,10 +214,8 @@
   },
   {
     "id": 23,
-    "images": [
-      "assets/images/tiles/barrel.png"
-    ],
-    "density":1,
+    "images": ["assets/images/tiles/barrel.png"],
+    "density": 1,
     "name": "Barrel",
     "render_mode": "flat",
     "actions": [
@@ -253,10 +227,8 @@
   },
   {
     "id": 24,
-    "images": [
-      "assets/images/tiles/junk.png"
-    ],
-    "density":3,
+    "images": ["assets/images/tiles/junk.png"],
+    "density": 3,
 
     "name": "Junk",
     "actions": [
@@ -268,10 +240,8 @@
   },
   {
     "id": 25,
-    "images": [
-      "assets/images/tiles/tire.png"
-    ],
-    "density":5,
+    "images": ["assets/images/tiles/tire.png"],
+    "density": 5,
 
     "name": "Tire",
     "actions": [
@@ -282,9 +252,7 @@
   },
   {
     "id": 26,
-    "images": [
-      "assets/images/tiles/plants_1.png"
-    ],
+    "images": ["assets/images/tiles/plants_1.png"],
     "name": "Plants 1",
     "render_mode": "flat",
     "actions": [
@@ -296,9 +264,7 @@
   },
   {
     "id": 27,
-    "images": [
-      "assets/images/tiles/plants_2.png"
-    ],
+    "images": ["assets/images/tiles/plants_2.png"],
     "name": "Plants 2",
     "render_mode": "flat",
     "actions": [
@@ -308,20 +274,16 @@
       }
     ]
   },
-   {
+  {
     "id": 27,
-    "images": [
-      "assets/images/tiles/crate.png"
-    ],
-        "density":2,
+    "images": ["assets/images/tiles/crate.png"],
+    "density": 2,
 
     "name": "Crate",
     "actions": [
       {
         "type": "destroy",
-                "drop_resource_id": "biomass"
-
-       
+        "drop_resource_id": "biomass"
       }
     ]
   }

@@ -71,16 +71,10 @@ void Toolbar::update(float dt, World& world) {
 
   // Hacker mode
   if (asw::input::wasKeyPressed(asw::input::Key::M)) {
-    auto* tile = tile_map.getTileAtIndex(cursor_idx);
+    auto pos = asw::Vec3<int>(cursor_idx.x, cursor_idx.y, cursor_idx.z + 1);
+    auto* tile = tile_map.getTileAtIndex(pos);
     if (tile != nullptr) {
       tile->setType("machine");
-    }
-  }
-
-  if (asw::input::wasKeyPressed(asw::input::Key::N)) {
-    auto* tile = tile_map.getTileAtIndex(cursor_idx);
-    if (tile != nullptr) {
-      tile->setType("rocks_rough");
     }
   }
 }

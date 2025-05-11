@@ -23,6 +23,10 @@ class Tile {
   std::shared_ptr<TileType> getType() const;
   short getTypeId() const;
 
+  // Meta
+  void setMeta(int meta) { this->meta = meta; }
+  int getMeta() const { return meta; }
+
   // Structure ref
   void setStructure(std::shared_ptr<Structure> structure);
   std::shared_ptr<Structure> getStructure() const;
@@ -32,7 +36,7 @@ class Tile {
             bool right_border);
 
  private:
-  short type{0};
+  int meta{0};
 
   asw::Vec3<int> position{0, 0, 0};
 

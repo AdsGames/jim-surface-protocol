@@ -13,8 +13,17 @@ asw::Vec3<int> TileMap::getSize() const {
 }
 
 void TileMap::update(float dt) {
+  // Tick timer
+  tick_timer += dt;
+  if (tick_timer < TICK_TIME) {
+    return;
+  }
+
+  // Subtract tick timer
+  tick_timer -= TICK_TIME;
+
   // Reset tile count
-  for (int i = 0; i < tileCount.size(); i++) {
+  for (unsigned int i = 0; i < tileCount.size(); i++) {
     tileCount[i] = 0;
   }
 
@@ -22,11 +31,46 @@ void TileMap::update(float dt) {
   for (int i = 0; i < MAP_WIDTH; i++) {
     for (int j = 0; j < MAP_DEPTH; j++) {
       for (int k = 0; k < MAP_HEIGHT; k++) {
-        int tile_id = mapTiles[i][j][k].getTypeId();
+        const int tile_id = mapTiles[i][j][k].getTypeId();
         if (tile_id == 0) {
           continue;
         }
-        tileCount[mapTiles[i][j][k].getTypeId()] += 1;
+        tileCount[tile_id] += 1;
+
+        tick_tile({i, j, k});
+      }
+    }
+  }
+}
+
+void TileMap::tick_tile(const asw::Vec3<int>& index) {
+  // Tick actions
+  auto type = mapTiles[index.x][index.y][index.z].getType();
+  if (type->getActions().empty()) {
+    return;
+  }
+
+  for (const auto& action : type->getActions()) {
+    if (action.type == ActionType::TICK &&
+        action.tick_type == TickType::PURIFY) {
+      auto point = index;
+      point.x += asw::random::between(-10, 10);
+      point.y += asw::random::between(-10, 10);
+
+      for (int i = 0; i < MAP_HEIGHT; i++) {
+        point.z = i;
+        auto* tile = getTileAtIndex(point);
+        if (tile == nullptr || tile->getType() == nullptr ||
+            tile->getType()->getActions().empty()) {
+          continue;
+        }
+
+        for (const auto& action2 : tile->getType()->getActions()) {
+          if (action2.type == ActionType::PURIFY) {
+            mapTiles[point.x][point.y][point.z].setType(
+                action2.transition_tile_id);
+          }
+        }
       }
     }
   }
