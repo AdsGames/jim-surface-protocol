@@ -92,8 +92,9 @@
   },
   {
     "id": 15,
-    "images": ["assets/images/tiles/rocks_rough.jpg"],
-    "name": "Rocks Rough",
+    "images": ["assets/images/tiles/rocks_rough.png"],
+    "name": "Wall",
+    "density":2,
     "render_mode": "cube"
   },
   {
