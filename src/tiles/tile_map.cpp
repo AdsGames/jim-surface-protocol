@@ -183,6 +183,8 @@ void TileMap::generate() {
             generateStructure("junk_pile_3", {i, j, k});
           } else if (asw::random::chance(0.001F)) {
             generateStructure("junk_pyramid", {i, j, k});
+          } else if (asw::random::chance(0.001F)) {
+            generateStructure("bike_shop", {i, j, k});
           }
         }
       }

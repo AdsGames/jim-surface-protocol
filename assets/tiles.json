@@ -264,19 +264,7 @@
       }
     ]
   },
-  {
-    "id": 27,
-    "images": ["assets/images/tiles/crate.png"],
-    "density": 2,
 
-    "name": "Crate",
-    "actions": [
-      {
-        "type": "destroy",
-        "drop_resource_id": "biomass"
-      }
-    ]
-  },
   {
     "id": 28,
     "images": ["assets/images/tiles/plants_2.png"],
@@ -395,6 +383,19 @@
         "drop_resource_id": "scrap"
 
        
+      }
+    ]
+  },
+    {
+    "id": 35,
+    "images": ["assets/images/tiles/crate.png"],
+    "density": 2,
+
+    "name": "Crate",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
       }
     ]
   }
