@@ -243,7 +243,7 @@ void Toolbar::draw(World& world) {
       asw::Vec2(1260.0F, 915.0F), green);
 
   // Upgrade window
-  //
+
   auto drill_speed = std::to_string(world.getDrillSpeed());
   auto player_speed = std::to_string(world.getPlayerSpeed());
 
@@ -335,12 +335,18 @@ void Toolbar::draw(World& world) {
   }
 
   if (actionProgress > 0) {
-    asw::draw::rectFill(asw::Quad(mouse_pos.x, mouse_pos.y, 204.0F, 34.0F),
-                        asw::util::makeColor(128, 128, 128));
+    asw::draw::rectFill(asw::Quad(mouse_pos.x, mouse_pos.y - 60, 208.0F, 38.0F),
+                        asw::util::makeColor(0, 0, 0));
 
-    asw::draw::rectFill(asw::Quad(mouse_pos.x + 2.0F, mouse_pos.y + 2,
-                                  actionProgress * 2, 30.0F),
-                        asw::util::makeColor(0, 255, 0));
+    asw::draw::rectFill(
+        asw::Quad(mouse_pos.x + 4.0F, mouse_pos.y + 4 - 60, actionProgress * 2,
+                  30.0F),
+        asw::util::makeColor(255 - (255 / 100) * actionProgress,
+                             255 + (255 / 100) * actionProgress, 0));
+
+    asw::draw::text(font, "Drilling...",
+                    asw::Vec2(mouse_pos.x + 4.0F, mouse_pos.y - 60 + 4.0F),
+                    asw::util::makeColor(255, 255, 255));
   }
 }
 
