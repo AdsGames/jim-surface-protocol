@@ -5,8 +5,9 @@
 #include "world.h"
 
 constexpr float BUTTON_SIZE = 64.0F;
+constexpr float TOOLBAR_HEIGHT = 100.0F;
 
-enum class ToolMode { INSPECT, PURIFIER, TREE, DRILL };
+enum class ToolMode { PURIFIER, TREE, DRILL };
 
 class Toolbar {
  public:
@@ -18,8 +19,6 @@ class Toolbar {
 
  private:
   float actionProgress{0.0F};
-
-  void drawResourceWindow(World& world);
 
   void action(World& world, float dt);
   bool actionEnabled(World& world);
@@ -42,22 +41,20 @@ class Toolbar {
   asw::Texture tree_button;
   asw::Texture drill_button;
   asw::Texture upgrade;
+  asw::Texture toolbar_ui;
 
-  asw::Quad<float> inspect_button_trans{10.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
-  asw::Quad<float> waypoint_button_trans{242.0F, 0.0F, BUTTON_SIZE,
+  asw::Quad<float> drill_button_trans{620.0F, 820.0F, BUTTON_SIZE, BUTTON_SIZE};
+  asw::Quad<float> purifier_button_trans{694.0F, 820.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};
-  asw::Quad<float> purifier_button_trans{232.0F, 0.0F, BUTTON_SIZE,
-                                         BUTTON_SIZE};
-  asw::Quad<float> tree_button_trans{158.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
-  asw::Quad<float> drill_button_trans{84.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
+  asw::Quad<float> tree_button_trans{768.0F, 820.0F, BUTTON_SIZE, BUTTON_SIZE};
 
-  asw::Quad<float> upgrade_drill_trans{935.0F, 0.0F, 32, 32};
-  asw::Quad<float> upgrade_move_trans{935.0F, 0.0F, 32, 32};
+  asw::Quad<float> upgrade_drill_trans{1040.0F, 868.0F, 32, 32};
+  asw::Quad<float> upgrade_move_trans{1040.0F, 915.0F, 32, 32};
 
   int drill_upgrade_cost{10};
   int move_upgrade_cost{10};
 
-  ToolMode mode{ToolMode::INSPECT};
+  ToolMode mode{ToolMode::DRILL};
 
   bool can_take_action{false};
 };

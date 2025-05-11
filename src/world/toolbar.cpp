@@ -12,6 +12,7 @@ void Toolbar::init() {
       asw::assets::loadTexture("assets/images/ui/purify-button.png");
   tree_button = asw::assets::loadTexture("assets/images/ui/tree-button.png");
   drill_button = asw::assets::loadTexture("assets/images/ui/drill-button.png");
+  toolbar_ui = asw::assets::loadTexture("assets/images/ui/toolbar.png");
 
   upgrade = asw::assets::loadTexture("assets/images/ui/upgrade.png");
 };
@@ -31,22 +32,9 @@ void Toolbar::update(float dt, World& world) {
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
   cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
 
-  // Update transofmrs
-
-  // T R A N S O F M R S
-
-  // M O O G E T R O N
-
-  inspect_button_trans.position.y = camera.size.y - 70;
-  purifier_button_trans.position.y = camera.size.y - 70;
-  tree_button_trans.position.y = camera.size.y - 70;
-  drill_button_trans.position.y = camera.size.y - 70;
-  upgrade_drill_trans.position.y = camera.size.y - 70;
-  upgrade_move_trans.position.y = camera.size.y - 40;
-
   // Find distance to worker
-  auto selected_tile = tile_map.getTileAtIndex(cursor_idx);
-  auto worker = world.getPlayer();
+  auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
+  auto* worker = world.getPlayer();
   if (worker != nullptr && selected_tile != nullptr) {
     const auto tile_pos = selected_tile->getPosition();
     const auto distance = asw::Vec3<float>(tile_pos.x, tile_pos.y, tile_pos.z)
@@ -90,10 +78,8 @@ void Toolbar::toolZoneAction(World& world) {
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
 
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
-  if (mouse_pos.y > camera.size.y - 80.0F) {
-    if (inspect_button_trans.contains(mouse_pos)) {
-      mode = ToolMode::INSPECT;
-    } else if (purifier_button_trans.contains(mouse_pos)) {
+  if (mouse_pos.y > camera.size.y - 160.0F) {
+    if (purifier_button_trans.contains(mouse_pos)) {
       mode = ToolMode::PURIFIER;
     } else if (tree_button_trans.contains(mouse_pos)) {
       mode = ToolMode::TREE;
@@ -198,11 +184,6 @@ bool Toolbar::actionEnabled(World& world) {
     }
   }
 
-  // Worker check
-  if (mode == ToolMode::INSPECT) {
-    return true;
-  }
-
   // Purifier check
   if (mode == ToolMode::PURIFIER && selected_tile != nullptr &&
       select_type != nullptr) {
@@ -227,49 +208,42 @@ bool Toolbar::actionEnabled(World& world) {
 void Toolbar::draw(World& world) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
+  auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
   auto world_pos = camera.position + mouse_pos;
   auto* selected_tile = tile_map.getTileAt(world_pos);
-  auto text_colour = asw::util::makeColor(255, 255, 255, 255);  // White
+  auto white = asw::util::makeColor(255, 255, 255);
+  auto green = asw::util::makeColor(128, 255, 128);
+  auto black = asw::util::makeColor(0, 0, 0);
 
   if (cursor_in_range && can_take_action) {
     drawWireframe(cursor_idx, camera.position, asw::util::makeColor(0, 255, 0));
   } else if (cursor_in_range) {
-    drawWireframe(cursor_idx, camera.position,
-                  asw::util::makeColor(255, 255, 255));
+    drawWireframe(cursor_idx, camera.position, white);
   } else {
     drawWireframe(cursor_idx, camera.position, asw::util::makeColor(255, 0, 0));
   }
 
-  // Border
-  asw::draw::rectFill(
-      asw::Quad(0.0F, camera.size.y - 80.0F, camera.size.x, camera.size.y),
-      asw::util::makeColor(128, 128, 128));
+  // Overlay
+  asw::draw::sprite(toolbar_ui, asw::Vec2<float>(0, 0));
 
-  // X + Y
-  asw::draw::text(font,
-                  "Pos: " + std::to_string(cursor_idx.x) + ", " +
-                      std::to_string(cursor_idx.y) + ", " +
-                      std::to_string(cursor_idx.z),
-                  asw::Vec2(10.0F, 100.0F), text_colour);
+  // Resource window
+  //
+  asw::draw::text(fontLarge, "Resources", asw::Vec2(1112.0F, 822.0F), black);
+  asw::draw::text(fontLarge, "Resources", asw::Vec2(1110.0F, 820.0F), white);
 
-  // Camera pos
-  asw::draw::text(font,
-                  "Cam: " + std::to_string(camera.position.x) + ", " +
-                      std::to_string(camera.position.y),
-                  asw::Vec2(10.0F, 115.0F), text_colour);
+  asw::draw::text(font, "Scrap", asw::Vec2(1110.0F, 868.0F), white);
+  asw::draw::textRight(
+      font, std::to_string(resource_manager.getResourceCount("scrap")),
+      asw::Vec2(1260.0F, 868.0F), green);
 
-  // Percent purified
-  auto percent_purified = std::to_string(world.getProgression() * 100.0F);
-  asw::draw::text(font, "Purity: " + percent_purified + "%",
-                  asw::Vec2(10.0F, 130.0F), text_colour);
+  asw::draw::text(font, "Biomass", asw::Vec2(1110.0F, 915.0F), white);
+  asw::draw::textRight(
+      font, std::to_string(resource_manager.getResourceCount("biomass")),
+      asw::Vec2(1260.0F, 915.0F), green);
 
-  // Buttons
-  asw::draw::stretchSprite(inspect_button, inspect_button_trans);
-  asw::draw::stretchSprite(purifier_button, purifier_button_trans);
-  asw::draw::stretchSprite(tree_button, tree_button_trans);
-  asw::draw::stretchSprite(drill_button, drill_button_trans);
-
+  // Upgrade window
+  //
   auto drill_speed = std::to_string(world.getDrillSpeed());
   auto player_speed = std::to_string(world.getPlayerSpeed());
 
@@ -280,68 +254,85 @@ void Toolbar::draw(World& world) {
   auto canBuyColour = asw::util::makeColor(150, 255, 150, 255);
   auto cantBuyColour = asw::util::makeColor(255, 150, 150, 255);
 
-  asw::draw::text(fontLarge, "Drill Speed: " + drill_speed,
-                  asw::Vec2(500.0F, camera.size.y - 70),
+  asw::draw::text(fontLarge, "Upgrades", asw::Vec2(882.0F, 822.0F), black);
+  asw::draw::text(fontLarge, "Upgrades", asw::Vec2(880.0F, 820.0F), white);
+
+  asw::draw::text(font, "Drill Speed: " + drill_speed,
+                  asw::Vec2(882.0F, 858.0F),
                   asw::util::makeColor(255, 255, 255, 255));
 
-  asw::draw::text(fontLarge,
-                  "Upgrade:   " + std::to_string(drill_upgrade_cost) + " scrap",
-                  asw::Vec2(800.0F, camera.size.y - 70),
+  asw::draw::text(font, "Cost " + std::to_string(drill_upgrade_cost) + " scrap",
+                  asw::Vec2(882.0F, 878.0F),
                   canBuyDrill ? canBuyColour : cantBuyColour);
+
+  asw::draw::text(font, "Move Speed: " + player_speed,
+                  asw::Vec2(882.0F, 905.0F),
+                  asw::util::makeColor(255, 255, 255, 255));
+
+  asw::draw::text(font, "Cost " + std::to_string(move_upgrade_cost) + " scrap",
+                  asw::Vec2(882.0F, 925.0F),
+                  canBuyMove ? canBuyColour : cantBuyColour);
 
   asw::draw::sprite(upgrade, asw::Vec2<float>(upgrade_drill_trans.position.x,
                                               upgrade_drill_trans.position.y));
-
   asw::draw::sprite(upgrade, asw::Vec2<float>(upgrade_move_trans.position.x,
                                               upgrade_move_trans.position.y));
 
-  asw::draw::sprite(upgrade, asw::Vec2<float>(935.0F, camera.size.y - 40));
+  // Inspect window
+  if (selected_tile != nullptr) {
+    auto tile_type = selected_tile->getType();
+    auto tile_structure = selected_tile->getStructure();
 
-  asw::draw::text(fontLarge,
-                  "Upgrade:   " + std::to_string(move_upgrade_cost) + " scrap",
-                  asw::Vec2(800.0F, camera.size.y - 40),
-                  canBuyMove ? canBuyColour : cantBuyColour);
+    if (tile_type != nullptr) {
+      asw::draw::text(font, "Info: " + tile_type->getName(),
+                      asw::Vec2(183.0F, 825.0F), white);
+    }
 
-  asw::draw::text(fontLarge, "Move Speed: " + player_speed,
-                  asw::Vec2(500.0F, camera.size.y - 40),
-                  asw::util::makeColor(255, 255, 255, 255));
+    if (tile_structure != nullptr) {
+      asw::draw::text(font, tile_structure->getType()->name,
+                      asw::Vec2(183.0F, 845.0F), white);
 
-  if (mode == ToolMode::INSPECT) {
-    asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
-  } else if (mode == ToolMode::PURIFIER) {
+      asw::draw::text(font, tile_structure->getType()->description,
+                      asw::Vec2(183.0F, 865.0F), white);
+    }
+  }
+
+  // X + Y
+  asw::draw::text(font,
+                  "Pos: " + std::to_string(cursor_idx.x) + ", " +
+                      std::to_string(cursor_idx.y) + ", " +
+                      std::to_string(cursor_idx.z),
+                  asw::Vec2(10.0F, 100.0F), white);
+
+  // Camera pos
+  asw::draw::text(font,
+                  "Cam: " + std::to_string(camera.position.x) + ", " +
+                      std::to_string(camera.position.y),
+                  asw::Vec2(10.0F, 115.0F), white);
+
+  // Mouse pos
+  asw::draw::text(font,
+                  "Mouse: " + std::to_string(mouse_pos.x) + ", " +
+                      std::to_string(mouse_pos.y),
+                  asw::Vec2(10.0F, 85.0F), white);
+
+  // Percent purified
+  auto percent_purified = std::to_string(world.getProgression() * 100.0F);
+  asw::draw::text(font, "Purity: " + percent_purified + "%",
+                  asw::Vec2(10.0F, 130.0F), white);
+
+  // Buttons
+  asw::draw::stretchSprite(purifier_button, purifier_button_trans);
+  asw::draw::stretchSprite(tree_button, tree_button_trans);
+  asw::draw::stretchSprite(drill_button, drill_button_trans);
+
+  if (mode == ToolMode::PURIFIER) {
     asw::draw::rect(purifier_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::TREE) {
     asw::draw ::rect(tree_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::DRILL) {
     asw::draw::rect(drill_button_trans, asw::util::makeColor(255, 255, 0));
   }
-
-  // Inspect View
-  if (mode == ToolMode::INSPECT) {
-    asw::draw::rectFill(asw::Quad(mouse_pos.x, mouse_pos.y, 500.0F, 150.0F),
-                        asw::util::makeColor(0, 0, 0));
-
-    // Inspect mode
-    if (selected_tile != nullptr) {
-      auto tile_type = selected_tile->getType();
-      auto tile_structure = selected_tile->getStructure();
-
-      if (tile_type != nullptr) {
-        asw::draw::text(font, "Info: " + tile_type->getName(),
-                        mouse_pos + asw::Vec2(10.0F, 10.0F), text_colour);
-      }
-
-      if (tile_structure != nullptr) {
-        asw::draw::text(font, tile_structure->getType()->name,
-                        mouse_pos + asw::Vec2(10.0F, 30.0F), text_colour);
-
-        asw::draw::text(font, tile_structure->getType()->description,
-                        mouse_pos + asw::Vec2(10.0F, 60.0F), text_colour);
-      }
-    }
-  }
-
-  drawResourceWindow(world);
 
   if (actionProgress > 0) {
     asw::draw::rectFill(asw::Quad(mouse_pos.x, mouse_pos.y, 204.0F, 34.0F),
@@ -350,37 +341,6 @@ void Toolbar::draw(World& world) {
     asw::draw::rectFill(asw::Quad(mouse_pos.x + 2.0F, mouse_pos.y + 2,
                                   actionProgress * 2, 30.0F),
                         asw::util::makeColor(0, 255, 0));
-  }
-}
-
-void Toolbar::drawResourceWindow(World& world) {
-  auto& resource_manager = world.getResourceManager();
-  auto& camera = world.getCamera();
-
-  const int offset_x = -170.0F;
-  auto& resources = resource_manager.getResources();
-
-  asw::draw::rectFill(
-      asw::Quad(camera.size.x + offset_x - 20.0F, 0.0F, 200.0F, 200.0F),
-      asw::util::makeColor(64, 64, 0));
-
-  asw::draw::text(font, "Resources", asw::Vec2(camera.size.x + offset_x, 10.0F),
-                  asw::util::makeColor(255, 255, 255, 255));
-
-  int index = 0;
-  for (const auto& [key, resource] : resources) {
-    const auto y_pos = 50.0F + index * 20;
-
-    asw::draw::stretchSprite(
-        resource->icon,
-        asw::Quad(camera.size.x + offset_x, y_pos + 10.0F, 10.0F, 10.0F));
-
-    asw::draw::text(font,
-                    resource->name + ": " + std::to_string(resource->amount),
-                    asw::Vec2(camera.size.x + offset_x + 20.0F, y_pos),
-                    asw::util::makeColor(255, 255, 255, 255));
-
-    index++;
   }
 }
 
