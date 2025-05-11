@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup cache
         uses: actions/cache@v4
@@ -50,6 +52,20 @@ jobs:
 
       - name: Build
         run: cmake --build --preset release
+
+      - name: Get the version
+        id: get_version
+        run: echo "VERSION=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Itch.io 🚀
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          ITCH_GAME: j1m-surface-protocol
+          ITCH_USER: ads-games
+          CHANNEL: HTML5
+          PACKAGE: ./build/release/target/
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
