@@ -108,7 +108,7 @@ void Toolbar::action(World& world, float dt) {
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
 
   // Toolbar zone
-  if (mouse_pos.y > camera.size.y - 80.0F) {
+  if (mouse_pos.y > camera.size.y - TOOLBAR_HEIGHT) {
     return;
   }
 
@@ -279,7 +279,8 @@ void Toolbar::draw(World& world) {
                                               upgrade_move_trans.position.y));
 
   // Inspect window
-  if (selected_tile != nullptr) {
+  if (mouse_pos.y < camera.size.y - TOOLBAR_HEIGHT &&
+      selected_tile != nullptr) {
     auto tile_type = selected_tile->getType();
     auto tile_structure = selected_tile->getStructure();
 
@@ -296,6 +297,88 @@ void Toolbar::draw(World& world) {
                       asw::Vec2(183.0F, 865.0F), white);
     }
   }
+  // Monkey head
+  else if (mouse_pos.x < 170.0F) {
+    asw::draw::text(font, "J1M Says:", asw::Vec2(183.0F, 825.0F), white);
+
+    if (world.getProgression() < 0.01F) {
+      asw::draw::text(font, "I am J1M, your guide.", asw::Vec2(183.0F, 845.0F),
+                      white);
+      asw::draw::text(font, "I will help you survive.",
+                      asw::Vec2(183.0F, 865.0F), white);
+      asw::draw::text(font, "Right click to set a waypoint.",
+                      asw::Vec2(183.0F, 885.0F), white);
+      asw::draw::text(font, "Left click to interact.",
+                      asw::Vec2(183.0F, 905.0F), white);
+      asw::draw::text(font, "Your goal is to purify the planet.",
+                      asw::Vec2(183.0F, 925.0F), white);
+    } else if (world.getProgression() < 0.5F) {
+      asw::draw::text(font, "You are doing great!", asw::Vec2(183.0F, 845.0F),
+                      white);
+      asw::draw::text(font, "Keep up the good work!", asw::Vec2(183.0F, 865.0F),
+                      white);
+    } else {
+      asw::draw::text(font, "You are almost there!", asw::Vec2(183.0F, 845.0F),
+                      white);
+      asw::draw::text(font, "Keep going!", asw::Vec2(183.0F, 865.0F), white);
+    }
+
+  } else if (drill_button_trans.contains(mouse_pos)) {
+    asw::draw::text(font, "Drill: ", asw::Vec2(183.0F, 825.0F), white);
+
+    asw::draw::text(font, "This tool is used to destroy scrap.",
+                    asw::Vec2(183.0F, 845.0F), white);
+    asw::draw::text(font, "It is very useful for clearing the area ",
+                    asw::Vec2(183.0F, 865.0F), white);
+    asw::draw::text(font, "and collecting resources.",
+                    asw::Vec2(183.0F, 885.0F), white);
+  } else if (purifier_button_trans.contains(mouse_pos)) {
+    asw::draw::text(font, "Purifier: ", asw::Vec2(183.0F, 825.0F), white);
+
+    asw::draw::text(font, "This tool is used to place a water ",
+                    asw::Vec2(183.0F, 845.0F), white);
+    asw::draw::text(font, "purifier. Water purifiers slowly ",
+                    asw::Vec2(183.0F, 865.0F), white);
+    asw::draw::text(font, "purify water and must be placed on water.",
+                    asw::Vec2(183.0F, 885.0F), white);
+
+    asw::draw::text(font, "Cost: 10 scrap", asw::Vec2(183.0F, 905.0F), white);
+  } else if (tree_button_trans.contains(mouse_pos)) {
+    asw::draw::text(font, "Tree: ", asw::Vec2(183.0F, 825.0F), white);
+
+    asw::draw::text(font, "This tool is used to plant trees.",
+                    asw::Vec2(183.0F, 845.0F), white);
+    asw::draw::text(font, "Trees will slowly purify soil.",
+                    asw::Vec2(183.0F, 865.0F), white);
+
+    asw::draw::text(font, "Cost: 10 biomass", asw::Vec2(183.0F, 905.0F), white);
+  }
+
+  // Buttons
+  asw::draw::stretchSprite(purifier_button, purifier_button_trans);
+  asw::draw::textCenter(
+      font, "Purifier",
+      purifier_button_trans.position + asw::Vec2(32.0F, 74.0F), white);
+
+  asw::draw::stretchSprite(tree_button, tree_button_trans);
+  asw::draw::textCenter(font, "Tree",
+                        tree_button_trans.position + asw::Vec2(32.0F, 74.0F),
+                        white);
+
+  asw::draw::stretchSprite(drill_button, drill_button_trans);
+  asw::draw::textCenter(font, "Drill",
+                        drill_button_trans.position + asw::Vec2(32.0F, 74.0F),
+                        white);
+
+  // Percent purified
+  auto percent_purified = std::to_string(world.getProgression() * 100.0F);
+  asw::draw::text(font, "Purification: " + percent_purified + "%",
+                  asw::Vec2(620.0F, 920.0F), white);
+
+  asw::draw::rectFill(asw::Quad(620.0F, 944.0F, 200.0F, 2.0F),
+                      asw::util::makeColor(32, 32, 32));
+  asw::draw::rectFill(
+      asw::Quad(620.0F, 944.0F, 200.0F * world.getProgression(), 2.0F), green);
 
   // X + Y
   asw::draw::text(font,
@@ -315,16 +398,6 @@ void Toolbar::draw(World& world) {
                   "Mouse: " + std::to_string(mouse_pos.x) + ", " +
                       std::to_string(mouse_pos.y),
                   asw::Vec2(10.0F, 85.0F), white);
-
-  // Percent purified
-  auto percent_purified = std::to_string(world.getProgression() * 100.0F);
-  asw::draw::text(font, "Purity: " + percent_purified + "%",
-                  asw::Vec2(10.0F, 130.0F), white);
-
-  // Buttons
-  asw::draw::stretchSprite(purifier_button, purifier_button_trans);
-  asw::draw::stretchSprite(tree_button, tree_button_trans);
-  asw::draw::stretchSprite(drill_button, drill_button_trans);
 
   if (mode == ToolMode::PURIFIER) {
     asw::draw::rect(purifier_button_trans, asw::util::makeColor(255, 255, 0));

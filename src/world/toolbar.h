@@ -5,7 +5,7 @@
 #include "world.h"
 
 constexpr float BUTTON_SIZE = 64.0F;
-constexpr float TOOLBAR_HEIGHT = 100.0F;
+constexpr float TOOLBAR_HEIGHT = 120.0F;
 
 enum class ToolMode { PURIFIER, TREE, DRILL };
 
@@ -44,9 +44,9 @@ class Toolbar {
   asw::Texture toolbar_ui;
 
   asw::Quad<float> drill_button_trans{620.0F, 820.0F, BUTTON_SIZE, BUTTON_SIZE};
-  asw::Quad<float> purifier_button_trans{694.0F, 820.0F, BUTTON_SIZE,
+  asw::Quad<float> purifier_button_trans{700.0F, 820.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};
-  asw::Quad<float> tree_button_trans{768.0F, 820.0F, BUTTON_SIZE, BUTTON_SIZE};
+  asw::Quad<float> tree_button_trans{780.0F, 820.0F, BUTTON_SIZE, BUTTON_SIZE};
 
   asw::Quad<float> upgrade_drill_trans{1040.0F, 868.0F, 32, 32};
   asw::Quad<float> upgrade_move_trans{1040.0F, 915.0F, 32, 32};

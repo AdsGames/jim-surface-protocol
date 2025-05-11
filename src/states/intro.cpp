@@ -25,6 +25,6 @@ void Intro::draw() {
   world.draw();
   toolbar.draw(world);
 
-  asw::draw::text(font, "Tojam 2025", asw::Vec2(10.0F, 10.0F),
+  asw::draw::text(font, "J1M Surface Protocol", asw::Vec2(10.0F, 10.0F),
                   asw::util::makeColor(255, 255, 255));
 }
