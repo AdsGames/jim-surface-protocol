@@ -13,16 +13,20 @@ void World::init() {
 
 void World::update(float dt) {
   // Keybo movement
-  if (asw::input::isKeyDown(asw::input::Key::A)) {
+  if (asw::input::isKeyDown(asw::input::Key::A) ||
+      asw::input::isKeyDown(asw::input::Key::LEFT)) {
     camera.position.x -= 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::D)) {
+  if (asw::input::isKeyDown(asw::input::Key::D) ||
+      asw::input::isKeyDown(asw::input::Key::RIGHT)) {
     camera.position.x += 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::W)) {
+  if (asw::input::isKeyDown(asw::input::Key::W) ||
+      asw::input::isKeyDown(asw::input::Key::UP)) {
     camera.position.y -= 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::S)) {
+  if (asw::input::isKeyDown(asw::input::Key::S) ||
+      asw::input::isKeyDown(asw::input::Key::DOWN)) {
     camera.position.y += 10;
   }
 

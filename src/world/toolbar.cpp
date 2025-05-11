@@ -24,8 +24,7 @@ void Toolbar::update(float dt, World& world) {
   can_take_action = actionEnabled(world);
 
   // CHEATING ZONE (DOONT LOOK)
-
-  if (asw::input::wasKeyPressed(asw::input::Key::F)) {
+  if (asw::input::wasKeyPressed(asw::input::Key::P)) {
     world.getResourceManager().addResourceCount("scrap", 100);
     world.getResourceManager().addResourceCount("biomass", 100);
   }
@@ -56,6 +55,14 @@ void Toolbar::update(float dt, World& world) {
 
   if (asw::input::wasButtonPressed(asw::input::MouseButton::LEFT)) {
     toolZoneAction(world);
+  }
+
+  if (asw::input::wasKeyPressed(asw::input::Key::NUM_1)) {
+    mode = ToolMode::PURIFIER;
+  } else if (asw::input::wasKeyPressed(asw::input::Key::NUM_2)) {
+    mode = ToolMode::TREE;
+  } else if (asw::input::wasKeyPressed(asw::input::Key::NUM_3)) {
+    mode = ToolMode::DRILL;
   }
 
   if (asw::input::isButtonDown(asw::input::MouseButton::RIGHT)) {
@@ -152,7 +159,7 @@ void Toolbar::action(World& world, float dt) {
     auto* tile = tile_map.getTileAtIndex(idx);
     if (tile != nullptr && tile->getType() == nullptr) {
       tile->setType("purifier");
-      resource_manager.addResourceCount("scrap", -10);
+      resource_manager.addResourceCount("biomass", -10);
     }
   }
 
@@ -177,7 +184,7 @@ bool Toolbar::actionEnabled(World& world) {
 
   // Can place purifier
   const auto can_buy_purifier =
-      resource_manager.getResourceCount("scrap") >= 10;
+      resource_manager.getResourceCount("biomass") >= 10;
   const auto can_buy_tree = resource_manager.getResourceCount("biomass") >= 10;
 
   if (!can_buy_purifier) {
@@ -382,7 +389,7 @@ void Toolbar::draw(World& world) {
     }
 
   } else if (drill_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "Drill: ", asw::Vec2(183.0F, 825.0F), green);
+    asw::draw::text(font, "[Key 1] Drill", asw::Vec2(183.0F, 825.0F), green);
 
     asw::draw::text(font, "This tool is used to destroy scrap.",
                     asw::Vec2(183.0F, 845.0F), green);
@@ -391,7 +398,7 @@ void Toolbar::draw(World& world) {
     asw::draw::text(font, "and collecting resources.",
                     asw::Vec2(183.0F, 885.0F), green);
   } else if (purifier_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "Purifier: ", asw::Vec2(183.0F, 825.0F), green);
+    asw::draw::text(font, "[Key 2] Purifier", asw::Vec2(183.0F, 825.0F), green);
 
     asw::draw::text(font, "This tool is used to place a water ",
                     asw::Vec2(183.0F, 845.0F), green);
@@ -400,9 +407,9 @@ void Toolbar::draw(World& world) {
     asw::draw::text(font, "purify water and must be placed on water.",
                     asw::Vec2(183.0F, 885.0F), green);
 
-    asw::draw::text(font, "Cost: 10 scrap", asw::Vec2(183.0F, 905.0F), green);
+    asw::draw::text(font, "Cost: 10 biomass", asw::Vec2(183.0F, 905.0F), green);
   } else if (tree_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "Tree: ", asw::Vec2(183.0F, 825.0F), green);
+    asw::draw::text(font, "[Key 3] Tree", asw::Vec2(183.0F, 825.0F), green);
 
     asw::draw::text(font, "This tool is used to plant trees.",
                     asw::Vec2(183.0F, 845.0F), green);

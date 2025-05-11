@@ -31,22 +31,6 @@ WorkerId Worker::getId() const {
 }
 
 void Worker::update(float dt, World& world) {
-  // Update position based on direction
-  if (asw::input::wasKeyPressed(asw::input::Key::LEFT)) {
-    direction = 0;
-  }
-  if (asw::input::wasKeyPressed(asw::input::Key::DOWN)) {
-    direction = 1;
-  }
-
-  if (asw::input::wasKeyPressed(asw::input::Key::RIGHT)) {
-    direction = 2;
-  }
-
-  if (asw::input::wasKeyPressed(asw::input::Key::UP)) {
-    direction = 3;
-  }
-
   auto waypoint = world.getPlayerWaypoint();
 
   asw::Vec3<float> waypointF(waypoint.x, waypoint.y, waypoint.z);

@@ -49,6 +49,11 @@ void Menu::update(float dt) {
       asw::display::setFullscreen(fullscreen);
     }
   }
+
+  if (asw::input::wasKeyPressed(asw::input::Key::F11)) {
+    fullscreen = !fullscreen;
+    asw::display::setFullscreen(fullscreen);
+  }
 }
 
 void Menu::draw() {
