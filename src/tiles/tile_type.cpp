@@ -82,7 +82,8 @@ void TileType::addAction(const ActionResult& action) {
 void TileType::draw(const asw::Vec3<int>& position,
                     const asw::Vec2<float>& offset,
                     bool left_border,
-                    bool right_border) {
+                    bool right_border,
+                    bool selected) {
   // Render image
   if (image == nullptr) {
     return;
@@ -106,6 +107,12 @@ void TileType::draw(const asw::Vec3<int>& position,
   }
 
   asw::draw::sprite(image, iso_pos);
+
+  if (selected) {
+    asw::draw::setBlendMode(image, asw::BlendMode::ADD);
+    asw::draw::sprite(image, iso_pos);
+    asw::draw::setBlendMode(image, asw::BlendMode::BLEND);
+  }
 
   if (left_border && render_mode != TileRenderMode::FLAT) {
     asw::draw::line(iso_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),

@@ -33,6 +33,8 @@ class TileMap {
 
   asw::Vec3<int> getIndexAt(const asw::Vec2<float>& position);
 
+  void setSelectedIndex(const asw::Vec3<int>& index) { selected_index = index; }
+
   int countByType(int type) const;
 
  private:
@@ -46,6 +48,9 @@ class TileMap {
 
   // Tile count
   std::array<int, 256> tileCount{0};
+
+  // Selected index
+  asw::Vec3<int> selected_index{-1, -1, -1};
 
   // Tick
   float tick_timer{0.0F};
