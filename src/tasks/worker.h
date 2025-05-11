@@ -30,11 +30,6 @@ class Worker {
  private:
   int direction{0};
 
-  bool up;
-  bool down;
-  bool left;
-  bool right;
-
   float angle{0};
 
   asw::Font font;
