@@ -27,4 +27,8 @@ void Game::draw() {
 
   asw::draw::text(font, "J1M Surface Protocol", asw::Vec2(10.0F, 10.0F),
                   asw::util::makeColor(255, 255, 255));
+
+  if (world.getProgression() > 0.99F)
+    asw::draw::text(font, "You win! The world is clean.",
+                    asw::Vec2(10.0F, 38.0F), asw::util::makeColor(0, 255, 0));
 }
