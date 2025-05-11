@@ -58,11 +58,11 @@ void Toolbar::update(float dt, World& world) {
   }
 
   if (asw::input::wasKeyPressed(asw::input::Key::NUM_1)) {
-    mode = ToolMode::PURIFIER;
-  } else if (asw::input::wasKeyPressed(asw::input::Key::NUM_2)) {
-    mode = ToolMode::TREE;
-  } else if (asw::input::wasKeyPressed(asw::input::Key::NUM_3)) {
     mode = ToolMode::DRILL;
+  } else if (asw::input::wasKeyPressed(asw::input::Key::NUM_2)) {
+    mode = ToolMode::PURIFIER;
+  } else if (asw::input::wasKeyPressed(asw::input::Key::NUM_3)) {
+    mode = ToolMode::TREE;
   }
 
   if (asw::input::isButtonDown(asw::input::MouseButton::RIGHT)) {
