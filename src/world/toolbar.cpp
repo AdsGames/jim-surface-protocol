@@ -95,9 +95,9 @@ void Toolbar::toolZoneAction(World& world) {
       }
     } else if (upgrade_move_trans.contains(mouse_pos)) {
       if (resource_manager.getResourceCount("scrap") >= move_upgrade_cost) {
-        move_upgrade_cost = move_upgrade_cost * 1.5F;
         world.setPlayerSpeed(world.getPlayerSpeed() + 1);
         resource_manager.addResourceCount("scrap", -move_upgrade_cost);
+        move_upgrade_cost = move_upgrade_cost * 1.5F;
       }
     }
   }
