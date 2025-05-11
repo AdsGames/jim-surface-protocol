@@ -1,6 +1,3 @@
 #pragma once
 
-enum class ProgramState {
-  Init,
-  Intro,
-};
+enum class ProgramState { Init, Game, Menu, Intro };
