@@ -84,6 +84,18 @@ void TileMap::generate() {
             mapTiles[i][j][k].setType("tire");
           } else if (asw::random::chance(0.01F)) {
             mapTiles[i][j][k].setType("junk");
+
+          } else if (asw::random::chance(0.01F)) {
+            mapTiles[i][j][k].setType("scrap_pile");
+          } else if (asw::random::chance(0.01F)) {
+            mapTiles[i][j][k].setType("dead_shrub");
+          } else if (asw::random::chance(0.01F)) {
+            mapTiles[i][j][k].setType("tire_stack");
+          } else if (asw::random::chance(0.01F)) {
+            mapTiles[i][j][k].setType("garbage");
+
+          } else if (asw::random::chance(0.01F)) {
+            mapTiles[i][j][k].setType("bike");
           } else if (asw::random::chance(0.01F)) {
             mapTiles[i][j][k].setType("crate");
           } else if (asw::random::chance(0.01F)) {

@@ -227,6 +227,7 @@
     "images": [
       "assets/images/tiles/bike.png"
     ],
+    "density": 1,
     "name": "Bike",
     "render_mode": "flat",
     "actions": [
@@ -320,6 +321,99 @@
       {
         "type": "destroy",
                 "drop_resource_id": "biomass"
+
+       
+      }
+    ]
+  }
+  ,
+   {
+    "id": 28,
+    "images": [
+      "assets/images/tiles/pile.png"
+    ],
+        "density":1,
+    "render_mode": "flat",
+
+    "name": "Scrap Pile",
+    "actions": [
+      {
+        "type": "destroy",
+                "drop_resource_id": "scrap"
+
+       
+      }
+    ]
+  }
+   ,
+   {
+    "id": 29,
+    "images": [
+      "assets/images/tiles/shrub.png"
+    ],
+        "density":1,
+    "render_mode": "flat",
+
+    "name": "Dead Shrub",
+    "actions": [
+      {
+        "type": "destroy",
+                "drop_resource_id": "biomass"
+
+       
+      }
+    ]
+  }
+   ,
+   {
+    "id": 30,
+    "images": [
+      "assets/images/tiles/tire_stack.png"
+    ],
+        "density":3,
+    "render_mode": "flat",
+
+    "name": "Tire Stack",
+    "actions": [
+      {
+        "type": "destroy"
+
+       
+      }
+    ]
+  }
+   ,
+   {
+    "id": 31,
+    "images": [
+      "assets/images/tiles/garbage.png"
+    ],
+        "density":1,
+    "render_mode": "flat",
+
+    "name": "Garbage",
+    "actions": [
+      {
+        "type": "destroy"
+
+       
+      }
+    ]
+  }
+   ,
+   {
+    "id": 32,
+    "images": [
+      "assets/images/tiles/dumpster.png"
+    ],
+        "density":2,
+    "render_mode": "flat",
+
+    "name": "Dumpster",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "scrap"
 
        
       }
