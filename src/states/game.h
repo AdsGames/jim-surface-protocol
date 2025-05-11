@@ -1,10 +1,14 @@
 #pragma once
 
 #include <asw/asw.h>
+#include <asw/util/Timer.h>
 
+#include "../world/toolbar.h"
+#include "../world/world.h"
 #include "state.h"
 
-class Intro : public asw::scene::Scene<ProgramState> {
+// Game screen of game
+class Game : public asw::scene::Scene<ProgramState> {
  public:
   using asw::scene::Scene<ProgramState>::Scene;
 
@@ -13,9 +17,8 @@ class Intro : public asw::scene::Scene<ProgramState> {
   void draw() override;
 
  private:
-  asw::Texture intro_1;
   asw::Font font;
-  asw::Font font_small;
-  float timer{0};
-  asw::Music music;
+
+  World world;
+  Toolbar toolbar;
 };

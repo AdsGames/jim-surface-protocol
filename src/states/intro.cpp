@@ -1,30 +1,31 @@
 #include "intro.h"
 
-#include <string>
-#include <vector>
+#include <asw/asw.h>
 
+#include "../tiles/structure_dictionary.h"
 #include "../tiles/tile_dictionary.h"
 
 void Intro::init() {
-  world.init();
-  toolbar.init();
+  intro_1 = asw::assets::loadTexture("assets/images/ui/intro-1.png");
+  font = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 128);
+  font_small = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 96);
 
-  font = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 32);
+  music = asw::assets::loadMusic("assets/music/intro.ogg");
+  asw::sound::playMusic(music, 64.0F);
 }
 
 void Intro::update(float dt) {
-  world.update(dt);
-  toolbar.update(dt, world);
-
-  if (asw::input::wasKeyPressed(asw::input::Key::ESCAPE)) {
-    asw::core::exit = true;
+  timer += dt;
+  if (timer > 2000.0f || asw::input::keyboard.anyPressed) {
+    sceneManager.setNextScene(ProgramState::Menu);
   }
 }
 
 void Intro::draw() {
-  world.draw();
-  toolbar.draw(world);
-
-  asw::draw::text(font, "J1M Surface Protocol", asw::Vec2(10.0F, 10.0F),
-                  asw::util::makeColor(255, 255, 255));
+  asw::draw::sprite(intro_1, asw::Vec2(0.0F, 0.0F));
+  asw::draw::textCenter(font, "J1M:", asw::Vec2(640.0F, 320.0F),
+                        asw::util::makeColor(255, 255, 255));
+  asw::draw::textCenter(font_small, "Surface Protocol",
+                        asw::Vec2(640.0F, 440.0F),
+                        asw::util::makeColor(255, 255, 255));
 }
