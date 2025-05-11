@@ -14,6 +14,8 @@ void Toolbar::init() {
       asw::assets::loadTexture("assets/images/ui/purify-button.png");
   tree_button = asw::assets::loadTexture("assets/images/ui/tree-button.png");
   drill_button = asw::assets::loadTexture("assets/images/ui/drill-button.png");
+
+  upgrade = asw::assets::loadTexture("assets/images/ui/upgrade.png");
 };
 
 void Toolbar::update(float dt, World& world) {
@@ -33,6 +35,8 @@ void Toolbar::update(float dt, World& world) {
   purifier_button_trans.position.y = camera.size.y - 70;
   tree_button_trans.position.y = camera.size.y - 70;
   drill_button_trans.position.y = camera.size.y - 70;
+  upgrade_drill_trans.position.y = camera.size.y - 70;
+  upgrade_move_trans.position.y = camera.size.y - 40;
 
   // Find distance to worker
   auto selected_tile = tile_map.getTileAtIndex(cursor_idx);
@@ -46,7 +50,6 @@ void Toolbar::update(float dt, World& world) {
 
   // Click buttons
   if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
-    toolZoneAction(world);
     actionProgress += dt * 0.5F;
     if (actionProgress > 100.0F) {
       action(world);
@@ -55,6 +58,10 @@ void Toolbar::update(float dt, World& world) {
 
   } else {
     actionProgress = 0;
+  }
+
+  if (asw::input::wasButtonPressed(asw::input::MouseButton::LEFT)) {
+    toolZoneAction(world);
   }
 
   if (asw::input::isButtonDown(asw::input::MouseButton::RIGHT)) {
@@ -99,6 +106,18 @@ void Toolbar::toolZoneAction(World& world) {
       mode = ToolMode::TREE;
     } else if (drill_button_trans.contains(mouse_pos)) {
       mode = ToolMode::DRILL;
+    } else if (upgrade_drill_trans.contains(mouse_pos)) {
+      if (resource_manager.getResourceCount("scrap") >= drill_upgrade_cost) {
+        world.setDrillSpeed(world.getDrillSpeed() + 1);
+        resource_manager.addResourceCount("scrap", -drill_upgrade_cost);
+        drill_upgrade_cost = drill_upgrade_cost * 1.5F;
+      }
+    } else if (upgrade_move_trans.contains(mouse_pos)) {
+      if (resource_manager.getResourceCount("scrap") >= move_upgrade_cost) {
+        move_upgrade_cost = move_upgrade_cost * 1.5F;
+        world.setPlayerSpeed(world.getPlayerSpeed() + 1);
+        resource_manager.addResourceCount("scrap", -move_upgrade_cost);
+      }
     }
   }
 }
@@ -184,16 +203,34 @@ void Toolbar::draw(World& world) {
   auto drill_speed = std::to_string(world.getDrillSpeed());
   auto player_speed = std::to_string(world.getPlayerSpeed());
 
+  auto canBuyDrill = world.getResourceManager().getResourceCount("scrap") >=
+                     drill_upgrade_cost;
+  auto canBuyMove =
+      world.getResourceManager().getResourceCount("scrap") >= move_upgrade_cost;
+  auto canBuyColour = asw::util::makeColor(150, 255, 150, 255);
+  auto cantBuyColour = asw::util::makeColor(255, 150, 150, 255);
+
   asw::draw::text(fontLarge, "Drill Speed: " + drill_speed,
                   asw::Vec2(500.0F, camera.size.y - 70),
                   asw::util::makeColor(255, 255, 255, 255));
 
-  asw::draw::text(fontLarge, "Upgrade:   100 scrap",
+  asw::draw::text(fontLarge,
+                  "Upgrade:   " + std::to_string(drill_upgrade_cost) + " scrap",
                   asw::Vec2(800.0F, camera.size.y - 70),
-                  asw::util::makeColor(255, 255, 255, 255));
-  asw::draw::text(fontLarge, "Upgrade:   100 scrap",
+                  canBuyDrill ? canBuyColour : cantBuyColour);
+
+  asw::draw::sprite(upgrade, asw::Vec2<float>(upgrade_drill_trans.position.x,
+                                              upgrade_drill_trans.position.y));
+
+  asw::draw::sprite(upgrade, asw::Vec2<float>(upgrade_move_trans.position.x,
+                                              upgrade_move_trans.position.y));
+
+  asw::draw::sprite(upgrade, asw::Vec2<float>(935.0F, camera.size.y - 40));
+
+  asw::draw::text(fontLarge,
+                  "Upgrade:   " + std::to_string(move_upgrade_cost) + " scrap",
                   asw::Vec2(800.0F, camera.size.y - 40),
-                  asw::util::makeColor(255, 255, 255, 255));
+                  canBuyMove ? canBuyColour : cantBuyColour);
 
   asw::draw::text(fontLarge, "Move Speed: " + player_speed,
                   asw::Vec2(500.0F, camera.size.y - 40),

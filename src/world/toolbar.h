@@ -40,15 +40,22 @@ class Toolbar {
   asw::Texture purifier_button;
   asw::Texture tree_button;
   asw::Texture drill_button;
+  asw::Texture upgrade;
 
   asw::Quad<float> inspect_button_trans{10.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> worker_button_trans{158.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
-  asw::Quad<float> waypoint_button_trans{232.0F, 0.0F, BUTTON_SIZE,
+  asw::Quad<float> waypoint_button_trans{242.0F, 0.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};
-  asw::Quad<float> purifier_button_trans{212.0F, 0.0F, BUTTON_SIZE,
+  asw::Quad<float> purifier_button_trans{232.0F, 0.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};
   asw::Quad<float> tree_button_trans{158.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> drill_button_trans{84.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
+
+  asw::Quad<float> upgrade_drill_trans{935.0F, 0.0F, 32, 32};
+  asw::Quad<float> upgrade_move_trans{935.0F, 0.0F, 32, 32};
+
+  int drill_upgrade_cost{10};
+  int move_upgrade_cost{10};
 
   ToolMode mode{ToolMode::INSPECT};
 };
