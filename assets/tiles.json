@@ -59,7 +59,7 @@
         "type": "tick",
         "action": "growth",
         "transition_tile_id": "plant_1",
-        "chance": 0.08
+        "chance": 0.008
       }
     ]
   },
@@ -70,16 +70,21 @@
   },
   {
     "id": 14,
-    "images": [
-      "assets/images/tiles/purifier.png"
-    ],
+    "images": ["assets/images/tiles/purifier.png"],
     "name": "Purifier",
     "render_mode": "cube_unique_top",
     "actions": [
       {
         "type": "tick",
         "action": "purify",
-        "chance": 0.08
+        "chance": 0.08,
+        "transition_tile_id": "toxic_water"
+      },
+      {
+        "type": "tick",
+        "action": "purify",
+        "chance": 0.08,
+        "transition_tile_id": "toxic_soil"
       }
     ]
   },
@@ -152,11 +157,11 @@
         "type": "destroy",
         "drop_resource_id": "biomass"
       },
-        {
+      {
         "type": "destroy",
         "drop_resource_id": "biomass"
       },
-        {
+      {
         "type": "destroy",
         "drop_resource_id": "biomass"
       }
@@ -238,7 +243,7 @@
     "images": ["assets/images/tiles/plants_1.png"],
     "name": "Plants 1",
     "render_mode": "flat",
-        "density": 1,
+    "density": 1,
 
     "actions": [
       {
@@ -290,17 +295,24 @@
         "type": "destroy",
         "drop_resource_id": "biomass"
       },
-           {
+      {
         "type": "destroy",
         "drop_resource_id": "biomass"
       },
-           {
+      {
         "type": "destroy",
         "drop_resource_id": "biomass"
       },
       {
         "type": "tick",
         "action": "purify",
+        "transition_tile_id": "toxic_soil",
+        "chance": 0.1
+      },
+      {
+        "type": "tick",
+        "action": "purify",
+        "transition_tile_id": "toxic_grass",
         "chance": 0.1
       }
     ]
@@ -382,12 +394,11 @@
         "type": "destroy",
         "drop_resource_id": "biomass"
       },
-            {
+      {
         "type": "destroy",
         "drop_resource_id": "biomass"
-      }
-      ,
-            {
+      },
+      {
         "type": "destroy",
         "drop_resource_id": "biomass"
       }

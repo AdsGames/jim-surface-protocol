@@ -307,15 +307,15 @@ void Toolbar::draw(World& world) {
 
     if (tile_type != nullptr) {
       asw::draw::text(font, "Tile: " + tile_type->getName(),
-                      asw::Vec2(183.0F, 825.0F), white);
+                      asw::Vec2(183.0F, 825.0F), green);
     }
 
     if (tile_structure != nullptr) {
       asw::draw::text(font, tile_structure->getType()->name,
-                      asw::Vec2(183.0F, 845.0F), white);
+                      asw::Vec2(183.0F, 845.0F), green);
 
       asw::draw::text(font, tile_structure->getType()->description,
-                      asw::Vec2(183.0F, 865.0F), white);
+                      asw::Vec2(183.0F, 865.0F), green);
     }
 
     // Get resources from actions
@@ -327,65 +327,88 @@ void Toolbar::draw(World& world) {
       }
 
       asw::draw::text(font, "Drop: " + res + " x " + std::to_string(count),
-                      asw::Vec2(183.0F, 885.0F + (i * 20)), white);
+                      asw::Vec2(183.0F, 885.0F + (i * 20)), green);
       i++;
     }
   }
+
+  // Debuggo
+  else if (asw::input::isKeyDown(asw::input::Key::Q)) {
+    // X + Y
+    asw::draw::text(font,
+                    "Pos: " + std::to_string(cursor_idx.x) + ", " +
+                        std::to_string(cursor_idx.y) + ", " +
+                        std::to_string(cursor_idx.z),
+                    asw::Vec2(183.0F, 845.0F), green);
+
+    // Camera pos
+    asw::draw::text(font,
+                    "Cam: " + std::to_string(camera.position.x) + ", " +
+                        std::to_string(camera.position.y),
+                    asw::Vec2(183.0F, 865.0F), green);
+
+    // Mouse pos
+    asw::draw::text(font,
+                    "Mouse: " + std::to_string(mouse_pos.x) + ", " +
+                        std::to_string(mouse_pos.y),
+                    asw::Vec2(183.0F, 885.0F), green);
+  }
+
   // Monkey head
   else if (mouse_pos.x < 170.0F) {
-    asw::draw::text(font, "J1M Says:", asw::Vec2(183.0F, 825.0F), white);
+    asw::draw::text(font, "J1M Says:", asw::Vec2(183.0F, 825.0F), green);
 
     if (world.getProgression() < 0.01F) {
       asw::draw::text(font, "I am J1M, your guide.", asw::Vec2(183.0F, 845.0F),
-                      white);
+                      green);
       asw::draw::text(font, "I will help you survive.",
-                      asw::Vec2(183.0F, 865.0F), white);
+                      asw::Vec2(183.0F, 865.0F), green);
       asw::draw::text(font, "Right click to set a waypoint.",
-                      asw::Vec2(183.0F, 885.0F), white);
+                      asw::Vec2(183.0F, 885.0F), green);
       asw::draw::text(font, "Left click to interact.",
-                      asw::Vec2(183.0F, 905.0F), white);
+                      asw::Vec2(183.0F, 905.0F), green);
       asw::draw::text(font, "Your goal is to purify the planet.",
-                      asw::Vec2(183.0F, 925.0F), white);
+                      asw::Vec2(183.0F, 925.0F), green);
     } else if (world.getProgression() < 0.5F) {
       asw::draw::text(font, "You are doing great!", asw::Vec2(183.0F, 845.0F),
-                      white);
+                      green);
       asw::draw::text(font, "Keep up the good work!", asw::Vec2(183.0F, 865.0F),
-                      white);
+                      green);
     } else {
       asw::draw::text(font, "You are almost there!", asw::Vec2(183.0F, 845.0F),
-                      white);
-      asw::draw::text(font, "Keep going!", asw::Vec2(183.0F, 865.0F), white);
+                      green);
+      asw::draw::text(font, "Keep going!", asw::Vec2(183.0F, 865.0F), green);
     }
 
   } else if (drill_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "Drill: ", asw::Vec2(183.0F, 825.0F), white);
+    asw::draw::text(font, "Drill: ", asw::Vec2(183.0F, 825.0F), green);
 
     asw::draw::text(font, "This tool is used to destroy scrap.",
-                    asw::Vec2(183.0F, 845.0F), white);
+                    asw::Vec2(183.0F, 845.0F), green);
     asw::draw::text(font, "It is very useful for clearing the area ",
-                    asw::Vec2(183.0F, 865.0F), white);
+                    asw::Vec2(183.0F, 865.0F), green);
     asw::draw::text(font, "and collecting resources.",
-                    asw::Vec2(183.0F, 885.0F), white);
+                    asw::Vec2(183.0F, 885.0F), green);
   } else if (purifier_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "Purifier: ", asw::Vec2(183.0F, 825.0F), white);
+    asw::draw::text(font, "Purifier: ", asw::Vec2(183.0F, 825.0F), green);
 
     asw::draw::text(font, "This tool is used to place a water ",
-                    asw::Vec2(183.0F, 845.0F), white);
+                    asw::Vec2(183.0F, 845.0F), green);
     asw::draw::text(font, "purifier. Water purifiers slowly ",
-                    asw::Vec2(183.0F, 865.0F), white);
+                    asw::Vec2(183.0F, 865.0F), green);
     asw::draw::text(font, "purify water and must be placed on water.",
-                    asw::Vec2(183.0F, 885.0F), white);
+                    asw::Vec2(183.0F, 885.0F), green);
 
-    asw::draw::text(font, "Cost: 10 scrap", asw::Vec2(183.0F, 905.0F), white);
+    asw::draw::text(font, "Cost: 10 scrap", asw::Vec2(183.0F, 905.0F), green);
   } else if (tree_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "Tree: ", asw::Vec2(183.0F, 825.0F), white);
+    asw::draw::text(font, "Tree: ", asw::Vec2(183.0F, 825.0F), green);
 
     asw::draw::text(font, "This tool is used to plant trees.",
-                    asw::Vec2(183.0F, 845.0F), white);
+                    asw::Vec2(183.0F, 845.0F), green);
     asw::draw::text(font, "Trees will slowly purify soil.",
-                    asw::Vec2(183.0F, 865.0F), white);
+                    asw::Vec2(183.0F, 865.0F), green);
 
-    asw::draw::text(font, "Cost: 10 biomass", asw::Vec2(183.0F, 905.0F), white);
+    asw::draw::text(font, "Cost: 10 biomass", asw::Vec2(183.0F, 905.0F), green);
   }
 
   // Buttons
@@ -414,25 +437,6 @@ void Toolbar::draw(World& world) {
   asw::draw::rectFill(
       asw::Quad(620.0F, 944.0F, 200.0F * world.getProgression(), 2.0F), green);
 
-  // X + Y
-  asw::draw::text(font,
-                  "Pos: " + std::to_string(cursor_idx.x) + ", " +
-                      std::to_string(cursor_idx.y) + ", " +
-                      std::to_string(cursor_idx.z),
-                  asw::Vec2(10.0F, 100.0F), white);
-
-  // Camera pos
-  asw::draw::text(font,
-                  "Cam: " + std::to_string(camera.position.x) + ", " +
-                      std::to_string(camera.position.y),
-                  asw::Vec2(10.0F, 115.0F), white);
-
-  // Mouse pos
-  asw::draw::text(font,
-                  "Mouse: " + std::to_string(mouse_pos.x) + ", " +
-                      std::to_string(mouse_pos.y),
-                  asw::Vec2(10.0F, 85.0F), white);
-
   if (mode == ToolMode::PURIFIER) {
     asw::draw::rect(purifier_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::TREE) {
@@ -455,6 +459,7 @@ void Toolbar::draw(World& world) {
                     asw::Vec2(mouse_pos.x + 4.0F, mouse_pos.y - 60 + 4.0F),
                     asw::util::makeColor(255, 255, 255));
   }
+
   if (world.getProgression() < 0.33F) {
     asw::draw::setAlpha(overlay_1, 1);
     asw::draw::sprite(overlay_1, asw::Vec2<float>(0, 0));

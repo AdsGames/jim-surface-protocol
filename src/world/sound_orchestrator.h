@@ -11,11 +11,12 @@ class SoundOrchestrator {
 
   void init();
 
-  void update(World& world);
+  void update(float dt, World& world);
 
  private:
   std::unordered_map<std::string, asw::Sample> samples;
   std::unordered_map<std::string, asw::Music> music;
 
   float last_progression{0.0F};
+  float progression_timer{0.0F};
 };

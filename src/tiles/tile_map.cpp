@@ -50,6 +50,11 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
     return;
   }
 
+  // Random point selection
+  auto point = index;
+  point.x += asw::random::between(-10, 10);
+  point.y += asw::random::between(-10, 10);
+
   for (const auto& action : type->getActions()) {
     if (action.type != ActionType::TICK) {
       continue;
@@ -61,15 +66,12 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
     }
 
     if (action.tick_type == TickType::PURIFY) {
-      auto point = index;
-      point.x += asw::random::between(-10, 10);
-      point.y += asw::random::between(-10, 10);
-
       for (int i = 0; i < MAP_HEIGHT; i++) {
         point.z = i;
         auto* tile = getTileAtIndex(point);
         if (tile == nullptr || tile->getType() == nullptr ||
-            tile->getType()->getActions().empty()) {
+            tile->getType()->getActions().empty() ||
+            tile->getType()->getIdString() != action.transition_tile_id) {
           continue;
         }
 
