@@ -28,17 +28,37 @@ void World::update(float dt) {
 
   // Mouse movement
   auto screen_size = asw::display::getLogicalSize();
-  if (asw::input::mouse.x >= screen_size.x - 2) {
+  if (asw::input::mouse.x >= screen_size.x - 4) {
     camera.position.x += 10;
   }
-  if (asw::input::mouse.x <= 2) {
+  if (asw::input::mouse.x <= 4) {
     camera.position.x -= 10;
   }
-  if (asw::input::mouse.y >= screen_size.y - 2) {
+  if (asw::input::mouse.y >= screen_size.y - 4) {
     camera.position.y += 10;
   }
-  if (asw::input::mouse.y <= 2) {
+  if (asw::input::mouse.y <= 4) {
     camera.position.y -= 10;
+  }
+
+  // Topmost
+  const auto min_x = -(MAP_DEPTH / 2.0F) * TILE_SIZE;
+  const auto max_x = (MAP_WIDTH / 2.0F + 1) * TILE_SIZE;
+  const auto min_y = -(MAP_HEIGHT / 2.0F) * TILE_SIZE;
+  const auto max_y =
+      std::max(MAP_WIDTH / 2.0F + 1, MAP_DEPTH / 2.0F + 1) * TILE_SIZE + 160.0F;
+
+  if (camera.position.y + camera.size.y > max_y) {
+    camera.position.y = max_y - camera.size.y;
+  }
+  if (camera.position.y < min_y) {
+    camera.position.y = min_y;
+  }
+  if (camera.position.x + camera.size.x > max_x) {
+    camera.position.x = max_x - camera.size.x;
+  }
+  if (camera.position.x < min_x) {
+    camera.position.x = min_x;
   }
 
   // Regenerate map
