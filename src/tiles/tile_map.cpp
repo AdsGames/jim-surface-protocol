@@ -131,7 +131,8 @@ void TileMap::generate() {
   for (int i = 0; i < MAP_WIDTH; ++i) {
     for (int j = 0; j < MAP_DEPTH; ++j) {
       auto frac = height_map.fractal(100, seed + i, seed + j);
-      auto height_val = static_cast<int>(MAP_HEIGHT * (frac + 1.0F) / 2.0F);
+      auto height_val =
+          static_cast<int>((MAP_HEIGHT / 2.0F) * (frac + 1.0F) / 2.0F);
 
       for (int k = 0; k < MAP_HEIGHT; ++k) {
         if (mapTiles[i][j][k].getType() != nullptr) {
@@ -218,6 +219,10 @@ void TileMap::generateStructure(const std::string& id_str,
 
       for (int k = 0; k < structure_def->dimensions.x; ++k) {
         auto id = structure_def->tiles[index++];
+        if (id == 0) {
+          continue;
+        }
+
         tile_offset.x = k;
 
         auto tile = getTileAtIndex(position + tile_offset);
@@ -239,7 +244,7 @@ Tile* TileMap::getTileAt(const asw::Vec2<float>& position) {
 Tile* TileMap::getTileAtIndex(const asw::Vec3<int>& index) {
   // Check bounds
   if (index.x < 0 || index.x >= MAP_WIDTH || index.y < 0 ||
-      index.y >= MAP_DEPTH) {
+      index.y >= MAP_DEPTH || index.z < 0 || index.z >= MAP_HEIGHT) {
     return nullptr;
   }
 

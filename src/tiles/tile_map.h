@@ -8,9 +8,9 @@
 
 #include "tile.h"
 
-constexpr int MAP_WIDTH = 100;
-constexpr int MAP_DEPTH = 100;
-constexpr int MAP_HEIGHT = 10;
+constexpr int MAP_WIDTH = 20;
+constexpr int MAP_DEPTH = 20;
+constexpr int MAP_HEIGHT = 16;
 
 constexpr float TICK_TIME = 100.0F;
 

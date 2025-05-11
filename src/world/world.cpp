@@ -87,8 +87,9 @@ void World::update(float dt) {
 }
 
 void World::draw() {
+  const int blue_percent = 64 * (progression + 1.0F);
   asw::draw::rectFill(asw::Quad(0.0F, 0.0F, camera.size.x, camera.size.y),
-                      asw::util::makeColor(0, 64, 128));
+                      asw::util::makeColor(0, 64, blue_percent));
 
   tile_map.draw(camera);
   player.draw(camera.position);
