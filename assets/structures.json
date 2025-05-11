@@ -168,4 +168,20 @@
 
     ]
   }
+,
+   {
+    "name": "Statue",
+    "id": 6,
+    "description": "''Must've been an ancient religious artifact''",
+    "layout": [
+      [
+        [36]
+       
+      ]
+       
+ 
+     
+
+    ]
+  }
 ]

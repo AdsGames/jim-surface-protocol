@@ -385,8 +385,7 @@
        
       }
     ]
-  },
-    {
+  } , {
     "id": 35,
     "images": ["assets/images/tiles/crate.png"],
     "density": 2,
@@ -398,5 +397,14 @@
         "drop_resource_id": "biomass"
       }
     ]
+  }
+  , {
+    "id": 36,
+    "render_mode": "flat",
+    "images": ["assets/images/tiles/goat.png"],
+
+
+    "name": "Goat on a pole"
+  
   }
 ]
