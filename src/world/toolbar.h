@@ -6,6 +6,8 @@
 
 constexpr float BUTTON_SIZE = 64.0F;
 constexpr float TOOLBAR_HEIGHT = 160.0F;
+constexpr int TREE_COST = 10;
+constexpr int PURIFIER_COST = 40;
 
 enum class ToolMode { PURIFIER, TREE, DRILL };
 

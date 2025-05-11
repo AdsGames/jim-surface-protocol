@@ -159,7 +159,7 @@ void Toolbar::action(World& world, float dt) {
     auto* tile = tile_map.getTileAtIndex(idx);
     if (tile != nullptr && tile->getType() == nullptr) {
       tile->setType("purifier");
-      resource_manager.addResourceCount("biomass", -10);
+      resource_manager.addResourceCount("biomass", -PURIFIER_COST);
     }
   }
 
@@ -170,7 +170,7 @@ void Toolbar::action(World& world, float dt) {
     auto* tile = tile_map.getTileAtIndex(idx);
     if (tile != nullptr && tile->getType() == nullptr) {
       tile->setType("sapling");
-      resource_manager.addResourceCount("biomass", -10);
+      resource_manager.addResourceCount("biomass", -TREE_COST);
     }
   }
 }
@@ -184,8 +184,9 @@ bool Toolbar::actionEnabled(World& world) {
 
   // Can place purifier
   const auto can_buy_purifier =
-      resource_manager.getResourceCount("biomass") >= 10;
-  const auto can_buy_tree = resource_manager.getResourceCount("biomass") >= 10;
+      resource_manager.getResourceCount("biomass") >= PURIFIER_COST;
+  const auto can_buy_tree =
+      resource_manager.getResourceCount("biomass") >= TREE_COST;
 
   if (!can_buy_purifier) {
     SDL_SetTextureColorMod(purifier_button.get(), 255, 150, 150);
