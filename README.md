@@ -1,6 +1,6 @@
-# tojam-2025
+# j1m-surface-protocol
 
-Tojam 2025 Game
+J1M Surface Protocol
 
 ## Demo
 

@@ -189,9 +189,7 @@
   },
   {
     "id": 22,
-    "images": [
-      "assets/images/tiles/bike.png"
-    ],
+    "images": ["assets/images/tiles/bike.png"],
     "density": 1,
     "name": "Bike",
     "render_mode": "flat",
@@ -292,88 +290,65 @@
         "action": "purify"
       }
     ]
-  }
-  ,
-   {
-    "id":33,
-    "images": [
-      "assets/images/tiles/pile.png"
-    ],
-        "density":1,
+  },
+  {
+    "id": 33,
+    "images": ["assets/images/tiles/pile.png"],
+    "density": 1,
     "render_mode": "flat",
 
     "name": "Scrap Pile",
     "actions": [
       {
         "type": "destroy",
-                "drop_resource_id": "scrap"
-
-       
+        "drop_resource_id": "scrap"
       }
     ]
-  }
-   ,
-   {
+  },
+  {
     "id": 34,
-    "images": [
-      "assets/images/tiles/shrub.png"
-    ],
-        "density":1,
+    "images": ["assets/images/tiles/shrub.png"],
+    "density": 1,
     "render_mode": "flat",
 
     "name": "Dead Shrub",
     "actions": [
       {
         "type": "destroy",
-                "drop_resource_id": "biomass"
-
-       
+        "drop_resource_id": "biomass"
       }
     ]
-  }
-   ,
-   {
+  },
+  {
     "id": 30,
-    "images": [
-      "assets/images/tiles/tire_stack.png"
-    ],
-        "density":3,
+    "images": ["assets/images/tiles/tire_stack.png"],
+    "density": 3,
     "render_mode": "flat",
 
     "name": "Tire Stack",
     "actions": [
       {
         "type": "destroy"
-
-       
       }
     ]
-  }
-   ,
-   {
+  },
+  {
     "id": 31,
-    "images": [
-      "assets/images/tiles/garbage.png"
-    ],
-        "density":1,
+    "images": ["assets/images/tiles/garbage.png"],
+    "density": 1,
     "render_mode": "flat",
 
     "name": "Garbage",
     "actions": [
       {
         "type": "destroy"
-
-       
       }
     ]
-  }
-   ,
-   {
+  },
+  {
     "id": 32,
-    "images": [
-      "assets/images/tiles/dumpster.png"
-    ],
-        "density":2,
+    "images": ["assets/images/tiles/dumpster.png"],
+    "density": 2,
     "render_mode": "flat",
 
     "name": "Dumpster",
@@ -381,11 +356,10 @@
       {
         "type": "destroy",
         "drop_resource_id": "scrap"
-
-       
       }
     ]
-  } , {
+  },
+  {
     "id": 35,
     "images": ["assets/images/tiles/crate.png"],
     "density": 2,
@@ -397,14 +371,12 @@
         "drop_resource_id": "biomass"
       }
     ]
-  }
-  , {
+  },
+  {
     "id": 36,
     "render_mode": "flat",
     "images": ["assets/images/tiles/goat.png"],
 
-
     "name": "Goat on a pole"
-  
   }
 ]

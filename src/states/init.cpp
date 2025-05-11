@@ -13,7 +13,7 @@ void Init::init() {
 
   asw::display::setIcon("assets/icon.ico");
 
-  asw::display::setTitle("Tojam 2025");
+  asw::display::setTitle("J1M Surface Protocol");
 }
 
 void Init::update(float dt) {
