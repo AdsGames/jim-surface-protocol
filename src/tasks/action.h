@@ -22,4 +22,5 @@ class ActionResult {
   std::string drop_resource_id;
   std::string spawn_structure_id;
   TickType tick_type{TickType::NONE};
+  float chance{0.0f};
 };

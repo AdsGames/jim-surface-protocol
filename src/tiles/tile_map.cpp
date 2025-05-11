@@ -55,6 +55,11 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
       continue;
     }
 
+    // Chance
+    if (!asw::random::chance(action.chance)) {
+      continue;
+    }
+
     if (action.tick_type == TickType::PURIFY) {
       auto point = index;
       point.x += asw::random::between(-10, 10);
@@ -98,12 +103,9 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
         continue;
       }
 
-      if (asw::random::chance(0.1F)) {
-        auto* tile = getTileAtIndex(point);
-        if (tile != nullptr) {
-          mapTiles[point.x][point.y][point.z].setType(
-              action.transition_tile_id);
-        }
+      auto* tile = getTileAtIndex(point);
+      if (tile != nullptr && tile->getType() == nullptr) {
+        mapTiles[point.x][point.y][point.z].setType(action.transition_tile_id);
       }
     }
   }

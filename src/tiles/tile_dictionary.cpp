@@ -148,6 +148,10 @@ void TileDictionary::load(const std::string& path) {
           result.drop_resource_id = action["drop_resource_id"];
         }
 
+        if (action.contains("chance")) {
+          result.chance = action["chance"];
+        }
+
         tile->addAction(result);
       }
     }

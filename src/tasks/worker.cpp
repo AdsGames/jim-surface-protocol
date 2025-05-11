@@ -103,9 +103,9 @@ void Worker::update(float dt, World& world) {
     }
 
     if (position.z < waypointF.z) {
-      dir.z = move;
+      dir.z = move * 2;
     } else if (position.z > waypointF.z) {
-      dir.z = -move;
+      dir.z = -move * 2;
     }
 
     position += dir;

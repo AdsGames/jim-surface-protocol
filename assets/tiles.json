@@ -58,7 +58,8 @@
       {
         "type": "tick",
         "action": "growth",
-        "transition_tile_id": "plant_1"
+        "transition_tile_id": "plant_1",
+        "chance": 0.08
       }
     ]
   },
@@ -73,12 +74,13 @@
       "assets/images/tiles/black_metal.jpg",
       "assets/images/tiles/diamond_plate.jpg"
     ],
-    "name": "Machine",
+    "name": "Purifier",
     "render_mode": "cube_unique_top",
     "actions": [
       {
         "type": "tick",
-        "action": "purify"
+        "action": "purify",
+        "chance": 0.08
       }
     ]
   },
@@ -256,7 +258,8 @@
       {
         "type": "tick",
         "action": "structure",
-        "spawn_structure_id": "tree"
+        "spawn_structure_id": "tree",
+        "chance": 0.001
       }
     ]
   },
@@ -271,7 +274,8 @@
       },
       {
         "type": "tick",
-        "action": "purify"
+        "action": "purify",
+        "chance": 0.1
       }
     ]
   },

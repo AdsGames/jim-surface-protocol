@@ -27,6 +27,7 @@ void Toolbar::update(float dt, World& world) {
 
   if (asw::input::wasKeyPressed(asw::input::Key::F)) {
     world.getResourceManager().addResourceCount("scrap", 100);
+    world.getResourceManager().addResourceCount("biomass", 100);
   }
 
   auto& camera = world.getCamera();
@@ -148,8 +149,9 @@ void Toolbar::action(World& world, float dt) {
     idx.z = idx.z + 1;
 
     auto* tile = tile_map.getTileAtIndex(idx);
-    if (tile != nullptr) {
-      tile->setType("machine");
+    if (tile != nullptr && tile->getType() == nullptr) {
+      tile->setType("purifier");
+      resource_manager.addResourceCount("scrap", -10);
     }
   }
 
@@ -158,8 +160,9 @@ void Toolbar::action(World& world, float dt) {
     idx.z = idx.z + 1;
 
     auto* tile = tile_map.getTileAtIndex(idx);
-    if (tile != nullptr) {
+    if (tile != nullptr && tile->getType() == nullptr) {
       tile->setType("sapling");
+      resource_manager.addResourceCount("biomass", -10);
     }
   }
 }
@@ -167,8 +170,26 @@ void Toolbar::action(World& world, float dt) {
 bool Toolbar::actionEnabled(World& world) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
+  auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
   cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
+
+  // Can place purifier
+  const auto can_buy_purifier =
+      resource_manager.getResourceCount("scrap") >= 10;
+  const auto can_buy_tree = resource_manager.getResourceCount("biomass") >= 10;
+
+  if (!can_buy_purifier) {
+    SDL_SetTextureColorMod(purifier_button.get(), 255, 150, 150);
+  } else {
+    SDL_SetTextureColorMod(purifier_button.get(), 255, 255, 255);
+  }
+
+  if (!can_buy_tree) {
+    SDL_SetTextureColorMod(tree_button.get(), 255, 150, 150);
+  } else {
+    SDL_SetTextureColorMod(tree_button.get(), 255, 255, 255);
+  }
 
   // Find selected tile
   auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
@@ -188,7 +209,7 @@ bool Toolbar::actionEnabled(World& world) {
 
   // Purifier check
   if (mode == ToolMode::PURIFIER && selected_tile != nullptr &&
-      select_type != nullptr) {
+      can_buy_purifier && select_type != nullptr) {
     if (select_type->getIdString() == "toxic_water" ||
         select_type->getIdString() == "water") {
       return true;
@@ -196,7 +217,7 @@ bool Toolbar::actionEnabled(World& world) {
   }
 
   // Tree check
-  if (mode == ToolMode::TREE && selected_tile != nullptr &&
+  if (mode == ToolMode::TREE && selected_tile != nullptr && can_buy_tree &&
       select_type != nullptr) {
     if (select_type->getIdString() == "toxic_grass" ||
         select_type->getIdString() == "ground_grass") {
@@ -230,7 +251,6 @@ void Toolbar::draw(World& world) {
   asw::draw::sprite(toolbar_ui, asw::Vec2<float>(0, 0));
 
   // Resource window
-  //
   asw::draw::text(fontLarge, "Resources", asw::Vec2(1112.0F, 822.0F), black);
   asw::draw::text(fontLarge, "Resources", asw::Vec2(1110.0F, 820.0F), white);
 
@@ -245,7 +265,6 @@ void Toolbar::draw(World& world) {
       asw::Vec2(1260.0F, 915.0F), green);
 
   // Upgrade window
-
   auto drill_speed = std::to_string(world.getDrillSpeed());
   auto player_speed = std::to_string(world.getPlayerSpeed());
 
