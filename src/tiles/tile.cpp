@@ -17,21 +17,13 @@ const asw::Vec3<int>& Tile::getPosition() const {
 // Types
 void Tile::setType(std::string type) {
   t_type = TileDictionary::getTile(type);
-  if (t_type == nullptr) {
-    this->type = 0;
-  } else {
-    this->type = t_type->getId();
-  }
+  this->meta = 0;
 }
 
 // Set type
 void Tile::setType(short type) {
   t_type = TileDictionary::getTile(type);
-  if (t_type == nullptr) {
-    this->type = 0;
-  } else {
-    this->type = t_type->getId();
-  }
+  this->meta = 0;
 }
 
 std::shared_ptr<TileType> Tile::getType() const {
@@ -39,7 +31,10 @@ std::shared_ptr<TileType> Tile::getType() const {
 }
 
 short Tile::getTypeId() const {
-  return type;
+  if (t_type == nullptr) {
+    return 0;
+  }
+  return t_type->getId();
 }
 
 // Structures

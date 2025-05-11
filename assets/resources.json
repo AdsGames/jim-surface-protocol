@@ -7,24 +7,6 @@
   },
   {
     "id": 2,
-    "name": "Water",
-    "description": "Water is a vital resource for all living organisms. It is used for drinking, irrigation, and industrial processes. Freshwater resources are limited and need to be managed sustainably.",
-    "icon": "assets/images/icons/water.png"
-  },
-  {
-    "id": 3,
-    "name": "Toxins",
-    "description": "Toxins are harmful substances that can cause damage to living organisms and the environment. They can be found in various forms, including chemicals, heavy metals, and biological agents.",
-    "icon": "assets/images/icons/toxins.png"
-  },
-  {
-    "id": 4,
-    "name": "Minerals",
-    "description": "Minerals are naturally occurring inorganic substances that are essential for various biological processes. They can be found in rocks, soil, and water.",
-    "icon": "assets/images/icons/minerals.png"
-  },
-  {
-    "id": 5,
     "name": "Scrap",
     "description": "Minerals are naturally occurring inorganic substances that are essential for various biological processes. They can be found in rocks, soil, and water.",
     "icon": "assets/images/icons/minerals.png"

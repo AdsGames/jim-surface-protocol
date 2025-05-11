@@ -6,7 +6,7 @@
 
 constexpr float BUTTON_SIZE = 64.0F;
 
-enum class ToolMode { INSPECT, WORKER, PURIFIER, TREE, DRILL };
+enum class ToolMode { INSPECT, PURIFIER, TREE, DRILL };
 
 class Toolbar {
  public:
@@ -22,6 +22,8 @@ class Toolbar {
   void drawResourceWindow(World& world);
 
   void action(World& world, float dt);
+  bool actionEnabled(World& world);
+
   void toolZoneAction(World& world);
   void rightClickAction(World& world);
 
@@ -36,14 +38,12 @@ class Toolbar {
   bool cursor_in_range{false};
 
   asw::Texture inspect_button;
-  asw::Texture worker_button;
   asw::Texture purifier_button;
   asw::Texture tree_button;
   asw::Texture drill_button;
   asw::Texture upgrade;
 
   asw::Quad<float> inspect_button_trans{10.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
-  asw::Quad<float> worker_button_trans{158.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> waypoint_button_trans{242.0F, 0.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};
   asw::Quad<float> purifier_button_trans{232.0F, 0.0F, BUTTON_SIZE,
@@ -58,4 +58,6 @@ class Toolbar {
   int move_upgrade_cost{10};
 
   ToolMode mode{ToolMode::INSPECT};
+
+  bool can_take_action{false};
 };
