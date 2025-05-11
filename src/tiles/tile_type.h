@@ -61,6 +61,9 @@ class TileType {
            render_mode == TileRenderMode::CUBE_UNIQUE_TOP ||
            render_mode == TileRenderMode::CUBE_TOP_ONLY;
   }
+  void setDensity(int new_density) { density = new_density; }
+
+  int getDensity() const { return density; }
 
  private:
   void renderCube(int texture_count, int face_count);
@@ -82,6 +85,7 @@ class TileType {
   std::string name;
   std::string id_str;
   asw::Quad<float> bounds;
+  int density{0};
 
   std::vector<asw::Texture> images;
   std::vector<asw::Texture> rendered_images;

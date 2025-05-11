@@ -134,6 +134,11 @@ void TileDictionary::load(const std::string& path) {
       }
     }
 
+    if (cTile.contains("density")) {
+      auto density = cTile["density"];
+      tile->setDensity(density);
+    }
+
     // Bake texture
     tile->bakeTexture(render_mode, alpha);
 

@@ -241,6 +241,7 @@
     "images": [
       "assets/images/tiles/barrel.png"
     ],
+    "density":1,
     "name": "Barrel",
     "render_mode": "flat",
     "actions": [
@@ -255,6 +256,8 @@
     "images": [
       "assets/images/tiles/junk.png"
     ],
+    "density":3,
+
     "name": "Junk",
     "actions": [
       {
@@ -268,6 +271,8 @@
     "images": [
       "assets/images/tiles/tire.png"
     ],
+    "density":5,
+
     "name": "Tire",
     "actions": [
       {
@@ -308,6 +313,8 @@
     "images": [
       "assets/images/tiles/crate.png"
     ],
+        "density":2,
+
     "name": "Crate",
     "actions": [
       {

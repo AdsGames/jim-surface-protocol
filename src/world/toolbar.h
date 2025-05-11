@@ -21,7 +21,7 @@ class Toolbar {
 
   void drawResourceWindow(World& world);
 
-  void action(World& world);
+  void action(World& world, float dt);
   void toolZoneAction(World& world);
   void rightClickAction(World& world);
 

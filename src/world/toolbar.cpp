@@ -19,6 +19,12 @@ void Toolbar::init() {
 };
 
 void Toolbar::update(float dt, World& world) {
+  // CHEATING ZONE (DOONT LOOK)
+
+  if (asw::input::wasKeyPressed(asw::input::Key::F)) {
+    world.getResourceManager().addResourceCount("scrap", 100);
+  }
+
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
@@ -50,14 +56,9 @@ void Toolbar::update(float dt, World& world) {
 
   // Click buttons
   if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
-    actionProgress += dt * 0.5F;
-    if (actionProgress > 100.0F) {
-      action(world);
-      actionProgress = 0;
-    }
-
+    action(world, dt);
   } else {
-    actionProgress = 0;
+    actionProgress = 0.0F;
   }
 
   if (asw::input::wasButtonPressed(asw::input::MouseButton::LEFT)) {
@@ -130,7 +131,7 @@ void Toolbar::toolZoneAction(World& world) {
   }
 }
 
-void Toolbar::action(World& world) {
+void Toolbar::action(World& world, float dt) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
   auto& resource_manager = world.getResourceManager();
@@ -149,13 +150,24 @@ void Toolbar::action(World& world) {
   } else if (cursor_in_range) {
     if (mode == ToolMode::DRILL && selected_tile != nullptr &&
         select_type != nullptr) {
-      auto actions = select_type->getActionsOfType(ActionType::DESTROY);
-      for (const auto& action : actions) {
-        if (!action.drop_resource_id.empty()) {
-          resource_manager.addResourceCount(action.drop_resource_id, 1);
+      auto density = select_type->getDensity();
+
+      if (density > 0) {
+        // this is where the drilling begins
+
+        actionProgress +=
+            dt * (0.05F / density) * (1 + world.getDrillSpeed() * 1.5F);
+        if (actionProgress > 100.0F) {
+          auto actions = select_type->getActionsOfType(ActionType::DESTROY);
+          for (const auto& action : actions) {
+            if (!action.drop_resource_id.empty()) {
+              resource_manager.addResourceCount(action.drop_resource_id, 1);
+            }
+          }
+          selected_tile->setType(0);
+          actionProgress = 0.0F;
         }
       }
-      selected_tile->setType(0);
     }
 
     if (mode == ToolMode::WORKER) {
