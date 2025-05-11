@@ -83,7 +83,7 @@ void World::update(float dt) {
   progression = (non_toxic_count) / (toxic_count + non_toxic_count + 0.1F);
 
   // Orch
-  sound_orchestrator.update(*this);
+  sound_orchestrator.update(dt, *this);
 }
 
 void World::draw() {
