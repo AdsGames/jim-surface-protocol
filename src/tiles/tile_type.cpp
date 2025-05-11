@@ -101,9 +101,7 @@ void TileType::draw(const asw::Vec3<int>& position,
 
   auto iso_pos = asw::Vec2(iso_x, iso_y);
 
-  if (render_mode == TileRenderMode::FLAT) {
-    iso_pos.y -= TILE_SIZE * 0.5F;
-  } else if (render_mode == TileRenderMode::CUBE_TOP_ONLY) {
+  if (render_mode == TileRenderMode::CUBE_TOP_ONLY) {
     iso_pos.y += TILE_SIZE * 0.2F;
   }
 
@@ -125,11 +123,6 @@ void TileType::draw(const asw::Vec3<int>& position,
 void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   auto width = TILE_SIZE;
   auto height = TILE_SIZE;
-
-  // if (mode == TileRenderMode::FLAT && images.size() > 0) {
-  //   width = asw::util::getTextureSize(images.at(0)).x;
-  //   height = asw::util::getTextureSize(images.at(0)).y;
-  // }
 
   // Render image
   image = asw::assets::createTexture(width, height);
