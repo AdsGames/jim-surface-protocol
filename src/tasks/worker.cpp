@@ -81,28 +81,31 @@ void Worker::update(float dt, World& world) {
   else if (angle < 0 && angle > -pi / 4)
     direction = 0;
 
-  float speed = 0.003F * (world.getPlayerSpeed());
-  float move = speed * dt;
-  if (position.distance(waypointF) >= move) {
-    left = false;
-    right = false;
-    up = false;
-    down = false;
+  const float speed = 0.003F * (world.getPlayerSpeed());
+  const float move = speed * dt;
 
+  if (position.distance(waypointF) > 0.0F) {
     auto dir = asw::Vec3<float>(0, 0, 0);
-    if (position.x < waypoint.x) {
+
+    if (std::abs(position.x - waypointF.x) < move) {
+      position.x = waypointF.x;
+    } else if (position.x < waypoint.x) {
       dir.x = move;
     } else if (position.x > waypointF.x) {
       dir.x = -move;
     }
 
-    if (position.y < waypointF.y) {
+    if (std::abs(position.y - waypointF.y) < move) {
+      position.y = waypointF.y;
+    } else if (position.y < waypointF.y) {
       dir.y = move;
     } else if (position.y > waypointF.y) {
       dir.y = -move;
     }
 
-    if (position.z < waypointF.z) {
+    if (std::abs(position.z - waypointF.z) < move * 2) {
+      position.z = waypointF.z;
+    } else if (position.z < waypointF.z) {
       dir.z = move * 2;
     } else if (position.z > waypointF.z) {
       dir.z = -move * 2;
@@ -128,22 +131,4 @@ void Worker::draw(const asw::Vec2<float>& offset) {
 
   asw::draw::stretchSprite(shadow, screen_size);
   asw::draw::stretchSprite(textures[direction], screen_size);
-
-  // std::string l = left ? "True" : "False";
-  // std::string r = right ? "True" : "False";
-  // std::string u = up ? "True" : "False";
-  // std::string d = down ? "True" : "False";
-
-  // auto t_pos = asw::Vec2<float>(0, 104);
-
-  // std::string angleStr = std::to_string(angle);
-  // std::string directionStr = std::to_string(direction);
-
-  // asw::draw::text(font, "Direction:  " + directionStr,
-  //                 t_pos + asw::Vec2<float>(0, 60),
-  //                 asw::util::makeColor(255, 255, 255));
-
-  // asw::draw::text(font, "Angle:  " + angleStr, t_pos + asw::Vec2<float>(0,
-  // 80),
-  //                 asw::util::makeColor(255, 255, 255));
 }
