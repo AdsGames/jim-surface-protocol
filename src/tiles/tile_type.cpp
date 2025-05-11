@@ -48,11 +48,11 @@ short TileType::getId() const {
   return id;
 }
 
-std::string TileType::getIdString() const {
+const std::string& TileType::getIdString() const {
   return id_str;
 }
 
-std::string TileType::getName() const {
+const std::string& TileType::getName() const {
   return name;
 }
 

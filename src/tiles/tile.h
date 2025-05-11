@@ -21,6 +21,7 @@ class Tile {
   void setType(short type);
   void setType(std::string type);
   std::shared_ptr<TileType> getType() const;
+  short getTypeId() const;
 
   // Structure ref
   void setStructure(std::shared_ptr<Structure> structure);
@@ -31,6 +32,8 @@ class Tile {
             bool right_border);
 
  private:
+  short type{0};
+
   asw::Vec3<int> position{0, 0, 0};
 
   std::shared_ptr<TileType> t_type{nullptr};

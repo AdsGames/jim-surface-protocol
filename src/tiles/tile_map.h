@@ -8,9 +8,9 @@
 
 #include "tile.h"
 
-constexpr int MAP_WIDTH = 128;
-constexpr int MAP_DEPTH = 128;
-constexpr int MAP_HEIGHT = 10;
+constexpr int MAP_WIDTH = 10;
+constexpr int MAP_DEPTH = 10;
+constexpr int MAP_HEIGHT = 1;
 
 class TileMap {
  public:
@@ -31,10 +31,15 @@ class TileMap {
 
   asw::Vec3<int> getIndexAt(const asw::Vec2<float>& position);
 
+  int countByType(int type) const;
+
  private:
   void draw_layer(const asw::Quad<float>& camera, int layer);
 
   // 3D Map
   std::array<std::array<std::array<Tile, MAP_HEIGHT>, MAP_DEPTH>, MAP_WIDTH>
       mapTiles;
+
+  // Tile count
+  std::array<int, 256> tileCount{0};
 };

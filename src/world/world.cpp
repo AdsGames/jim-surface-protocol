@@ -1,15 +1,14 @@
 #include "world.h"
 
-World::World() {
+void World::init() {
+  resource_manager.load("assets/resources.json");
+  tile_map.generate();
+  sound_orchestrator.init();
+
   waypointTexture =
       asw::assets::loadTexture("assets/images/player/waypoint.png");
   shadowTexture =
       asw::assets::loadTexture("assets/images/player/128/shadow.png");
-}
-
-void World::init() {
-  resource_manager.load("assets/resources.json");
-  tile_map.generate();
 }
 
 void World::update(float dt) {
@@ -51,6 +50,21 @@ void World::update(float dt) {
   tile_map.update(dt);
 
   player.update(dt, *this);
+
+  // Maybe this should go somewhere else :thonk:
+  // Count toxins
+  const auto toxic_count = tile_map.countByType(18) + tile_map.countByType(16) +
+                           tile_map.countByType(17);
+
+  const auto non_toxic_count = tile_map.countByType(5) +
+                               tile_map.countByType(12) +
+                               tile_map.countByType(13);
+
+  // Calculate progression
+  progression = (non_toxic_count) / (toxic_count + non_toxic_count + 0.1F);
+
+  // Orch
+  sound_orchestrator.update(*this);
 }
 
 void World::draw() {
@@ -81,6 +95,7 @@ void World::draw() {
                              shadow_transform);  // Shadow
   }
 }
+
 WorkerId World::addWorker(const asw::Vec3<int>& position) {
   auto worker = Worker();
   worker.setPosition(position);

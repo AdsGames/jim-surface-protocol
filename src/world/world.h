@@ -5,11 +5,10 @@
 #include "../tasks/worker.h"
 #include "../tiles/tile_map.h"
 #include "./resource_manager.h"
+#include "./sound_orchestrator.h"
 
 class World {
  public:
-  World();
-
   /// Base
   void init();
 
@@ -45,6 +44,9 @@ class World {
   int getPlayerSpeed() const { return playerSpeed; }
   void setPlayerSpeed(int speed) { playerSpeed = speed; }
 
+  // Purity Progression
+  float getProgression() const { return progression; }
+
  private:
   asw::Vec3<int> playerWaypoint{0, 0, 0};
 
@@ -61,7 +63,11 @@ class World {
 
   ResourceManager resource_manager;
 
+  SoundOrchestrator sound_orchestrator;
+
   asw::Quad<float> camera{0, 0, 1280, 960};
 
   std::unordered_map<WorkerId, Worker> workers;
+
+  float progression{0.0F};
 };

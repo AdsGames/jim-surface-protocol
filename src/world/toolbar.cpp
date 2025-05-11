@@ -70,14 +70,14 @@ void Toolbar::update(float dt, World& world) {
 
   // Hacker mode
   if (asw::input::wasKeyPressed(asw::input::Key::M)) {
-    auto tile = tile_map.getTileAtIndex(cursor_idx);
+    auto* tile = tile_map.getTileAtIndex(cursor_idx);
     if (tile != nullptr) {
       tile->setType("machine");
     }
   }
 
   if (asw::input::wasKeyPressed(asw::input::Key::N)) {
-    auto tile = tile_map.getTileAtIndex(cursor_idx);
+    auto* tile = tile_map.getTileAtIndex(cursor_idx);
     if (tile != nullptr) {
       tile->setType("rocks_rough");
     }
@@ -91,9 +91,8 @@ void Toolbar::rightClickAction(World& world) {
 
 void Toolbar::toolZoneAction(World& world) {
   auto& camera = world.getCamera();
-  auto& tile_map = world.getTileMap();
-  auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
+
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
   if (mouse_pos.y > camera.size.y - 80.0F) {
     if (inspect_button_trans.contains(mouse_pos)) {
@@ -129,7 +128,7 @@ void Toolbar::action(World& world) {
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
 
   // Find selected tile
-  auto selected_tile = tile_map.getTileAtIndex(cursor_idx);
+  auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
   std::shared_ptr<TileType> select_type = nullptr;
   if (selected_tile != nullptr) {
     select_type = selected_tile->getType();
@@ -143,7 +142,7 @@ void Toolbar::action(World& world) {
         select_type != nullptr) {
       auto actions = select_type->getActionsOfType(ActionType::DESTROY);
       for (const auto& action : actions) {
-        if (action.drop_resource_id != "") {
+        if (!action.drop_resource_id.empty()) {
           resource_manager.addResourceCount(action.drop_resource_id, 1);
         }
       }
@@ -158,7 +157,7 @@ void Toolbar::action(World& world) {
         select_type != nullptr) {
       auto actions = select_type->getActionsOfType(ActionType::PURIFY);
       for (const auto& action : actions) {
-        if (action.transition_tile_id != "") {
+        if (!action.transition_tile_id.empty()) {
           selected_tile->setType(action.transition_tile_id);
         }
       }
@@ -171,7 +170,7 @@ void Toolbar::draw(World& world) {
   auto& tile_map = world.getTileMap();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
   auto world_pos = camera.position + mouse_pos;
-  auto selected_tile = tile_map.getTileAt(world_pos);
+  auto* selected_tile = tile_map.getTileAt(world_pos);
   auto text_colour = asw::util::makeColor(255, 255, 255, 255);  // White
 
   // Outline
@@ -192,6 +191,11 @@ void Toolbar::draw(World& world) {
                       std::to_string(cursor_idx.y) + ", " +
                       std::to_string(cursor_idx.z),
                   asw::Vec2(10.0F, 100.0F), text_colour);
+
+  // Percent purified
+  auto percent_purified = std::to_string(world.getProgression() * 100.0F);
+  asw::draw::text(font, "Purity: " + percent_purified + "%",
+                  asw::Vec2(10.0F, 130.0F), text_colour);
 
   // Buttons
   asw::draw::stretchSprite(inspect_button, inspect_button_trans);

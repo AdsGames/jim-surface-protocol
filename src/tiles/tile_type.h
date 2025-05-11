@@ -32,8 +32,8 @@ class TileType {
             bool right_border);
 
   short getId() const;
-  std::string getName() const;
-  std::string getIdString() const;
+  const std::string& getName() const;
+  const std::string& getIdString() const;
 
   const asw::Quad<float>& getBoundingBox() const;
 

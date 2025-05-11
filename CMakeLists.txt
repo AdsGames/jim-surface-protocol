@@ -8,12 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/target)
 
 include(cmake/get_cpm.cmake)
-# CPMAddPackage("gh:adsgames/asw@0.5.9")
-CPMAddPackage(
-  NAME asw
-  GITHUB_REPOSITORY adsgames/asw
-  GIT_TAG 8b8806468f13c5ec07f2329a4e6c2449c648ce6f
-)
+CPMAddPackage("gh:adsgames/asw@0.5.10")
 CPMAddPackage("gh:nlohmann/json@3.11.3")
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)

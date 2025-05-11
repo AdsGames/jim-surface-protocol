@@ -12,7 +12,25 @@ asw::Vec3<int> TileMap::getSize() const {
   return {MAP_WIDTH, MAP_HEIGHT, MAP_DEPTH};
 }
 
-void TileMap::update(float dt) {}
+void TileMap::update(float dt) {
+  // Reset tile count
+  for (int i = 0; i < tileCount.size(); i++) {
+    tileCount[i] = 0;
+  }
+
+  // Update tiles
+  for (int i = 0; i < MAP_WIDTH; i++) {
+    for (int j = 0; j < MAP_DEPTH; j++) {
+      for (int k = 0; k < MAP_HEIGHT; k++) {
+        int tile_id = mapTiles[i][j][k].getTypeId();
+        if (tile_id == 0) {
+          continue;
+        }
+        tileCount[mapTiles[i][j][k].getTypeId()] += 1;
+      }
+    }
+  }
+}
 
 void TileMap::generate() {
   // Init map
@@ -190,4 +208,11 @@ void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
       tile.draw(camera.position, empty_left, empty_right);
     }
   }
+}
+
+int TileMap::countByType(int type) const {
+  if (type < 0 || type >= tileCount.size()) {
+    return 0;
+  }
+  return tileCount[type];
 }
