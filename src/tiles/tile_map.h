@@ -20,7 +20,7 @@ class TileMap {
 
   asw::Vec3<int> getSize() const;
 
-  void update(float deltaTime);
+  void update(float dt);
 
   void draw(const asw::Quad<float>& camera);
 

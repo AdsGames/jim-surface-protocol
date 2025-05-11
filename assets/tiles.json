@@ -37,26 +37,6 @@
     "name": "Fire"
   },
   {
-    "id": 8,
-    "images": ["assets/images/tiles/dirt.png"],
-    "name": "Dirt"
-  },
-  {
-    "id": 9,
-    "images": [
-      "assets/images/tiles/grass.png",
-      "assets/images/tiles/grass_top.png"
-    ],
-    "name": "Grass",
-    "render_mode": "cube_unique_top",
-    "actions": [
-      {
-        "type": "tick",
-        "action": "growth"
-      }
-    ]
-  },
-  {
     "id": 10,
     "images": ["assets/images/tiles/wall.png"],
     "name": "Wall"
@@ -73,7 +53,14 @@
       "assets/images/tiles/ground_top.png"
     ],
     "name": "Ground Grass",
-    "render_mode": "cube_unique_top"
+    "render_mode": "cube_unique_top",
+    "actions": [
+      {
+        "type": "tick",
+        "action": "growth",
+        "transition_tile_id": "plant_1"
+      }
+    ]
   },
   {
     "id": 13,
@@ -284,6 +271,34 @@
       {
         "type": "destroy",
         "drop_resource_id": "biomass"
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "images": ["assets/images/tiles/plants_2.png"],
+    "name": "Sapling",
+    "render_mode": "flat",
+    "actions": [
+      {
+        "type": "tick",
+        "action": "structure",
+        "spawn_structure_id": "tree"
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "images": ["assets/images/tiles/willow_bark.jpg"],
+    "name": "Trunk Purifier",
+    "actions": [
+      {
+        "type": "destroy",
+        "drop_resource_id": "biomass"
+      },
+      {
+        "type": "tick",
+        "action": "purify"
       }
     ]
   }

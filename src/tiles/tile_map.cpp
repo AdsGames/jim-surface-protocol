@@ -51,8 +51,11 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
   }
 
   for (const auto& action : type->getActions()) {
-    if (action.type == ActionType::TICK &&
-        action.tick_type == TickType::PURIFY) {
+    if (action.type != ActionType::TICK) {
+      continue;
+    }
+
+    if (action.tick_type == TickType::PURIFY) {
       auto point = index;
       point.x += asw::random::between(-10, 10);
       point.y += asw::random::between(-10, 10);
@@ -70,6 +73,36 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
             mapTiles[point.x][point.y][point.z].setType(
                 action2.transition_tile_id);
           }
+        }
+      }
+    }
+
+    if (action.tick_type == TickType::STRUCTURE) {
+      auto point = index;
+      point.z += 1;
+
+      if (action.spawn_structure_id.empty()) {
+        std::cerr << "Error: No structure ID provided" << std::endl;
+        continue;
+      }
+
+      generateStructure(action.spawn_structure_id, point);
+    }
+
+    if (action.tick_type == TickType::GROWTH) {
+      auto point = index;
+      point.z += 1;
+
+      if (action.transition_tile_id.empty()) {
+        std::cerr << "Error: No tile ID provided" << std::endl;
+        continue;
+      }
+
+      if (asw::random::chance(0.1F)) {
+        auto* tile = getTileAtIndex(point);
+        if (tile != nullptr) {
+          mapTiles[point.x][point.y][point.z].setType(
+              action.transition_tile_id);
         }
       }
     }
@@ -122,8 +155,6 @@ void TileMap::generate() {
         else if (k - 1 < height_val) {
           if (asw::random::chance(0.001F)) {
             generateStructure("house", {i, j, k});
-          } else if (asw::random::chance(0.001F)) {
-            generateStructure("dead_tree", {i, j, k});
           } else if (asw::random::chance(0.01F)) {
             mapTiles[i][j][k].setType("tire");
           } else if (asw::random::chance(0.01F)) {

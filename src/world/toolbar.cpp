@@ -8,8 +8,6 @@ void Toolbar::init() {
 
   inspect_button =
       asw::assets::loadTexture("assets/images/ui/inspect-button.png");
-  worker_button =
-      asw::assets::loadTexture("assets/images/ui/worker-button.png");
   purifier_button =
       asw::assets::loadTexture("assets/images/ui/purify-button.png");
   tree_button = asw::assets::loadTexture("assets/images/ui/tree-button.png");
@@ -19,6 +17,9 @@ void Toolbar::init() {
 };
 
 void Toolbar::update(float dt, World& world) {
+  // Enabled actions
+  can_take_action = actionEnabled(world);
+
   // CHEATING ZONE (DOONT LOOK)
 
   if (asw::input::wasKeyPressed(asw::input::Key::F)) {
@@ -37,7 +38,6 @@ void Toolbar::update(float dt, World& world) {
   // M O O G E T R O N
 
   inspect_button_trans.position.y = camera.size.y - 70;
-  // worker_button_trans.position.y = camera.size.y - 70;
   purifier_button_trans.position.y = camera.size.y - 70;
   tree_button_trans.position.y = camera.size.y - 70;
   drill_button_trans.position.y = camera.size.y - 70;
@@ -55,7 +55,8 @@ void Toolbar::update(float dt, World& world) {
   }
 
   // Click buttons
-  if (asw::input::isButtonDown(asw::input::MouseButton::LEFT)) {
+  if (asw::input::isButtonDown(asw::input::MouseButton::LEFT) &&
+      can_take_action && cursor_in_range) {
     action(world, dt);
   } else {
     actionProgress = 0.0F;
@@ -67,15 +68,6 @@ void Toolbar::update(float dt, World& world) {
 
   if (asw::input::isButtonDown(asw::input::MouseButton::RIGHT)) {
     rightClickAction(world);
-  }
-
-  // Hacker mode
-  if (asw::input::wasKeyPressed(asw::input::Key::M)) {
-    auto pos = asw::Vec3<int>(cursor_idx.x, cursor_idx.y, cursor_idx.z + 1);
-    auto* tile = tile_map.getTileAtIndex(pos);
-    if (tile != nullptr) {
-      tile->setType("machine");
-    }
   }
 }
 
@@ -101,8 +93,6 @@ void Toolbar::toolZoneAction(World& world) {
   if (mouse_pos.y > camera.size.y - 80.0F) {
     if (inspect_button_trans.contains(mouse_pos)) {
       mode = ToolMode::INSPECT;
-    } else if (worker_button_trans.contains(mouse_pos)) {
-      mode = ToolMode::WORKER;
     } else if (purifier_button_trans.contains(mouse_pos)) {
       mode = ToolMode::PURIFIER;
     } else if (tree_button_trans.contains(mouse_pos)) {
@@ -131,6 +121,11 @@ void Toolbar::action(World& world, float dt) {
   auto& resource_manager = world.getResourceManager();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
 
+  // Toolbar zone
+  if (mouse_pos.y > camera.size.y - 80.0F) {
+    return;
+  }
+
   // Find selected tile
   auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
   std::shared_ptr<TileType> select_type = nullptr;
@@ -138,46 +133,96 @@ void Toolbar::action(World& world, float dt) {
     select_type = selected_tile->getType();
   }
 
-  // Tile zone
-  if (mouse_pos.y > camera.size.y - 80.0F) {
-    // take a huge steaming stinky poo on the floor
-  } else if (cursor_in_range) {
-    if (mode == ToolMode::DRILL && selected_tile != nullptr &&
-        select_type != nullptr) {
-      auto density = select_type->getDensity();
+  if (mode == ToolMode::DRILL && selected_tile != nullptr &&
+      select_type != nullptr) {
+    auto density = select_type->getDensity();
 
-      if (density > 0) {
-        // this is where the drilling begins
+    if (density > 0) {
+      // this is where the drilling begins
 
-        actionProgress +=
-            dt * (0.05F / density) * (1 + world.getDrillSpeed() * 1.5F);
-        if (actionProgress > 100.0F) {
-          auto actions = select_type->getActionsOfType(ActionType::DESTROY);
-          for (const auto& action : actions) {
-            if (!action.drop_resource_id.empty()) {
-              resource_manager.addResourceCount(action.drop_resource_id, 1);
-            }
+      actionProgress +=
+          dt * (0.05F / density) * (1 + world.getDrillSpeed() * 1.5F);
+      if (actionProgress > 100.0F) {
+        auto actions = select_type->getActionsOfType(ActionType::DESTROY);
+        for (const auto& action : actions) {
+          if (!action.drop_resource_id.empty()) {
+            resource_manager.addResourceCount(action.drop_resource_id, 1);
           }
-          selected_tile->setType(0);
-          actionProgress = 0.0F;
         }
-      }
-    }
-
-    if (mode == ToolMode::WORKER) {
-      world.addWorker(cursor_idx);
-    }
-
-    if (mode == ToolMode::PURIFIER && selected_tile != nullptr &&
-        select_type != nullptr) {
-      auto actions = select_type->getActionsOfType(ActionType::PURIFY);
-      for (const auto& action : actions) {
-        if (!action.transition_tile_id.empty()) {
-          selected_tile->setType(action.transition_tile_id);
-        }
+        selected_tile->setType(0);
+        actionProgress = 0.0F;
       }
     }
   }
+
+  if (mode == ToolMode::PURIFIER && selected_tile != nullptr &&
+      select_type != nullptr) {
+    auto idx = cursor_idx;
+    idx.z = idx.z + 1;
+
+    auto* tile = tile_map.getTileAtIndex(idx);
+    if (tile != nullptr) {
+      tile->setType("machine");
+    }
+  }
+
+  if (mode == ToolMode::TREE) {
+    auto idx = cursor_idx;
+    idx.z = idx.z + 1;
+
+    auto* tile = tile_map.getTileAtIndex(idx);
+    if (tile != nullptr) {
+      tile->setType("sapling");
+    }
+  }
+}
+
+bool Toolbar::actionEnabled(World& world) {
+  auto& camera = world.getCamera();
+  auto& tile_map = world.getTileMap();
+  auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
+  cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
+
+  // Find selected tile
+  auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
+  std::shared_ptr<TileType> select_type = nullptr;
+  if (selected_tile != nullptr) {
+    select_type = selected_tile->getType();
+  }
+
+  // Density check
+  if (mode == ToolMode::DRILL && selected_tile != nullptr &&
+      select_type != nullptr) {
+    auto density = select_type->getDensity();
+    if (density > 0) {
+      return true;
+    }
+  }
+
+  // Worker check
+  if (mode == ToolMode::INSPECT) {
+    return true;
+  }
+
+  // Purifier check
+  if (mode == ToolMode::PURIFIER && selected_tile != nullptr &&
+      select_type != nullptr) {
+    if (select_type->getIdString() == "toxic_water" ||
+        select_type->getIdString() == "water") {
+      return true;
+    }
+  }
+
+  // Tree check
+  if (mode == ToolMode::TREE && selected_tile != nullptr &&
+      select_type != nullptr) {
+    if (select_type->getIdString() == "toxic_grass" ||
+        select_type->getIdString() == "ground_grass") {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void Toolbar::draw(World& world) {
@@ -188,27 +233,13 @@ void Toolbar::draw(World& world) {
   auto* selected_tile = tile_map.getTileAt(world_pos);
   auto text_colour = asw::util::makeColor(255, 255, 255, 255);  // White
 
-  bool drillable = false;
-  // Outline
-  if (selected_tile != nullptr) {
-    auto select_type = selected_tile->getType();
-    if (select_type != nullptr) {
-      if (select_type->getDensity() > 0) {
-        drillable = true;
-      }
-      if (cursor_in_range) {
-        drawWireframe(cursor_idx, camera.position,
-                      asw::util::makeColor(0, 255, 0));
-      } else {
-        drawWireframe(cursor_idx, camera.position,
-                      asw::util::makeColor(255, 0, 0));
-      }
-    }
-  }
-
-  if (!drillable) {
+  if (cursor_in_range && can_take_action) {
+    drawWireframe(cursor_idx, camera.position, asw::util::makeColor(0, 255, 0));
+  } else if (cursor_in_range) {
     drawWireframe(cursor_idx, camera.position,
                   asw::util::makeColor(255, 255, 255));
+  } else {
+    drawWireframe(cursor_idx, camera.position, asw::util::makeColor(255, 0, 0));
   }
 
   // Border
@@ -223,6 +254,12 @@ void Toolbar::draw(World& world) {
                       std::to_string(cursor_idx.z),
                   asw::Vec2(10.0F, 100.0F), text_colour);
 
+  // Camera pos
+  asw::draw::text(font,
+                  "Cam: " + std::to_string(camera.position.x) + ", " +
+                      std::to_string(camera.position.y),
+                  asw::Vec2(10.0F, 115.0F), text_colour);
+
   // Percent purified
   auto percent_purified = std::to_string(world.getProgression() * 100.0F);
   asw::draw::text(font, "Purity: " + percent_purified + "%",
@@ -230,7 +267,6 @@ void Toolbar::draw(World& world) {
 
   // Buttons
   asw::draw::stretchSprite(inspect_button, inspect_button_trans);
-  // asw::draw::stretchSprite(worker_button, worker_button_trans);
   asw::draw::stretchSprite(purifier_button, purifier_button_trans);
   asw::draw::stretchSprite(tree_button, tree_button_trans);
   asw::draw::stretchSprite(drill_button, drill_button_trans);
@@ -273,8 +309,6 @@ void Toolbar::draw(World& world) {
 
   if (mode == ToolMode::INSPECT) {
     asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
-  } else if (mode == ToolMode::WORKER) {
-    asw::draw::rect(worker_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::PURIFIER) {
     asw::draw::rect(purifier_button_trans, asw::util::makeColor(255, 255, 0));
   } else if (mode == ToolMode::TREE) {

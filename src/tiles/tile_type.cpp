@@ -126,10 +126,10 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   auto width = TILE_SIZE;
   auto height = TILE_SIZE;
 
-  if (mode == TileRenderMode::FLAT && images.size() > 0) {
-    width = asw::util::getTextureSize(images.at(0)).x;
-    height = asw::util::getTextureSize(images.at(0)).y;
-  }
+  // if (mode == TileRenderMode::FLAT && images.size() > 0) {
+  //   width = asw::util::getTextureSize(images.at(0)).x;
+  //   height = asw::util::getTextureSize(images.at(0)).y;
+  // }
 
   // Render image
   image = asw::assets::createTexture(width, height);
@@ -213,5 +213,6 @@ void TileType::renderCube(int texture_count, int face_count) {
 }
 
 void TileType::renderFlat() {
-  asw::draw::sprite(images.at(0), asw::Vec2(0.0F, 0.0F));
+  asw::draw::stretchSprite(images.at(0),
+                           asw::Quad<float>(0.0F, 0.0F, TILE_SIZE, TILE_SIZE));
 }

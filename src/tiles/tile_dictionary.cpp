@@ -125,6 +125,8 @@ void TileDictionary::load(const std::string& path) {
               result.tick_type = TickType::PURIFY;
             } else if (tick_type == "growth") {
               result.tick_type = TickType::GROWTH;
+            } else if (tick_type == "structure") {
+              result.tick_type = TickType::STRUCTURE;
             } else {
               std::cerr << "Error: Unknown tick type " << tick_type << '\n';
             }
@@ -138,6 +140,10 @@ void TileDictionary::load(const std::string& path) {
           result.transition_tile_id = action["transition_tile_id"];
         }
 
+        if (action.contains("spawn_structure_id")) {
+          result.spawn_structure_id = action["spawn_structure_id"];
+        }
+
         if (action.contains("drop_resource_id")) {
           result.drop_resource_id = action["drop_resource_id"];
         }
@@ -146,10 +152,14 @@ void TileDictionary::load(const std::string& path) {
       }
     }
 
+    std::cout << "  Actions: " << tile->getActions().size() << '\n';
+
     if (cTile.contains("density")) {
       auto density = cTile["density"];
       tile->setDensity(density);
     }
+
+    std::cout << "  Density: " << tile->getDensity() << '\n';
 
     // Bake texture
     tile->bakeTexture(render_mode, alpha);
