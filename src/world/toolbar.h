@@ -30,6 +30,8 @@ class Toolbar {
                      asw::Color colour);
 
   asw::Font font;
+  asw::Font fontLarge;
+
   asw::Vec3<int> cursor_idx{0, 0, 0};
   bool cursor_in_range{false};
 
@@ -43,10 +45,10 @@ class Toolbar {
   asw::Quad<float> worker_button_trans{158.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
   asw::Quad<float> waypoint_button_trans{232.0F, 0.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};
-  asw::Quad<float> purifier_button_trans{306.0F, 0.0F, BUTTON_SIZE,
+  asw::Quad<float> purifier_button_trans{212.0F, 0.0F, BUTTON_SIZE,
                                          BUTTON_SIZE};
-  asw::Quad<float> tree_button_trans{380.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
-  asw::Quad<float> drill_button_trans{454.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
+  asw::Quad<float> tree_button_trans{158.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
+  asw::Quad<float> drill_button_trans{84.0F, 0.0F, BUTTON_SIZE, BUTTON_SIZE};
 
   ToolMode mode{ToolMode::INSPECT};
 };

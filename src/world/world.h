@@ -39,12 +39,21 @@ class World {
   bool getWaypointActive() const { return waypointActive; }
   void setWaypointActive(bool active) { waypointActive = active; }
 
+  int getDrillSpeed() const { return drillSpeed; }
+  void setDrillSpeed(int speed) { drillSpeed = speed; }
+
+  int getPlayerSpeed() const { return playerSpeed; }
+  void setPlayerSpeed(int speed) { playerSpeed = speed; }
+
  private:
   asw::Vec3<int> playerWaypoint{0, 0, 0};
 
   asw::Texture waypointTexture;
   asw::Texture shadowTexture;
   bool waypointActive{false};
+
+  int drillSpeed{1};
+  int playerSpeed{1};
 
   Worker player;
 

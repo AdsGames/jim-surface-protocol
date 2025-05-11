@@ -4,6 +4,8 @@
 
 void Toolbar::init() {
   font = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 18);
+  fontLarge = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 30);
+
   inspect_button =
       asw::assets::loadTexture("assets/images/ui/inspect-button.png");
   worker_button =
@@ -27,7 +29,7 @@ void Toolbar::update(float dt, World& world) {
   // M O O G E T R O N
 
   inspect_button_trans.position.y = camera.size.y - 70;
-  worker_button_trans.position.y = camera.size.y - 70;
+  // worker_button_trans.position.y = camera.size.y - 70;
   purifier_button_trans.position.y = camera.size.y - 70;
   tree_button_trans.position.y = camera.size.y - 70;
   drill_button_trans.position.y = camera.size.y - 70;
@@ -174,10 +176,28 @@ void Toolbar::draw(World& world) {
 
   // Buttons
   asw::draw::stretchSprite(inspect_button, inspect_button_trans);
-  asw::draw::stretchSprite(worker_button, worker_button_trans);
+  // asw::draw::stretchSprite(worker_button, worker_button_trans);
   asw::draw::stretchSprite(purifier_button, purifier_button_trans);
   asw::draw::stretchSprite(tree_button, tree_button_trans);
   asw::draw::stretchSprite(drill_button, drill_button_trans);
+
+  auto drill_speed = std::to_string(world.getDrillSpeed());
+  auto player_speed = std::to_string(world.getPlayerSpeed());
+
+  asw::draw::text(fontLarge, "Drill Speed: " + drill_speed,
+                  asw::Vec2(500.0F, camera.size.y - 70),
+                  asw::util::makeColor(255, 255, 255, 255));
+
+  asw::draw::text(fontLarge, "Upgrade:   100 scrap",
+                  asw::Vec2(800.0F, camera.size.y - 70),
+                  asw::util::makeColor(255, 255, 255, 255));
+  asw::draw::text(fontLarge, "Upgrade:   100 scrap",
+                  asw::Vec2(800.0F, camera.size.y - 40),
+                  asw::util::makeColor(255, 255, 255, 255));
+
+  asw::draw::text(fontLarge, "Move Speed: " + player_speed,
+                  asw::Vec2(500.0F, camera.size.y - 40),
+                  asw::util::makeColor(255, 255, 255, 255));
 
   if (mode == ToolMode::INSPECT) {
     asw::draw::rect(inspect_button_trans, asw::util::makeColor(255, 255, 0));
