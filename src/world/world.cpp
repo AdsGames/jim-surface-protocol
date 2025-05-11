@@ -100,11 +100,6 @@ void World::draw() {
   tile_map.draw(camera);
   player.draw(camera.position);
 
-  // Draw workers
-  for (auto& [id, worker] : workers) {
-    worker.draw(camera.position);
-  }
-
   if (waypointActive) {
     // Draw player waypoint
     auto player_waypoint = getPlayerWaypoint();
@@ -120,22 +115,6 @@ void World::draw() {
     asw::draw::stretchSprite(shadowTexture,
                              shadow_transform);  // Shadow
   }
-}
-
-WorkerId World::addWorker(const asw::Vec3<int>& position) {
-  auto worker = Worker();
-  worker.setPosition(position);
-  workers[worker.getId()] = worker;
-
-  return worker.getId();
-}
-
-Worker* World::getWorker(WorkerId id) {
-  auto it = workers.find(id);
-  if (it != workers.end()) {
-    return &it->second;
-  }
-  return nullptr;
 }
 
 Worker* World::getPlayer() {

@@ -67,7 +67,5 @@ class World {
 
   asw::Quad<float> camera{-640, -480, 1280, 960};
 
-  std::unordered_map<WorkerId, Worker> workers;
-
   float progression{0.0F};
 };
