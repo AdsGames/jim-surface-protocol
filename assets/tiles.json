@@ -1,45 +1,10 @@
 [
   {
-    "id": 1,
-    "images": ["assets/images/tiles/glass.png"],
-    "name": "Stained Glass"
-  },
-  {
-    "id": 2,
-    "images": ["assets/images/tiles/cement.png"],
-    "name": "Cement"
-  },
-  {
-    "id": 3,
-    "images": ["assets/images/tiles/cement_full.png"],
-    "name": "Cement Full"
-  },
-  {
-    "id": 4,
-    "images": ["assets/images/tiles/tile.png"],
-    "name": "Tile"
-  },
-  {
     "id": 5,
     "images": ["assets/images/tiles/water_deep.png"],
     "name": "Water",
     "alpha": 0.5,
     "render_mode": "cube_top_only"
-  },
-  {
-    "id": 6,
-    "images": ["assets/images/tiles/wood.png"],
-    "name": "Wood"
-  },
-  {
-    "id": 7,
-    "images": ["assets/images/tiles/fire_0.png"],
-    "name": "Fire"
-  },
-  {
-    "id": 10,
-    "images": ["assets/images/tiles/wall.png"],
-    "name": "Wall"
   },
   {
     "id": 11,
@@ -70,12 +35,14 @@
   },
   {
     "id": 14,
-    "images": ["assets/images/tiles/purifier.png"],
+    "images": [
+      "assets/images/tiles/purifier.png",
+      "assets/images/tiles/black_metal.jpg"
+    ],
     "name": "Purifier",
     "render_mode": "cube_unique_top",
     "density": 1,
     "actions": [
-
       {
         "type": "tick",
         "action": "purify",
@@ -94,7 +61,7 @@
     "id": 15,
     "images": ["assets/images/tiles/rocks_rough.png"],
     "name": "Wall",
-    "density":2,
+    "density": 2,
     "render_mode": "cube"
   },
   {
@@ -227,11 +194,11 @@
         "type": "destroy",
         "drop_resource_id": "scrap"
       },
-         {
+      {
         "type": "destroy",
         "drop_resource_id": "scrap"
-      }
-      ,   {
+      },
+      {
         "type": "destroy",
         "drop_resource_id": "scrap"
       }
@@ -288,7 +255,7 @@
         "type": "tick",
         "action": "structure",
         "spawn_structure_id": "tree",
-        "chance": 0.001
+        "chance": 0.004
       },
       {
         "type": "destroy",
@@ -420,9 +387,8 @@
     "render_mode": "flat",
     "images": ["assets/images/tiles/goat.png"],
     "name": "Goat on a pole"
-  }
-,
-   {
+  },
+  {
     "id": 37,
     "images": ["assets/images/tiles/leaves.png"],
     "density": 1,
@@ -434,5 +400,4 @@
       }
     ]
   }
-  
 ]

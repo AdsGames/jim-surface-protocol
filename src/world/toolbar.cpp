@@ -383,12 +383,17 @@ void Toolbar::draw(World& world) {
                       green);
       asw::draw::text(font, "Keep up the good work!", asw::Vec2(183.0F, 865.0F),
                       green);
-    } else {
+    } else if (world.getProgression() < 0.99F) {
       asw::draw::text(font, "You are almost there!", asw::Vec2(183.0F, 845.0F),
                       green);
       asw::draw::text(font, "Keep going!", asw::Vec2(183.0F, 865.0F), green);
+    } else {
+      asw::draw::text(font, "You did it!", asw::Vec2(183.0F, 845.0F), green);
+      asw::draw::text(font, "You have purified the planet!",
+                      asw::Vec2(183.0F, 865.0F), green);
+      asw::draw::text(font, "Congratulations!", asw::Vec2(183.0F, 885.0F),
+                      green);
     }
-
   } else if (drill_button_trans.contains(mouse_pos)) {
     asw::draw::text(font, "[Key 1] Drill", asw::Vec2(183.0F, 825.0F), green);
 
@@ -438,6 +443,12 @@ void Toolbar::draw(World& world) {
 
   // Percent purified
   auto percent_purified = std::to_string(world.getProgression() * 100.0F);
+  if (world.getProgression() > 0.99F) {
+    percent_purified = "100.0";
+  }
+  if (percent_purified.size() > 5) {
+    percent_purified = percent_purified.substr(0, 4);
+  }
   asw::draw::text(font, "Purification: " + percent_purified + "%",
                   asw::Vec2(620.0F, 920.0F), white);
 
