@@ -17,9 +17,7 @@ class World {
   void draw();
 
   /// Worker Utils
-  WorkerId addWorker(const asw::Vec3<int>& position);
-  Worker* getWorker(WorkerId id);
-  Worker* getPlayer();
+  Worker& getPlayer();
 
   /// Camera Utils
   asw::Quad<float>& getCamera() { return camera; }
@@ -38,12 +36,6 @@ class World {
   bool getWaypointActive() const { return waypointActive; }
   void setWaypointActive(bool active) { waypointActive = active; }
 
-  int getDrillSpeed() const { return drillSpeed; }
-  void setDrillSpeed(int speed) { drillSpeed = speed; }
-
-  int getPlayerSpeed() const { return playerSpeed; }
-  void setPlayerSpeed(int speed) { playerSpeed = speed; }
-
   // Purity Progression
   float getProgression() const { return progression; }
 
@@ -53,9 +45,6 @@ class World {
   asw::Texture waypointTexture;
   asw::Texture shadowTexture;
   bool waypointActive{false};
-
-  int drillSpeed{1};
-  int playerSpeed{1};
 
   Worker player;
 

@@ -254,6 +254,18 @@ Tile* TileMap::getTileAtIndex(const asw::Vec3<int>& index) {
   return &mapTiles[index.x][index.y][index.z];
 }
 
+Tile* TileMap::getTopTileAt(const asw::Vec2<int>& index) {
+  // Get top tile
+  for (int i = MAP_HEIGHT - 1; i >= 0; --i) {
+    auto* tile = getTileAtIndex({index.x, index.y, i});
+    if (tile != nullptr && tile->getType() != nullptr) {
+      return tile;
+    }
+  }
+
+  return nullptr;
+}
+
 asw::Vec3<int> TileMap::getIndexAt(const asw::Vec2<float>& position) {
   // "Clamp" position coords to tile coords
   auto sx = position.x / (TILE_SIZE / 2.0F) - 0.5F;
@@ -282,16 +294,33 @@ asw::Vec3<int> TileMap::getIndexAt(const asw::Vec2<float>& position) {
 }
 
 // Draw at position
-void TileMap::draw(const asw::Quad<float>& camera) {
+void TileMap::draw(const asw::Quad<float>& camera,
+                   const asw::Vec3<int>& start,
+                   const asw::Vec3<int>& end) {
   for (int i = 0; i < MAP_HEIGHT; ++i) {
-    draw_layer(camera, i);
+    draw_layer(camera, i, start, end);
   }
 }
 
 // Draw a layer
-void TileMap::draw_layer(const asw::Quad<float>& camera, int layer) {
-  for (int i = 0; i < MAP_WIDTH; ++i) {
-    for (int j = 0; j < MAP_DEPTH; ++j) {
+void TileMap::draw_layer(const asw::Quad<float>& camera,
+                         int layer,
+                         const asw::Vec3<int>& start,
+                         const asw::Vec3<int>& end) {
+  if (layer < start.z || layer > end.z) {
+    return;
+  }
+
+  for (int i = 0; i < TileMap::MAP_WIDTH; ++i) {
+    if ((start.z == layer && i < start.x)) {
+      continue;
+    }
+
+    for (int j = 0; j < TileMap::MAP_DEPTH; ++j) {
+      if ((start.z == layer && j < start.y)) {
+        continue;
+      }
+
       auto tile = mapTiles[i][j][layer];
 
       if (tile.getType() == nullptr) {

@@ -37,11 +37,11 @@ void Toolbar::update(float dt, World& world) {
 
   // Find distance to worker
   auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
-  auto* worker = world.getPlayer();
-  if (worker != nullptr && selected_tile != nullptr) {
+  auto& worker = world.getPlayer();
+  if (selected_tile != nullptr) {
     const auto tile_pos = selected_tile->getPosition();
     const auto distance = asw::Vec3<float>(tile_pos.x, tile_pos.y, tile_pos.z)
-                              .distance(worker->getPosition());
+                              .distance(worker.getPosition());
     cursor_in_range = distance < 10.0F;
   }
 
@@ -86,6 +86,7 @@ void Toolbar::rightClickAction(World& world) {
 void Toolbar::toolZoneAction(World& world) {
   auto& camera = world.getCamera();
   auto& resource_manager = world.getResourceManager();
+  auto& player = world.getPlayer();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
 
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
@@ -98,13 +99,13 @@ void Toolbar::toolZoneAction(World& world) {
       mode = ToolMode::DRILL;
     } else if (upgrade_drill_trans.contains(mouse_pos)) {
       if (resource_manager.getResourceCount("scrap") >= drill_upgrade_cost) {
-        world.setDrillSpeed(world.getDrillSpeed() + 1);
+        player.setDrillSpeed(player.getDrillSpeed() + 1);
         resource_manager.addResourceCount("scrap", -drill_upgrade_cost);
         drill_upgrade_cost = drill_upgrade_cost * 1.5F;
       }
     } else if (upgrade_move_trans.contains(mouse_pos)) {
       if (resource_manager.getResourceCount("scrap") >= move_upgrade_cost) {
-        world.setPlayerSpeed(world.getPlayerSpeed() + 1);
+        player.setMoveSpeed(player.getMoveSpeed() + 1);
         resource_manager.addResourceCount("scrap", -move_upgrade_cost);
         move_upgrade_cost = move_upgrade_cost * 1.5F;
       }
@@ -116,6 +117,7 @@ void Toolbar::action(World& world, float dt) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
   auto& resource_manager = world.getResourceManager();
+  auto& player = world.getPlayer();
   auto mouse_pos = asw::Vec2(asw::input::mouse.x, asw::input::mouse.y);
 
   // Toolbar zone
@@ -137,7 +139,7 @@ void Toolbar::action(World& world, float dt) {
     if (density > 0) {
       // this is where the drilling begins
 
-      actionProgress += dt * (0.03F / density) * (world.getDrillSpeed() * 3);
+      actionProgress += dt * (0.03F / density) * (player.getDrillSpeed() * 3);
       if (actionProgress > 100.0F) {
         auto actions = select_type->getActionsOfType(ActionType::DESTROY);
         for (const auto& action : actions) {
@@ -274,8 +276,8 @@ void Toolbar::draw(World& world) {
       asw::Vec2(1260.0F, 915.0F), green);
 
   // Upgrade window
-  auto drill_speed = std::to_string(world.getDrillSpeed());
-  auto player_speed = std::to_string(world.getPlayerSpeed());
+  auto drill_speed = std::to_string(world.getPlayer().getDrillSpeed());
+  auto player_speed = std::to_string(world.getPlayer().getMoveSpeed());
 
   auto canBuyDrill = world.getResourceManager().getResourceCount("scrap") >=
                      drill_upgrade_cost;

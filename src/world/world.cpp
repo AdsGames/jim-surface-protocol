@@ -97,8 +97,16 @@ void World::draw() {
   asw::draw::rectFill(asw::Quad(0.0F, 0.0F, camera.size.x, camera.size.y),
                       asw::util::makeColor(0, 64, blue_percent));
 
-  tile_map.draw(camera);
+  // Get player z position
+  const auto player_position =
+      asw::Vec3(static_cast<int>(std::round(player.getPosition().x)),
+                static_cast<int>(std::round(player.getPosition().y)),
+                static_cast<int>(std::round(player.getPosition().z)));
+
+  tile_map.draw(camera, asw::Vec3(0, 0, 0), player_position);
   player.draw(camera.position);
+  tile_map.draw(camera, player_position,
+                asw::Vec3(TileMap::MAP_WIDTH, TileMap::MAP_DEPTH, MAP_HEIGHT));
 
   if (waypointActive) {
     // Draw player waypoint
@@ -117,6 +125,6 @@ void World::draw() {
   }
 }
 
-Worker* World::getPlayer() {
-  return &player;
+Worker& World::getPlayer() {
+  return player;
 }

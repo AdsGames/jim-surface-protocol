@@ -27,10 +27,15 @@ class Worker {
   void draw(const asw::Vec2<float>& offset);
   void update();
 
+  // Stats
+  int getDrillSpeed() const { return drillSpeed; }
+  void setDrillSpeed(int speed) { drillSpeed = speed; }
+
+  int getMoveSpeed() const { return moveSpeed; }
+  void setMoveSpeed(int speed) { moveSpeed = speed; }
+
  private:
   int direction{0};
-
-  float angle{0};
 
   asw::Font font;
 
@@ -38,11 +43,15 @@ class Worker {
 
   asw::Vec3<float> position;
 
-  std::array<asw::Texture, 6> textures;
+  std::array<asw::Texture, 8> textures;
 
   asw::Texture shadow;
 
   WorkerId id;
 
   WorkerStatus status{WorkerStatus::IDLE};
+
+  int drillSpeed{1};
+
+  int moveSpeed{1};
 };

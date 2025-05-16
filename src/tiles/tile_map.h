@@ -20,7 +20,9 @@ class TileMap {
 
   void update(float dt);
 
-  void draw(const asw::Quad<float>& camera);
+  void draw(const asw::Quad<float>& camera,
+            const asw::Vec3<int>& start,
+            const asw::Vec3<int>& end);
 
   void generate();
   void generateStructure(const std::string& id_str,
@@ -28,6 +30,7 @@ class TileMap {
 
   Tile* getTileAt(const asw::Vec2<float>& position);
   Tile* getTileAtIndex(const asw::Vec3<int>& index);
+  Tile* getTopTileAt(const asw::Vec2<int>& index);
 
   asw::Vec3<int> getIndexAt(const asw::Vec2<float>& position);
 
@@ -40,7 +43,10 @@ class TileMap {
   static float SEED;
 
  private:
-  void draw_layer(const asw::Quad<float>& camera, int layer);
+  void draw_layer(const asw::Quad<float>& camera,
+                  int layer,
+                  const asw::Vec3<int>& start,
+                  const asw::Vec3<int>& end);
 
   void tick_tile(const asw::Vec3<int>& index);
 
