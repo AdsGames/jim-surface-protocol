@@ -75,13 +75,13 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # - name: Deploy to A.D.S. Games
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   uses: adsgames/deploy-to-adsgames@v1.1.2
-      #   with:
-      #     project-id: todo
-      #     build-dir: ./build/release/target/
-      #     platform: WEB
-      #     bucket-access-key: ${{ secrets.LINODE_BUCKET_ACCESS_KEY }}
-      #     bucket-secret-key: ${{ secrets.LINODE_BUCKET_SECRET_KEY }}
-      #     api-key: ${{ secrets.ADSGAMES_API_KEY }}
+      - name: Deploy to A.D.S. Games
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: adsgames/deploy-to-adsgames@v1.1.2
+        with:
+          project-id: ab9e16b7-d318-46d3-a8c9-bf171475afa1
+          build-dir: ./build/release/target/
+          platform: WEB
+          bucket-access-key: ${{ secrets.LINODE_BUCKET_ACCESS_KEY }}
+          bucket-secret-key: ${{ secrets.LINODE_BUCKET_SECRET_KEY }}
+          api-key: ${{ secrets.ADSGAMES_API_KEY }}
