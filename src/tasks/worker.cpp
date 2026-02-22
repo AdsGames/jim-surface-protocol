@@ -7,18 +7,18 @@
 WorkerId Worker::idCounter = 0;
 
 Worker::Worker() : id(idCounter++) {
-  textures[0] = asw::assets::loadTexture("assets/images/player/128/3.png");
-  textures[1] = asw::assets::loadTexture("assets/images/player/128/4.png");
-  textures[2] = asw::assets::loadTexture("assets/images/player/128/2.png");
-  textures[3] = asw::assets::loadTexture("assets/images/player/128/2.png");
-  textures[4] = asw::assets::loadTexture("assets/images/player/128/1.png");
-  textures[5] = asw::assets::loadTexture("assets/images/player/128/5.png");
-  textures[6] = asw::assets::loadTexture("assets/images/player/128/0.png");
-  textures[7] = asw::assets::loadTexture("assets/images/player/128/0.png");
+  textures[0] = asw::assets::load_texture("assets/images/player/128/3.png");
+  textures[1] = asw::assets::load_texture("assets/images/player/128/4.png");
+  textures[2] = asw::assets::load_texture("assets/images/player/128/2.png");
+  textures[3] = asw::assets::load_texture("assets/images/player/128/2.png");
+  textures[4] = asw::assets::load_texture("assets/images/player/128/1.png");
+  textures[5] = asw::assets::load_texture("assets/images/player/128/5.png");
+  textures[6] = asw::assets::load_texture("assets/images/player/128/0.png");
+  textures[7] = asw::assets::load_texture("assets/images/player/128/0.png");
 
-  shadow = asw::assets::loadTexture("assets/images/player/128/shadow.png");
+  shadow = asw::assets::load_texture("assets/images/player/128/shadow.png");
 
-  font = asw::assets::loadFont("assets/fonts/syne-mono.ttf", 16);
+  font = asw::assets::load_font("assets/fonts/syne-mono.ttf", 16);
 }
 
 void Worker::setPosition(const asw::Vec3<int>& pos) {
@@ -43,7 +43,7 @@ void Worker::update(float dt, World& world) {
   // Move to waypoint
   const auto waypoint_xy = asw::Vec2<float>(waypoint.x, waypoint.y);
   const auto position_xy = asw::Vec2<float>(position.x, position.y);
-  const float speed = 0.003F * player.getMoveSpeed();
+  const float speed = 3.0F * player.getMoveSpeed();
   const float move = speed * dt;
 
   if (position_xy.distance(waypoint_xy) > 0.1F) {
@@ -100,6 +100,6 @@ void Worker::draw(const asw::Vec2<float>& offset) {
                 iso_y * TILE_HEIGHT_F - offset.y + TILE_HEIGHT_F * 0.25F,
                 TILE_WIDTH_F, TILE_WIDTH_F);
 
-  asw::draw::stretchSprite(shadow, screen_size);
-  asw::draw::stretchSprite(textures[direction], screen_size);
+  asw::draw::stretch_sprite(shadow, screen_size);
+  asw::draw::stretch_sprite(textures[direction], screen_size);
 }

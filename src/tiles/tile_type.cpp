@@ -109,21 +109,21 @@ void TileType::draw(const asw::Vec3<int>& position,
   asw::draw::sprite(image, iso_pos);
 
   if (selected) {
-    asw::draw::setBlendMode(image, asw::BlendMode::ADD);
+    asw::draw::set_blend_mode(image, asw::BlendMode::Add);
     asw::draw::sprite(image, iso_pos);
-    asw::draw::setBlendMode(image, asw::BlendMode::BLEND);
+    asw::draw::set_blend_mode(image, asw::BlendMode::Blend);
   }
 
   if (left_border && render_mode != TileRenderMode::FLAT) {
     asw::draw::line(iso_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
                     iso_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
-                    asw::util::makeColor(0, 0, 0, 128));
+                    asw::Color(0, 0, 0, 128));
   }
 
   if (right_border && render_mode != TileRenderMode::FLAT) {
     asw::draw::line(iso_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
                     iso_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
-                    asw::util::makeColor(0, 0, 0, 128));
+                    asw::Color(0, 0, 0, 128));
   }
 }
 
@@ -132,17 +132,17 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   auto height = TILE_SIZE;
 
   // Render image
-  image = asw::assets::createTexture(width, height);
+  image = asw::assets::create_texture(width, height);
 
-  SDL_SetTextureBlendMode(image.get(), SDL_BLENDMODE_BLEND);
+  asw::draw::set_blend_mode(image, asw::BlendMode::Blend);
   SDL_SetTextureScaleMode(image.get(), SDL_SCALEMODE_NEAREST);
 
   // Set the render target to the image
-  asw::display::setRenderTarget(image);
+  asw::display::set_render_target(image);
 
   // Fill transparent
-  asw::draw::rectFill(asw::Quad<float>(0.0F, 0.0F, height, width),
-                      asw::util::makeColor(0, 0, 0, 0));
+  asw::draw::rect_fill(asw::Quad<float>(0.0F, 0.0F, height, width),
+                       asw::Color(0, 0, 0, 0));
 
   // Render cube
   if (mode == TileRenderMode::CUBE) {
@@ -167,7 +167,7 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   render_mode = mode;
 
   // Reset the render target to the default
-  asw::display::setRenderTarget(nullptr);
+  asw::display::set_render_target(nullptr);
 
   if (alpha < 1.0F) {
     SDL_SetTextureAlphaModFloat(image.get(), alpha);
@@ -213,6 +213,6 @@ void TileType::renderCube(int texture_count, int face_count) {
 }
 
 void TileType::renderFlat() {
-  asw::draw::stretchSprite(images.at(0),
-                           asw::Quad<float>(0.0F, 0.0F, TILE_SIZE, TILE_SIZE));
+  asw::draw::stretch_sprite(images.at(0),
+                            asw::Quad<float>(0.0F, 0.0F, TILE_SIZE, TILE_SIZE));
 }

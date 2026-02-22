@@ -1,7 +1,6 @@
 #pragma once
 
 #include <asw/asw.h>
-#include <asw/util/Timer.h>
 #include <array>
 #include <string>
 #include <vector>
@@ -12,7 +11,7 @@ constexpr int MAX_MAP_WIDTH = 100;
 constexpr int MAX_MAP_DEPTH = 100;
 constexpr int MAP_HEIGHT = 16;
 
-constexpr float TICK_TIME = 100.0F;
+constexpr float TICK_TIME = 0.1F;
 
 class TileMap {
  public:

@@ -6,20 +6,20 @@
 #include "../tiles/tile_dictionary.h"
 
 void Init::init() {
-  asw::display::setTitle("Setting up");
+  asw::display::set_title("Setting up");
 
   TileDictionary::load("assets/tiles.json");
   StructureDictionary::load("assets/structures.json");
 
-  asw::display::setIcon("assets/icon.ico");
+  asw::display::set_icon("assets/icon.ico");
 
-  asw::display::setTitle("J1M Surface Protocol");
+  asw::display::set_title("J1M Surface Protocol");
 }
 
 void Init::update(float dt) {
-  sceneManager.setNextScene(ProgramState::Intro);
+  manager.set_next_scene(ProgramState::Intro);
 }
 
 void Init::draw() {
-  asw::draw::clearColor(asw::util::makeColor(0, 0, 0));
+  asw::draw::clear_color(asw::color::black);
 }

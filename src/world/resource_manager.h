@@ -55,7 +55,7 @@ class ResourceManager {
       auto resource = std::make_shared<ResourceType>();
       resource->name = name;
       resource->description = description;
-      resource->icon = asw::assets::loadTexture(icon_path);
+      resource->icon = asw::assets::load_texture(icon_path);
       resource->id = id;
       resource->id_str = id_str;
       resource->amount = 0;

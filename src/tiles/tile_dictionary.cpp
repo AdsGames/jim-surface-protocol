@@ -71,7 +71,7 @@ void TileDictionary::load(const std::string& path) {
     // Images
     int image_count = 0;
     for (auto const& image : cTile["images"]) {
-      auto tex = asw::assets::loadTexture(image);
+      auto tex = asw::assets::load_texture(image);
       tile->addImage(tex);
       image_count++;
     }

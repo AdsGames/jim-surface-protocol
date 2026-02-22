@@ -1,7 +1,6 @@
 #pragma once
 
 #include <asw/asw.h>
-#include <asw/util/Timer.h>
 
 #include "../world/toolbar.h"
 #include "../world/world.h"

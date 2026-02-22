@@ -6,42 +6,42 @@ void World::init() {
   sound_orchestrator.init();
 
   waypointTexture =
-      asw::assets::loadTexture("assets/images/player/waypoint.png");
+      asw::assets::load_texture("assets/images/player/waypoint.png");
   shadowTexture =
-      asw::assets::loadTexture("assets/images/player/128/shadow.png");
+      asw::assets::load_texture("assets/images/player/128/shadow.png");
 }
 
 void World::update(float dt) {
   // Keybo movement
-  if (asw::input::isKeyDown(asw::input::Key::A) ||
-      asw::input::isKeyDown(asw::input::Key::LEFT)) {
+  if (asw::input::get_key(asw::input::Key::A) ||
+      asw::input::get_key(asw::input::Key::Left)) {
     camera.position.x -= 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::D) ||
-      asw::input::isKeyDown(asw::input::Key::RIGHT)) {
+  if (asw::input::get_key(asw::input::Key::D) ||
+      asw::input::get_key(asw::input::Key::Right)) {
     camera.position.x += 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::W) ||
-      asw::input::isKeyDown(asw::input::Key::UP)) {
+  if (asw::input::get_key(asw::input::Key::W) ||
+      asw::input::get_key(asw::input::Key::Up)) {
     camera.position.y -= 10;
   }
-  if (asw::input::isKeyDown(asw::input::Key::S) ||
-      asw::input::isKeyDown(asw::input::Key::DOWN)) {
+  if (asw::input::get_key(asw::input::Key::S) ||
+      asw::input::get_key(asw::input::Key::Down)) {
     camera.position.y += 10;
   }
 
   // Mouse movement
-  auto screen_size = asw::display::getLogicalSize();
-  if (asw::input::mouse.x >= screen_size.x - 4) {
+  auto screen_size = asw::display::get_logical_size();
+  if (asw::input::mouse.position.x >= screen_size.x - 4) {
     camera.position.x += 10;
   }
-  if (asw::input::mouse.x <= 4) {
+  if (asw::input::mouse.position.x <= 4) {
     camera.position.x -= 10;
   }
-  if (asw::input::mouse.y >= screen_size.y - 4) {
+  if (asw::input::mouse.position.y >= screen_size.y - 4) {
     camera.position.y += 10;
   }
-  if (asw::input::mouse.y <= 4) {
+  if (asw::input::mouse.position.y <= 4) {
     camera.position.y -= 10;
   }
 
@@ -68,7 +68,7 @@ void World::update(float dt) {
   }
 
   // Regenerate map
-  if (asw::input::wasKeyPressed(asw::input::Key::G)) {
+  if (asw::input::get_key_down(asw::input::Key::G)) {
     tile_map.generate();
   }
 
@@ -94,8 +94,8 @@ void World::update(float dt) {
 
 void World::draw() {
   const int blue_percent = 64 * (progression + 1.0F);
-  asw::draw::rectFill(asw::Quad(0.0F, 0.0F, camera.size.x, camera.size.y),
-                      asw::util::makeColor(0, 64, blue_percent));
+  asw::draw::rect_fill(asw::Quad(0.0F, 0.0F, camera.size.x, camera.size.y),
+                       asw::Color(0, 64, blue_percent));
 
   // Get player z position
   const auto player_position =
@@ -120,8 +120,8 @@ void World::draw() {
 
     auto loc = player_waypoint_screen + asw::Vec2<float>(6, -16);
     auto shadow_transform = asw::Quad<float>(loc.x, loc.y, 48, 48);
-    asw::draw::stretchSprite(shadowTexture,
-                             shadow_transform);  // Shadow
+    asw::draw::stretch_sprite(shadowTexture,
+                              shadow_transform);  // Shadow
   }
 }
 

@@ -2,12 +2,12 @@
 #include "world.h"
 
 void SoundOrchestrator::init() {
-  music["early"] = asw::assets::loadMusic("assets/music/early.ogg");
-  music["mid"] = asw::assets::loadMusic("assets/music/intro.ogg");
-  music["late"] = asw::assets::loadMusic("assets/music/late.ogg");
+  music["early"] = asw::assets::load_music("assets/music/early.ogg");
+  music["mid"] = asw::assets::load_music("assets/music/intro.ogg");
+  music["late"] = asw::assets::load_music("assets/music/late.ogg");
 
   samples["progression"] =
-      asw::assets::loadSample("assets/music/progression.ogg");
+      asw::assets::load_sample("assets/music/progression.ogg");
 }
 
 void SoundOrchestrator::update(float dt, World& world) {
@@ -20,24 +20,24 @@ void SoundOrchestrator::update(float dt, World& world) {
   // Transition mode
   if (progression >= 0.33F && last_progression < 0.33F) {
     progression_timer = 10000.0F;
-    asw::sound::stopMusic();
-    asw::sound::play(samples.at("progression"), 64, 128, 0);
+    asw::sound::stop_music();
+    asw::sound::play(samples.at("progression"), 0.5F);
   }
 
   if (progression >= 0.66F && last_progression < 0.66F) {
     progression_timer = 10000.0F;
-    asw::sound::stopMusic();
-    asw::sound::play(samples.at("progression"), 64, 128, 0);
+    asw::sound::stop_music();
+    asw::sound::play(samples.at("progression"), 0.5F);
   }
 
   // Play music based on progression
-  if (!Mix_PlayingMusic() && progression_timer <= 0.0F) {
+  if (!asw::sound::is_music_playing() && progression_timer <= 0.0F) {
     if (progression < 0.33F) {
-      asw::sound::playMusic(music.at("early"));
+      asw::sound::play_music(music.at("early"));
     } else if (progression < 0.66F) {
-      asw::sound::playMusic(music.at("mid"));
+      asw::sound::play_music(music.at("mid"));
     } else {
-      asw::sound::playMusic(music.at("late"));
+      asw::sound::play_music(music.at("late"));
     }
   }
 
