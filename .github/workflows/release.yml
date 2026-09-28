@@ -20,3 +20,14 @@ jobs:
       deploy: ${{ startsWith(github.ref, 'refs/tags/v') }}
     secrets:
       ADSGAMES_API_KEY: ${{ secrets.ADSGAMES_API_KEY }}
+
+  itch:
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: adsgames/deploy-to-adsgames/.github/workflows/deploy-itch.yml@v1
+    with:
+      itch-project: ads-games/j1m-surface-protocol
+      # Keeps the channel the web build was already published on
+      channels: '{"WEB": "HTML5", "LINUX": "linux", "WINDOWS": "windows", "MAC": "mac"}'
+    secrets:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
