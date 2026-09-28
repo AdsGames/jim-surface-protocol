@@ -32,7 +32,7 @@ void Toolbar::update(float dt, World& world) {
   auto const& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
   auto const& mouse_pos = asw::input::get_mouse().position;
-  cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
+  cursor_idx = tile_map.getIndexAt(camera.screen_to_world(mouse_pos));
   tile_map.setSelectedIndex(cursor_idx);
 
   // Find distance to worker
@@ -90,7 +90,7 @@ void Toolbar::toolZoneAction(World& world) {
   const auto& mouse_pos = asw::input::get_mouse().position;
 
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
-  if (mouse_pos.y > camera.size.y - 160.0F) {
+  if (mouse_pos.y > camera.get_view().size.y - TOOLBAR_HEIGHT) {
     if (purifier_button_trans.contains(mouse_pos)) {
       mode = ToolMode::PURIFIER;
     } else if (tree_button_trans.contains(mouse_pos)) {
@@ -121,7 +121,7 @@ void Toolbar::action(World& world, float dt) {
   const auto& mouse_pos = asw::input::get_mouse().position;
 
   // Toolbar zone
-  if (mouse_pos.y > camera.size.y - TOOLBAR_HEIGHT) {
+  if (mouse_pos.y > camera.get_view().size.y - TOOLBAR_HEIGHT) {
     return;
   }
 
@@ -182,7 +182,7 @@ bool Toolbar::actionEnabled(World& world) {
   auto& tile_map = world.getTileMap();
   auto const& resource_manager = world.getResourceManager();
   const auto& mouse_pos = asw::input::get_mouse().position;
-  cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
+  cursor_idx = tile_map.getIndexAt(camera.screen_to_world(mouse_pos));
 
   // Can place purifier
   const auto can_buy_purifier =
@@ -240,20 +240,20 @@ bool Toolbar::actionEnabled(World& world) {
 }
 
 void Toolbar::draw(World& world) {
-  auto& camera = world.getCamera();
+  const auto view = world.getCamera().get_view();
   auto& tile_map = world.getTileMap();
   auto& resource_manager = world.getResourceManager();
   const auto& mouse_pos = asw::input::get_mouse().position;
-  auto world_pos = camera.position + mouse_pos;
+  auto world_pos = view.position + mouse_pos;
   auto* selected_tile = tile_map.getTileAt(world_pos);
   auto green = asw::Color(128, 255, 128);
 
   if (cursor_in_range && can_take_action) {
-    drawWireframe(cursor_idx, camera.position, green);
+    drawWireframe(cursor_idx, view.position, green);
   } else if (cursor_in_range) {
-    drawWireframe(cursor_idx, camera.position, asw::color::white);
+    drawWireframe(cursor_idx, view.position, asw::color::white);
   } else {
-    drawWireframe(cursor_idx, camera.position, asw::color::red);
+    drawWireframe(cursor_idx, view.position, asw::color::red);
   }
 
   // Overlay
@@ -321,7 +321,7 @@ void Toolbar::draw(World& world) {
 
     // Camera pos
     asw::draw::text(
-        font, std::format("Cam: {}, {}", camera.position.x, camera.position.y),
+        font, std::format("Cam: {}, {}", view.position.x, view.position.y),
         asw::Vec2(183.0F, 865.0F), green);
 
     // Mouse pos
@@ -331,7 +331,7 @@ void Toolbar::draw(World& world) {
   }
 
   // Inspect window
-  else if (mouse_pos.y < camera.size.y - TOOLBAR_HEIGHT &&
+  else if (mouse_pos.y < view.size.y - TOOLBAR_HEIGHT &&
            selected_tile != nullptr) {
     auto tile_type = selected_tile->getType();
     auto tile_structure = selected_tile->getStructure();

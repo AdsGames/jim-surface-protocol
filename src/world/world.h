@@ -20,7 +20,7 @@ class World {
   Worker& getPlayer();
 
   /// Camera Utils
-  asw::Quad<float>& getCamera() { return camera; }
+  asw::Camera& getCamera() { return camera; }
 
   /// Tile Utils
   TileMap& getTileMap() { return tile_map; }
@@ -54,7 +54,7 @@ class World {
 
   SoundOrchestrator sound_orchestrator;
 
-  asw::Quad<float> camera{-640, -480, 1280, 960};
+  asw::Camera camera;
 
   float progression{0.0F};
 };

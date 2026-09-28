@@ -1,5 +1,14 @@
 #include "world.h"
 
+#include <algorithm>
+
+#include "toolbar.h"
+
+namespace {
+// Camera scroll per update, in pixels
+constexpr float CAMERA_PAN_SPEED = 10.0F;
+}  // namespace
+
 void World::init() {
   resource_manager.load("assets/resources.json");
   tile_map.generate();
@@ -9,63 +18,60 @@ void World::init() {
       asw::assets::load_texture("assets/images/player/waypoint.png");
   shadowTexture =
       asw::assets::load_texture("assets/images/player/128/shadow.png");
-}
 
-void World::update(float dt) {
-  // Keybo movement
-  if (asw::input::get_key(asw::input::Key::A) ||
-      asw::input::get_key(asw::input::Key::Left)) {
-    camera.position.x -= 10;
-  }
-  if (asw::input::get_key(asw::input::Key::D) ||
-      asw::input::get_key(asw::input::Key::Right)) {
-    camera.position.x += 10;
-  }
-  if (asw::input::get_key(asw::input::Key::W) ||
-      asw::input::get_key(asw::input::Key::Up)) {
-    camera.position.y -= 10;
-  }
-  if (asw::input::get_key(asw::input::Key::S) ||
-      asw::input::get_key(asw::input::Key::Down)) {
-    camera.position.y += 10;
-  }
-
-  // Mouse movement
-  auto screen_size = asw::display::get_logical_size();
-  if (asw::input::get_mouse().position.x >= screen_size.x - 4) {
-    camera.position.x += 10;
-  }
-  if (asw::input::get_mouse().position.x <= 4) {
-    camera.position.x -= 10;
-  }
-  if (asw::input::get_mouse().position.y >= screen_size.y - 4) {
-    camera.position.y += 10;
-  }
-  if (asw::input::get_mouse().position.y <= 4) {
-    camera.position.y -= 10;
-  }
-
-  // Topmost
+  // Keep the view over the map, with room below it for the toolbar
   const auto min_x = -(TileMap::MAP_DEPTH / 2.0F) * TILE_SIZE;
   const auto max_x = (TileMap::MAP_WIDTH / 2.0F + 1) * TILE_SIZE;
   const auto min_y = -(MAP_HEIGHT / 2.0F) * TILE_SIZE;
   const auto max_y =
       std::max(TileMap::MAP_WIDTH / 2.0F + 1, TileMap::MAP_DEPTH / 2.0F + 1) *
           TILE_SIZE +
-      160.0F;
+      TOOLBAR_HEIGHT;
 
-  if (camera.position.y + camera.size.y > max_y) {
-    camera.position.y = max_y - camera.size.y;
+  const auto screen_size = asw::display::get_logical_size();
+  camera = asw::Camera(asw::Vec2<float>(static_cast<float>(screen_size.x),
+                                        static_cast<float>(screen_size.y)));
+  camera.set_bounds(asw::Quad<float>(min_x, min_y, max_x - min_x, max_y - min_y));
+  camera.set_position(asw::Vec2<float>(-640.0F, -480.0F));
+}
+
+void World::update(float dt) {
+  // Keybo movement
+  auto pan = asw::Vec2<float>(0.0F, 0.0F);
+  if (asw::input::get_key(asw::input::Key::A) ||
+      asw::input::get_key(asw::input::Key::Left)) {
+    pan.x -= CAMERA_PAN_SPEED;
   }
-  if (camera.position.y < min_y) {
-    camera.position.y = min_y;
+  if (asw::input::get_key(asw::input::Key::D) ||
+      asw::input::get_key(asw::input::Key::Right)) {
+    pan.x += CAMERA_PAN_SPEED;
   }
-  if (camera.position.x + camera.size.x > max_x) {
-    camera.position.x = max_x - camera.size.x;
+  if (asw::input::get_key(asw::input::Key::W) ||
+      asw::input::get_key(asw::input::Key::Up)) {
+    pan.y -= CAMERA_PAN_SPEED;
   }
-  if (camera.position.x < min_x) {
-    camera.position.x = min_x;
+  if (asw::input::get_key(asw::input::Key::S) ||
+      asw::input::get_key(asw::input::Key::Down)) {
+    pan.y += CAMERA_PAN_SPEED;
   }
+
+  // Mouse movement
+  auto screen_size = asw::display::get_logical_size();
+  const auto& mouse_pos = asw::input::get_mouse().position;
+  if (mouse_pos.x >= screen_size.x - 4) {
+    pan.x += CAMERA_PAN_SPEED;
+  }
+  if (mouse_pos.x <= 4) {
+    pan.x -= CAMERA_PAN_SPEED;
+  }
+  if (mouse_pos.y >= screen_size.y - 4) {
+    pan.y += CAMERA_PAN_SPEED;
+  }
+  if (mouse_pos.y <= 4) {
+    pan.y -= CAMERA_PAN_SPEED;
+  }
+
+  camera.set_position(camera.get_position() + pan);
 
   // Regenerate map
   if (asw::input::get_key_down(asw::input::Key::G)) {
@@ -94,7 +100,8 @@ void World::update(float dt) {
 
 void World::draw() {
   const int blue_percent = 64 * (progression + 1.0F);
-  asw::draw::rect_fill(asw::Quad(0.0F, 0.0F, camera.size.x, camera.size.y),
+  const auto view = camera.get_view();
+  asw::draw::rect_fill(asw::Quad(0.0F, 0.0F, view.size.x, view.size.y),
                        asw::Color(0, 64, blue_percent));
 
   // Get player z position
@@ -103,17 +110,16 @@ void World::draw() {
                 static_cast<int>(std::round(player.getPosition().y)),
                 static_cast<int>(std::round(player.getPosition().z)));
 
-  tile_map.draw(camera, asw::Vec3(0, 0, 0), player_position);
-  player.draw(camera.position);
-  tile_map.draw(camera, player_position,
+  tile_map.draw(view, asw::Vec3(0, 0, 0), player_position);
+  player.draw(view.position);
+  tile_map.draw(view, player_position,
                 asw::Vec3(TileMap::MAP_WIDTH, TileMap::MAP_DEPTH, MAP_HEIGHT));
 
   if (waypointActive) {
     // Draw player waypoint
     auto player_waypoint = getPlayerWaypoint();
-    auto player_waypoint_screen =
-        asw::Vec2(isoX(player_waypoint), isoY(player_waypoint)) * TILE_HEIGHT -
-        camera.position;
+    auto player_waypoint_screen = camera.world_to_screen(
+        asw::Vec2(isoX(player_waypoint), isoY(player_waypoint)) * TILE_HEIGHT);
 
     asw::draw::sprite(waypointTexture,
                       player_waypoint_screen + asw::Vec2<float>(0, -48));
