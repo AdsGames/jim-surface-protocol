@@ -135,7 +135,7 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   image = asw::assets::create_texture(width, height);
 
   asw::draw::set_blend_mode(image, asw::BlendMode::Blend);
-  SDL_SetTextureScaleMode(image.get(), SDL_SCALEMODE_NEAREST);
+  asw::draw::set_scale_mode(image, asw::ScaleMode::Nearest);
 
   // Set the render target to the image
   asw::display::set_render_target(image);
@@ -170,7 +170,7 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   asw::display::set_render_target(nullptr);
 
   if (alpha < 1.0F) {
-    SDL_SetTextureAlphaModFloat(image.get(), alpha);
+    asw::draw::set_alpha(image, alpha);
   }
 }
 

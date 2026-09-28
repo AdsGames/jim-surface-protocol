@@ -192,17 +192,11 @@ bool Toolbar::actionEnabled(World& world) {
   const auto can_buy_tree =
       resource_manager.getResourceCount("biomass") >= TREE_COST;
 
-  if (!can_buy_purifier) {
-    SDL_SetTextureColorMod(purifier_button.get(), 255, 150, 150);
-  } else {
-    SDL_SetTextureColorMod(purifier_button.get(), 255, 255, 255);
-  }
-
-  if (!can_buy_tree) {
-    SDL_SetTextureColorMod(tree_button.get(), 255, 150, 150);
-  } else {
-    SDL_SetTextureColorMod(tree_button.get(), 255, 255, 255);
-  }
+  const auto cant_buy_tint = asw::Color(255, 150, 150);
+  asw::draw::set_tint(purifier_button,
+                      can_buy_purifier ? asw::color::white : cant_buy_tint);
+  asw::draw::set_tint(tree_button,
+                      can_buy_tree ? asw::color::white : cant_buy_tint);
 
   // Find selected tile
   auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
@@ -262,10 +256,8 @@ void Toolbar::draw(World& world) {
   asw::draw::sprite(toolbar_ui, asw::Vec2<float>(0, 0));
 
   // Resource window
-  asw::draw::text(fontLarge, "Resources", asw::Vec2(1112.0F, 822.0F),
-                  asw::color::black);
-  asw::draw::text(fontLarge, "Resources", asw::Vec2(1110.0F, 820.0F),
-                  asw::color::white);
+  asw::draw::text_shadow(fontLarge, "Resources", asw::Vec2(1110.0F, 820.0F),
+                         asw::color::white);
 
   asw::draw::text(font, "Scrap", asw::Vec2(1110.0F, 868.0F), asw::color::white);
   asw::draw::text(font,
@@ -289,10 +281,8 @@ void Toolbar::draw(World& world) {
   auto canBuyColour = asw::Color(150, 255, 150, 255);
   auto cantBuyColour = asw::Color(255, 150, 150, 255);
 
-  asw::draw::text(fontLarge, "Upgrades", asw::Vec2(882.0F, 822.0F),
-                  asw::color::black);
-  asw::draw::text(fontLarge, "Upgrades", asw::Vec2(880.0F, 820.0F),
-                  asw::color::white);
+  asw::draw::text_shadow(fontLarge, "Upgrades", asw::Vec2(880.0F, 820.0F),
+                         asw::color::white);
 
   asw::draw::text(font, "Drill Speed: " + drill_speed,
                   asw::Vec2(882.0F, 858.0F), asw::color::white);
@@ -474,8 +464,8 @@ void Toolbar::draw(World& world) {
 
     asw::draw::rect_fill(asw::Quad(mouse_pos.x + 4.0F, mouse_pos.y + 4 - 60,
                                    actionProgress * 2, 30.0F),
-                         asw::Color(255 - (255 / 100) * actionProgress,
-                                    255 + (255 / 100) * actionProgress, 0));
+                         asw::color::yellow.lerp(asw::Color(55, 255, 0),
+                                                 actionProgress / 100.0F));
 
     asw::draw::text(font, "Drilling...",
                     asw::Vec2(mouse_pos.x + 4.0F, mouse_pos.y - 60 + 4.0F),
