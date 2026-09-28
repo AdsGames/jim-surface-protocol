@@ -5,7 +5,6 @@
 #include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <sstream>
 
 /// Structure Instance
 ///
@@ -43,7 +42,7 @@ std::shared_ptr<StructureType> StructureDictionary::getStructure(int id) {
     return *found;
   }
 
-  std::cout << "Warning: Structure " << id << " not found" << '\n';
+  asw::log::warn("Structure {} not found", id);
 
   return nullptr;
 }
@@ -57,7 +56,7 @@ std::shared_ptr<StructureType> StructureDictionary::getStructure(
     return *found;
   }
 
-  std::cout << "Warning: Structure " << id_str << " not found" << '\n';
+  asw::log::warn("Structure {} not found", id_str);
 
   return nullptr;
 }
@@ -66,12 +65,12 @@ void StructureDictionary::load(const std::string& path) {
   // Open file or abort if it does not exist
   std::ifstream file(path);
   if (!file.is_open()) {
-    std::cerr << "Error: Could not open file " << path << '\n';
+    asw::log::error("Could not open file {}", path);
     return;
   }
 
   // Get first node
-  std::cout << "Loading structures..." << '\n';
+  asw::log::info("Loading structures...");
 
   for (auto const& cTile : nlohmann::json::parse(file)) {
     // Numeric identifier
@@ -82,10 +81,6 @@ void StructureDictionary::load(const std::string& path) {
     std::string id_str = name;
     std::transform(id_str.begin(), id_str.end(), id_str.begin(), ::tolower);
     std::replace(id_str.begin(), id_str.end(), ' ', '_');
-
-    std::cout << "~ ID: " << id << '\n';
-    std::cout << "  Name: " << name << '\n';
-    std::cout << "  ID String: " << id_str << '\n';
 
     // Create structure
     auto structure = std::make_shared<StructureType>();
@@ -113,15 +108,15 @@ void StructureDictionary::load(const std::string& path) {
       }
     }
 
-    std::cout << "  Z: " << structure->dimensions.z << '\n';
-    std::cout << "  Y: " << structure->dimensions.y << '\n';
-    std::cout << "  X: " << structure->dimensions.x << '\n';
+    asw::log::debug("Structure {} ({}): {}, {}x{}x{}", id, id_str, name,
+                    structure->dimensions.x, structure->dimensions.y,
+                    structure->dimensions.z);
 
     // Add to types
     structures.push_back(structure);
   }
 
-  std::cout << "Loaded " << structures.size() << " structures" << '\n';
+  asw::log::info("Loaded {} structures", structures.size());
 
   // Close
   file.close();
