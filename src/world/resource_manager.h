@@ -3,7 +3,6 @@
 #include <asw/asw.h>
 #include <array>
 #include <fstream>
-#include <iostream>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -26,12 +25,12 @@ class ResourceManager {
     // Open file or abort if it does not exist
     std::ifstream file(path);
     if (!file.is_open()) {
-      std::cerr << "Error: Could not open file " << path << '\n';
+      asw::log::error("Could not open file {}", path);
       return;
     }
 
     // Get first node
-    std::cout << "Loading resources..." << '\n';
+    asw::log::info("Loading resources...");
 
     for (auto const& cTile : nlohmann::json::parse(file)) {
       // Numeric identifier
@@ -45,11 +44,8 @@ class ResourceManager {
       std::transform(id_str.begin(), id_str.end(), id_str.begin(), ::tolower);
       std::replace(id_str.begin(), id_str.end(), ' ', '_');
 
-      std::cout << "~ ID: " << id << '\n';
-      std::cout << "  Name: " << name << '\n';
-      std::cout << "  Description: " << description << '\n';
-      std::cout << "  Icon: " << icon_path << '\n';
-      std::cout << "  ID String: " << id_str << '\n';
+      asw::log::debug("Resource {} ({}): {}, icon {}", id, id_str, name,
+                      icon_path);
 
       // Create resource
       auto resource = std::make_shared<ResourceType>();
@@ -64,7 +60,7 @@ class ResourceManager {
       resources[id_str] = resource;
     }
 
-    std::cout << "Loaded " << resources.size() << " resources" << '\n';
+    asw::log::info("Loaded {} resources", resources.size());
 
     // Close
     file.close();
@@ -72,7 +68,7 @@ class ResourceManager {
 
   void addResourceCount(const std::string& type, int amount) {
     if (resources.find(type) == resources.end()) {
-      std::cerr << "Error: Resource type " << type << " not found." << '\n';
+      asw::log::error("Resource type {} not found", type);
       return;
     }
 
@@ -81,7 +77,7 @@ class ResourceManager {
 
   int getResourceCount(const std::string& type) const {
     if (resources.find(type) == resources.end()) {
-      std::cerr << "Error: Resource type " << type << " not found." << '\n';
+      asw::log::error("Resource type {} not found", type);
       return 0;
     }
 
@@ -90,7 +86,7 @@ class ResourceManager {
 
   std::shared_ptr<ResourceType> getResource(const std::string& type) const {
     if (resources.find(type) == resources.end()) {
-      std::cerr << "Error: Resource type " << type << " not found." << '\n';
+      asw::log::error("Resource type {} not found", type);
       return nullptr;
     }
 

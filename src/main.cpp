@@ -1,5 +1,7 @@
 #include <asw/asw.h>
 
+#include "./lib/controls.h"
+
 #include "./states/game.h"
 #include "./states/init.h"
 #include "./states/intro.h"
@@ -12,6 +14,8 @@ int main() {
   asw::core::init(1280, 960);
 
   asw::core::print_info();
+
+  controls::bind();
 
   auto app = asw::scene::SceneManager<ProgramState>();
   app.register_scene<Init>(ProgramState::Init, app);

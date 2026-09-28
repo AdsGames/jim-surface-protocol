@@ -2,7 +2,6 @@
 
 #include <asw/asw.h>
 #include <array>
-#include <iostream>
 #include <string>
 
 #include "../lib/project.h"

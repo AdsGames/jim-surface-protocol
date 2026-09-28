@@ -3,7 +3,6 @@
 #include <cmath>
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include <sstream>
 
 #include "../tiles/structure_dictionary.h"
 #include "../vendor/simplex_noise.h"
@@ -89,7 +88,7 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
       point.z += 1;
 
       if (action.spawn_structure_id.empty()) {
-        std::cerr << "Error: No structure ID provided" << std::endl;
+        asw::log::error("No structure ID provided");
         continue;
       }
 
@@ -101,7 +100,7 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
       point.z += 1;
 
       if (action.transition_tile_id.empty()) {
-        std::cerr << "Error: No tile ID provided" << std::endl;
+        asw::log::error("No tile ID provided");
         continue;
       }
 
@@ -346,7 +345,7 @@ void TileMap::draw_layer(const asw::Quad<float>& camera,
 }
 
 int TileMap::countByType(int type) const {
-  if (type < 0 || type >= tileCount.size()) {
+  if (type < 0 || static_cast<size_t>(type) >= tileCount.size()) {
     return 0;
   }
   return tileCount[type];

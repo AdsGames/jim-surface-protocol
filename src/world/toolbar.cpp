@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "../lib/controls.h"
+
 void Toolbar::init() {
   font = asw::assets::load_font("assets/fonts/syne-mono.ttf", 18);
   fontLarge = asw::assets::load_font("assets/fonts/syne-mono.ttf", 30);
@@ -31,8 +33,8 @@ void Toolbar::update(float dt, World& world) {
 
   auto const& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
-  auto const& mouse_pos = asw::input::mouse.position;
-  cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
+  auto const& mouse_pos = asw::input::get_mouse().position;
+  cursor_idx = tile_map.getIndexAt(camera.screen_to_world(mouse_pos));
   tile_map.setSelectedIndex(cursor_idx);
 
   // Find distance to worker
@@ -57,11 +59,11 @@ void Toolbar::update(float dt, World& world) {
     toolZoneAction(world);
   }
 
-  if (asw::input::get_key_down(asw::input::Key::Num1)) {
+  if (asw::input::get_action_down(controls::TOOL_DRILL)) {
     mode = ToolMode::DRILL;
-  } else if (asw::input::get_key_down(asw::input::Key::Num2)) {
+  } else if (asw::input::get_action_down(controls::TOOL_PURIFIER)) {
     mode = ToolMode::PURIFIER;
-  } else if (asw::input::get_key_down(asw::input::Key::Num3)) {
+  } else if (asw::input::get_action_down(controls::TOOL_TREE)) {
     mode = ToolMode::TREE;
   }
 
@@ -87,10 +89,10 @@ void Toolbar::toolZoneAction(World& world) {
   auto const& camera = world.getCamera();
   auto& resource_manager = world.getResourceManager();
   auto& player = world.getPlayer();
-  const auto& mouse_pos = asw::input::mouse.position;
+  const auto& mouse_pos = asw::input::get_mouse().position;
 
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
-  if (mouse_pos.y > camera.size.y - 160.0F) {
+  if (mouse_pos.y > camera.get_view().size.y - TOOLBAR_HEIGHT) {
     if (purifier_button_trans.contains(mouse_pos)) {
       mode = ToolMode::PURIFIER;
     } else if (tree_button_trans.contains(mouse_pos)) {
@@ -118,10 +120,10 @@ void Toolbar::action(World& world, float dt) {
   auto& tile_map = world.getTileMap();
   auto& resource_manager = world.getResourceManager();
   auto const& player = world.getPlayer();
-  const auto& mouse_pos = asw::input::mouse.position;
+  const auto& mouse_pos = asw::input::get_mouse().position;
 
   // Toolbar zone
-  if (mouse_pos.y > camera.size.y - TOOLBAR_HEIGHT) {
+  if (mouse_pos.y > camera.get_view().size.y - TOOLBAR_HEIGHT) {
     return;
   }
 
@@ -181,8 +183,8 @@ bool Toolbar::actionEnabled(World& world) {
   auto const& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
   auto const& resource_manager = world.getResourceManager();
-  const auto& mouse_pos = asw::input::mouse.position;
-  cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
+  const auto& mouse_pos = asw::input::get_mouse().position;
+  cursor_idx = tile_map.getIndexAt(camera.screen_to_world(mouse_pos));
 
   // Can place purifier
   const auto can_buy_purifier =
@@ -190,17 +192,11 @@ bool Toolbar::actionEnabled(World& world) {
   const auto can_buy_tree =
       resource_manager.getResourceCount("biomass") >= TREE_COST;
 
-  if (!can_buy_purifier) {
-    SDL_SetTextureColorMod(purifier_button.get(), 255, 150, 150);
-  } else {
-    SDL_SetTextureColorMod(purifier_button.get(), 255, 255, 255);
-  }
-
-  if (!can_buy_tree) {
-    SDL_SetTextureColorMod(tree_button.get(), 255, 150, 150);
-  } else {
-    SDL_SetTextureColorMod(tree_button.get(), 255, 255, 255);
-  }
+  const auto cant_buy_tint = asw::Color(255, 150, 150);
+  asw::draw::set_tint(purifier_button,
+                      can_buy_purifier ? asw::color::white : cant_buy_tint);
+  asw::draw::set_tint(tree_button,
+                      can_buy_tree ? asw::color::white : cant_buy_tint);
 
   // Find selected tile
   auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
@@ -240,30 +236,28 @@ bool Toolbar::actionEnabled(World& world) {
 }
 
 void Toolbar::draw(World& world) {
-  auto& camera = world.getCamera();
+  const auto view = world.getCamera().get_view();
   auto& tile_map = world.getTileMap();
   auto& resource_manager = world.getResourceManager();
-  const auto& mouse_pos = asw::input::mouse.position;
-  auto world_pos = camera.position + mouse_pos;
+  const auto& mouse_pos = asw::input::get_mouse().position;
+  auto world_pos = view.position + mouse_pos;
   auto* selected_tile = tile_map.getTileAt(world_pos);
   auto green = asw::Color(128, 255, 128);
 
   if (cursor_in_range && can_take_action) {
-    drawWireframe(cursor_idx, camera.position, green);
+    drawWireframe(cursor_idx, view.position, green);
   } else if (cursor_in_range) {
-    drawWireframe(cursor_idx, camera.position, asw::color::white);
+    drawWireframe(cursor_idx, view.position, asw::color::white);
   } else {
-    drawWireframe(cursor_idx, camera.position, asw::color::red);
+    drawWireframe(cursor_idx, view.position, asw::color::red);
   }
 
   // Overlay
   asw::draw::sprite(toolbar_ui, asw::Vec2<float>(0, 0));
 
   // Resource window
-  asw::draw::text(fontLarge, "Resources", asw::Vec2(1112.0F, 822.0F),
-                  asw::color::black);
-  asw::draw::text(fontLarge, "Resources", asw::Vec2(1110.0F, 820.0F),
-                  asw::color::white);
+  asw::draw::text_shadow(fontLarge, "Resources", asw::Vec2(1110.0F, 820.0F),
+                         asw::color::white);
 
   asw::draw::text(font, "Scrap", asw::Vec2(1110.0F, 868.0F), asw::color::white);
   asw::draw::text(font,
@@ -287,10 +281,8 @@ void Toolbar::draw(World& world) {
   auto canBuyColour = asw::Color(150, 255, 150, 255);
   auto cantBuyColour = asw::Color(255, 150, 150, 255);
 
-  asw::draw::text(fontLarge, "Upgrades", asw::Vec2(882.0F, 822.0F),
-                  asw::color::black);
-  asw::draw::text(fontLarge, "Upgrades", asw::Vec2(880.0F, 820.0F),
-                  asw::color::white);
+  asw::draw::text_shadow(fontLarge, "Upgrades", asw::Vec2(880.0F, 820.0F),
+                         asw::color::white);
 
   asw::draw::text(font, "Drill Speed: " + drill_speed,
                   asw::Vec2(882.0F, 858.0F), asw::color::white);
@@ -321,7 +313,7 @@ void Toolbar::draw(World& world) {
 
     // Camera pos
     asw::draw::text(
-        font, std::format("Cam: {}, {}", camera.position.x, camera.position.y),
+        font, std::format("Cam: {}, {}", view.position.x, view.position.y),
         asw::Vec2(183.0F, 865.0F), green);
 
     // Mouse pos
@@ -331,7 +323,7 @@ void Toolbar::draw(World& world) {
   }
 
   // Inspect window
-  else if (mouse_pos.y < camera.size.y - TOOLBAR_HEIGHT &&
+  else if (mouse_pos.y < view.size.y - TOOLBAR_HEIGHT &&
            selected_tile != nullptr) {
     auto tile_type = selected_tile->getType();
     auto tile_structure = selected_tile->getStructure();
@@ -472,8 +464,8 @@ void Toolbar::draw(World& world) {
 
     asw::draw::rect_fill(asw::Quad(mouse_pos.x + 4.0F, mouse_pos.y + 4 - 60,
                                    actionProgress * 2, 30.0F),
-                         asw::Color(255 - (255 / 100) * actionProgress,
-                                    255 + (255 / 100) * actionProgress, 0));
+                         asw::color::yellow.lerp(asw::Color(55, 255, 0),
+                                                 actionProgress / 100.0F));
 
     asw::draw::text(font, "Drilling...",
                     asw::Vec2(mouse_pos.x + 4.0F, mouse_pos.y - 60 + 4.0F),

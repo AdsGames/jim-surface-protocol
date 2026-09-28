@@ -5,7 +5,6 @@
 #include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <sstream>
 
 std::vector<std::shared_ptr<TileType>> TileDictionary::types;
 
@@ -21,7 +20,7 @@ std::shared_ptr<TileType> TileDictionary::getTile(int id) {
     return *found;
   }
 
-  std::cout << "Warning: Tile " << id << " not found" << '\n';
+  asw::log::warn("Tile {} not found", id);
 
   return nullptr;
 }
@@ -35,7 +34,7 @@ std::shared_ptr<TileType> TileDictionary::getTile(const std::string& id_str) {
     return *found;
   }
 
-  std::cout << "Warning: Tile " << id_str << " not found" << '\n';
+  asw::log::warn("Tile {} not found", id_str);
 
   return nullptr;
 }
@@ -44,12 +43,12 @@ void TileDictionary::load(const std::string& path) {
   // Open file or abort if it does not exist
   std::ifstream file(path);
   if (!file.is_open()) {
-    std::cerr << "Error: Could not open file " << path << '\n';
+    asw::log::error("Could not open file {}", path);
     return;
   }
 
   // Get first node
-  std::cout << "Loading tiles..." << '\n';
+  asw::log::info("Loading tiles...");
 
   for (auto const& cTile : nlohmann::json::parse(file)) {
     // Numeric identifier
@@ -61,10 +60,6 @@ void TileDictionary::load(const std::string& path) {
     std::transform(id_str.begin(), id_str.end(), id_str.begin(), ::tolower);
     std::replace(id_str.begin(), id_str.end(), ' ', '_');
 
-    std::cout << "~ ID: " << id << '\n';
-    std::cout << "  Name: " << name << '\n';
-    std::cout << "  ID String: " << id_str << '\n';
-
     // Create tile
     auto tile = std::make_shared<TileType>(id, name, id_str);
 
@@ -75,8 +70,6 @@ void TileDictionary::load(const std::string& path) {
       tile->addImage(tex);
       image_count++;
     }
-
-    std::cout << "  Images: " << image_count << '\n';
 
     // Render mode
     TileRenderMode render_mode = TileRenderMode::CUBE;
@@ -91,11 +84,9 @@ void TileDictionary::load(const std::string& path) {
       } else if (mode == "cube_top_only") {
         render_mode = TileRenderMode::CUBE_TOP_ONLY;
       } else {
-        std::cerr << "Error: Unknown render mode " << mode << '\n';
+        asw::log::error("Unknown render mode {}", mode.dump());
       }
     }
-
-    std::cout << "  Render Mode: " << static_cast<int>(render_mode) << '\n';
 
     // Alpha
     float alpha = 1.0F;
@@ -109,7 +100,7 @@ void TileDictionary::load(const std::string& path) {
         ActionResult result;
 
         if (!action.contains("type")) {
-          std::cerr << "Error: Action type not found" << '\n';
+          asw::log::error("Action type not found");
           continue;
         }
 
@@ -128,11 +119,12 @@ void TileDictionary::load(const std::string& path) {
             } else if (tick_type == "structure") {
               result.tick_type = TickType::STRUCTURE;
             } else {
-              std::cerr << "Error: Unknown tick type " << tick_type << '\n';
+              asw::log::error("Unknown tick type {}", tick_type.dump());
             }
           }
         } else {
-          std::cerr << "Error: Unknown action type " << action["type"] << '\n';
+          asw::log::error("Unknown action type {}",
+                          action["type"].dump());
           continue;
         }
 
@@ -156,14 +148,15 @@ void TileDictionary::load(const std::string& path) {
       }
     }
 
-    std::cout << "  Actions: " << tile->getActions().size() << '\n';
-
     if (cTile.contains("density")) {
       auto density = cTile["density"];
       tile->setDensity(density);
     }
 
-    std::cout << "  Density: " << tile->getDensity() << '\n';
+    asw::log::debug(
+        "Tile {} ({}): {}, {} images, render mode {}, {} actions, density {}",
+        id, id_str, name, image_count, static_cast<int>(render_mode),
+        tile->getActions().size(), tile->getDensity());
 
     // Bake texture
     tile->bakeTexture(render_mode, alpha);
@@ -172,7 +165,7 @@ void TileDictionary::load(const std::string& path) {
     types.push_back(tile);
   }
 
-  std::cout << "Loaded " << types.size() << " tiles" << '\n';
+  asw::log::info("Loaded {} tiles", types.size());
 
   // Close
   file.close();

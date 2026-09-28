@@ -2,6 +2,8 @@
 
 #include <asw/asw.h>
 
+#include "../lib/controls.h"
+
 #include "../tiles/structure_dictionary.h"
 #include "../tiles/tile_dictionary.h"
 #include "../tiles/tile_map.h"
@@ -26,12 +28,12 @@ void Menu::update(float dt) {
   timer += dt;
   frame = static_cast<int>(std::floor(timer)) % 6;
 
-  if (asw::input::get_key_down(asw::input::Key::Escape)) {
-    asw::core::exit = true;
+  if (asw::input::get_action_down(controls::BACK)) {
+    asw::core::exit();
   }
 
   if (asw::input::get_mouse_button_down(asw::input::MouseButton::Left)) {
-    const auto& mouse_pos = asw::input::mouse.position;
+    const auto& mouse_pos = asw::input::get_mouse().position;
     if (start_easy_transform.contains(mouse_pos)) {
       TileMap::MAP_WIDTH = 40;
       TileMap::MAP_DEPTH = 40;
@@ -43,14 +45,14 @@ void Menu::update(float dt) {
       TileMap::SEED = asw::random::between(0.0F, 10000.0F);
       manager.set_next_scene(ProgramState::Game);
     } else if (exit_transform.contains(mouse_pos)) {
-      asw::core::exit = true;
+      asw::core::exit();
     } else if (fullscreen_transform.contains(mouse_pos)) {
       fullscreen = !fullscreen;
       asw::display::set_fullscreen(fullscreen);
     }
   }
 
-  if (asw::input::get_key_down(asw::input::Key::F11)) {
+  if (asw::input::get_action_down(controls::FULLSCREEN)) {
     fullscreen = !fullscreen;
     asw::display::set_fullscreen(fullscreen);
   }
