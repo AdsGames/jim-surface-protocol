@@ -200,13 +200,13 @@ void TileType::renderCube(int texture_count, int face_count) {
 
     // Special top face
     if (f == 0 && texture_count == 2 && images.size() > 1) {
-      SDL_RenderGeometry(asw::display::renderer, images.at(1).get(), verts, 4,
+      SDL_RenderGeometry(asw::display::get_renderer(), images.at(1).get(), verts, 4,
                          RENDER_ORDER, 6);
     }
 
     // Default cube
     else {
-      SDL_RenderGeometry(asw::display::renderer, images.at(0).get(), verts, 4,
+      SDL_RenderGeometry(asw::display::get_renderer(), images.at(0).get(), verts, 4,
                          RENDER_ORDER, 6);
     }
   }

@@ -31,7 +31,7 @@ void Toolbar::update(float dt, World& world) {
 
   auto const& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
-  auto const& mouse_pos = asw::input::mouse.position;
+  auto const& mouse_pos = asw::input::get_mouse().position;
   cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
   tile_map.setSelectedIndex(cursor_idx);
 
@@ -87,7 +87,7 @@ void Toolbar::toolZoneAction(World& world) {
   auto const& camera = world.getCamera();
   auto& resource_manager = world.getResourceManager();
   auto& player = world.getPlayer();
-  const auto& mouse_pos = asw::input::mouse.position;
+  const auto& mouse_pos = asw::input::get_mouse().position;
 
   // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
   if (mouse_pos.y > camera.size.y - 160.0F) {
@@ -118,7 +118,7 @@ void Toolbar::action(World& world, float dt) {
   auto& tile_map = world.getTileMap();
   auto& resource_manager = world.getResourceManager();
   auto const& player = world.getPlayer();
-  const auto& mouse_pos = asw::input::mouse.position;
+  const auto& mouse_pos = asw::input::get_mouse().position;
 
   // Toolbar zone
   if (mouse_pos.y > camera.size.y - TOOLBAR_HEIGHT) {
@@ -181,7 +181,7 @@ bool Toolbar::actionEnabled(World& world) {
   auto const& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
   auto const& resource_manager = world.getResourceManager();
-  const auto& mouse_pos = asw::input::mouse.position;
+  const auto& mouse_pos = asw::input::get_mouse().position;
   cursor_idx = tile_map.getIndexAt(camera.position + mouse_pos);
 
   // Can place purifier
@@ -243,7 +243,7 @@ void Toolbar::draw(World& world) {
   auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
   auto& resource_manager = world.getResourceManager();
-  const auto& mouse_pos = asw::input::mouse.position;
+  const auto& mouse_pos = asw::input::get_mouse().position;
   auto world_pos = camera.position + mouse_pos;
   auto* selected_tile = tile_map.getTileAt(world_pos);
   auto green = asw::Color(128, 255, 128);

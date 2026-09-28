@@ -32,16 +32,16 @@ void World::update(float dt) {
 
   // Mouse movement
   auto screen_size = asw::display::get_logical_size();
-  if (asw::input::mouse.position.x >= screen_size.x - 4) {
+  if (asw::input::get_mouse().position.x >= screen_size.x - 4) {
     camera.position.x += 10;
   }
-  if (asw::input::mouse.position.x <= 4) {
+  if (asw::input::get_mouse().position.x <= 4) {
     camera.position.x -= 10;
   }
-  if (asw::input::mouse.position.y >= screen_size.y - 4) {
+  if (asw::input::get_mouse().position.y >= screen_size.y - 4) {
     camera.position.y += 10;
   }
-  if (asw::input::mouse.position.y <= 4) {
+  if (asw::input::get_mouse().position.y <= 4) {
     camera.position.y -= 10;
   }
 

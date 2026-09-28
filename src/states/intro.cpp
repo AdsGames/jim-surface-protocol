@@ -11,12 +11,12 @@ void Intro::init() {
   font_small = asw::assets::load_font("assets/fonts/syne-mono.ttf", 96);
 
   music = asw::assets::load_music("assets/music/intro.ogg");
-  asw::sound::play_music(music, 64.0F);
+  asw::sound::play_music(music);
 }
 
 void Intro::update(float dt) {
   timer += dt;
-  if (timer > 2.0f || asw::input::keyboard.any_pressed) {
+  if (timer > 2.0f || asw::input::get_keyboard().any_pressed) {
     manager.set_next_scene(ProgramState::Menu);
   }
 }
