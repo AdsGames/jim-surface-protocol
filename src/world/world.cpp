@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "../lib/controls.h"
 #include "toolbar.h"
 
 namespace {
@@ -36,22 +37,18 @@ void World::init() {
 }
 
 void World::update(float dt) {
-  // Keybo movement
+  // Keyboard and controller movement
   auto pan = asw::Vec2<float>(0.0F, 0.0F);
-  if (asw::input::get_key(asw::input::Key::A) ||
-      asw::input::get_key(asw::input::Key::Left)) {
+  if (asw::input::get_action(controls::CAMERA_LEFT)) {
     pan.x -= CAMERA_PAN_SPEED;
   }
-  if (asw::input::get_key(asw::input::Key::D) ||
-      asw::input::get_key(asw::input::Key::Right)) {
+  if (asw::input::get_action(controls::CAMERA_RIGHT)) {
     pan.x += CAMERA_PAN_SPEED;
   }
-  if (asw::input::get_key(asw::input::Key::W) ||
-      asw::input::get_key(asw::input::Key::Up)) {
+  if (asw::input::get_action(controls::CAMERA_UP)) {
     pan.y -= CAMERA_PAN_SPEED;
   }
-  if (asw::input::get_key(asw::input::Key::S) ||
-      asw::input::get_key(asw::input::Key::Down)) {
+  if (asw::input::get_action(controls::CAMERA_DOWN)) {
     pan.y += CAMERA_PAN_SPEED;
   }
 

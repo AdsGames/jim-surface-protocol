@@ -2,6 +2,8 @@
 
 #include <asw/asw.h>
 
+#include "../lib/controls.h"
+
 #include "../tiles/structure_dictionary.h"
 #include "../tiles/tile_dictionary.h"
 
@@ -16,7 +18,7 @@ void Intro::init() {
 
 void Intro::update(float dt) {
   timer += dt;
-  if (timer > 2.0f || asw::input::get_keyboard().any_pressed) {
+  if (timer > 2.0f || controls::any_skip()) {
     manager.set_next_scene(ProgramState::Menu);
   }
 }

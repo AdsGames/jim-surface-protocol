@@ -2,6 +2,8 @@
 
 #include <asw/asw.h>
 
+#include "../lib/controls.h"
+
 #include "../tiles/structure_dictionary.h"
 #include "../tiles/tile_dictionary.h"
 #include "../tiles/tile_map.h"
@@ -26,7 +28,7 @@ void Menu::update(float dt) {
   timer += dt;
   frame = static_cast<int>(std::floor(timer)) % 6;
 
-  if (asw::input::get_key_down(asw::input::Key::Escape)) {
+  if (asw::input::get_action_down(controls::BACK)) {
     asw::core::exit();
   }
 
@@ -50,7 +52,7 @@ void Menu::update(float dt) {
     }
   }
 
-  if (asw::input::get_key_down(asw::input::Key::F11)) {
+  if (asw::input::get_action_down(controls::FULLSCREEN)) {
     fullscreen = !fullscreen;
     asw::display::set_fullscreen(fullscreen);
   }

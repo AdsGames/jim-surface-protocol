@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "../lib/controls.h"
 #include "../tiles/tile_dictionary.h"
 
 void Game::init() {
@@ -17,7 +18,7 @@ void Game::update(float dt) {
   world.update(dt);
   toolbar.update(dt, world);
 
-  if (asw::input::get_key_down(asw::input::Key::Escape)) {
+  if (asw::input::get_action_down(controls::BACK)) {
     manager.set_next_scene(ProgramState::Menu);
   }
 }

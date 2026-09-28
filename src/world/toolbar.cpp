@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "../lib/controls.h"
+
 void Toolbar::init() {
   font = asw::assets::load_font("assets/fonts/syne-mono.ttf", 18);
   fontLarge = asw::assets::load_font("assets/fonts/syne-mono.ttf", 30);
@@ -57,11 +59,11 @@ void Toolbar::update(float dt, World& world) {
     toolZoneAction(world);
   }
 
-  if (asw::input::get_key_down(asw::input::Key::Num1)) {
+  if (asw::input::get_action_down(controls::TOOL_DRILL)) {
     mode = ToolMode::DRILL;
-  } else if (asw::input::get_key_down(asw::input::Key::Num2)) {
+  } else if (asw::input::get_action_down(controls::TOOL_PURIFIER)) {
     mode = ToolMode::PURIFIER;
-  } else if (asw::input::get_key_down(asw::input::Key::Num3)) {
+  } else if (asw::input::get_action_down(controls::TOOL_TREE)) {
     mode = ToolMode::TREE;
   }
 
