@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/target)
 
 include(cmake/get_cpm.cmake)
-CPMAddPackage("gh:adsgames/asw@0.12.1")
+CPMAddPackage("gh:adsgames/asw@0.12.3")
 CPMAddPackage("gh:nlohmann/json@3.11.3")
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
@@ -21,22 +21,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   nlohmann_json::nlohmann_json
 )
 
-if(EMSCRIPTEN)
-  set_target_properties(${PROJECT_NAME} PROPERTIES
-    OUTPUT_NAME "index"
-    SUFFIX ".html"
-  )
+asw_add_web_target(${PROJECT_NAME}
+  TITLE "J1M Surface Protocol"
+  BACKGROUND "#000000"
+  ASSETS ${CMAKE_CURRENT_LIST_DIR}/assets
+)
 
+if(EMSCRIPTEN)
   target_link_options(${PROJECT_NAME} PRIVATE
-    -sWASM=1
-    -sALLOW_MEMORY_GROWTH=1
     -sMAXIMUM_MEMORY=1gb
     -sSTACK_SIZE=32mb
     -sINITIAL_MEMORY=64mb
-  )
-
-  set_target_properties(${PROJECT_NAME} PROPERTIES
-    LINK_FLAGS "--preload-file ${CMAKE_CURRENT_LIST_DIR}/assets@/assets --use-preload-plugins --shell-file ${CMAKE_CURRENT_LIST_DIR}/index.html"
+    --use-preload-plugins
   )
 endif()
 
