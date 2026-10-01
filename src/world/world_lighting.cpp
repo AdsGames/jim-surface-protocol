@@ -1,5 +1,7 @@
 #include "world_lighting.h"
 
+#include <algorithm>
+
 #include "../lib/project.h"
 #include "../tiles/tile_ids.h"
 #include "world.h"
@@ -53,7 +55,14 @@ void WorldLighting::update(float dt, World& world) {
 
   // Ambient moves from the toxic day to the clean day as the world is purified
   const float clean = asw::easing::smoothstep(world.getProgression());
-  light_map.set_ambient(toxic_cycle.at(time).lerp(clean_cycle.at(time), clean));
+  const auto ambient = toxic_cycle.at(time).lerp(clean_cycle.at(time), clean);
+  light_map.set_ambient(ambient);
+
+  // Brightness of the ambient light, as the eye sees it
+  const float brightness =
+      ((0.299F * ambient.r) + (0.587F * ambient.g) + (0.114F * ambient.b)) /
+      255.0F;
+  darkness = std::clamp((0.7F - brightness) / 0.45F, 0.0F, 1.0F);
 
   glow_timer += dt;
   if (glow_timer >= GLOW_INTERVAL) {
@@ -70,7 +79,8 @@ void WorldLighting::update(float dt, World& world) {
   const auto& position = world.getPlayer().getPosition();
   asw::lighting::Light lamp;
   lamp.position = asw::Vec2(isoXf(position) * TILE_HEIGHT_F + TILE_HEIGHT_F,
-                            isoYf(position) * TILE_HEIGHT_F + TILE_HEIGHT_F);
+                            isoYf(position) * TILE_HEIGHT_F + TILE_HEIGHT_F +
+                                world.getPlayer().getSurfaceDrop());
   lamp.radius = 180.0F;
   lamp.color = WORKER_LIGHT;
   lamp.intensity = 0.8F;
@@ -81,11 +91,9 @@ void WorldLighting::update(float dt, World& world) {
 
   // Beacon on the waypoint
   if (world.getWaypointActive()) {
-    const auto waypoint = world.getPlayerWaypoint();
     asw::lighting::Light beacon;
     beacon.position =
-        asw::Vec2(isoX(waypoint) * TILE_HEIGHT_F + TILE_HEIGHT_F,
-                  isoY(waypoint) * TILE_HEIGHT_F + TILE_HEIGHT_F / 2);
+        world.getTileMap().getSurfaceOf(world.getPlayerWaypoint()).center();
     beacon.radius = 90.0F;
     beacon.color = WAYPOINT_LIGHT;
     beacon.pulse = 0.4F;
@@ -111,17 +119,19 @@ void WorldLighting::computeGlow(World& world) {
     tile_light->set_falloff(GLOW_FALLOFF);
   }
 
-  top_z.assign(static_cast<std::size_t>(width * depth), 0);
+  surfaces.assign(static_cast<std::size_t>(width * depth), std::nullopt);
   tile_light->clear_lights();
 
   for (int i = 0; i < width; ++i) {
     for (int j = 0; j < depth; ++j) {
-      const auto* top = tile_map.getTopTileAt({i, j});
-      const int z = top != nullptr ? top->getPosition().z : 0;
-      top_z[(i * depth) + j] = z;
+      // Items do not block glow, so the height is the ground's
+      const auto surface = tile_map.getSurface({i, j});
+      surfaces[(i * depth) + j] = surface;
+      const int z = surface ? surface->index.z : 0;
       tile_light->set_solid(i, j, z >= SOLID_HEIGHT);
 
-      if (top != nullptr && top->getTypeId() == tile_id::TOXIC_WATER) {
+      if (surface && tile_map.getTileAtIndex(surface->index)->getTypeId() ==
+                         tile_id::TOXIC_WATER) {
         tile_light->add_light(i, j, TOXIC_GLOW);
       }
 
@@ -167,7 +177,12 @@ void WorldLighting::renderGlow() {
         continue;
       }
 
-      auto face = isoDiamond({i, j, top_z[(i * depth) + j]}, TILE_HEIGHT_F);
+      const auto& surface = surfaces[(i * depth) + j];
+      if (!surface) {
+        continue;
+      }
+
+      auto face = surface->face();
       for (auto& point : face) {
         point = (point - glow_bounds.position) * GLOW_SCALE;
       }

@@ -50,6 +50,7 @@ void Game::init() {
   ui.root.clear_children();
   ui.ctx.theme.font = font_ui;
   ui.ctx.theme.toast.margin = 60.0F;
+  ui.ctx.theme.sound_activate = asw::assets::load_sample("assets/sfx/ui.ogg");
 
   // White ring, so focus does not look like the yellow chosen tool frame
   ui.ctx.theme.focus_ring = {
@@ -99,6 +100,8 @@ void Game::update(float dt) {
   // against was_busy, so the same press does not reach the world
   const bool pointer_used_by_ui = ui.update();
   if (ui.has_modal()) {
+    // The toolbar does not update under a menu, so stop the drill here
+    world.getSounds().setDrilling(false);
     return;
   }
 
@@ -158,6 +161,12 @@ void Game::draw() {
   }
 }
 
+void Game::cleanup() {
+  // The stage music and ambience belong to this playthrough
+  asw::sound::stop_music();
+  world.getSounds().stop();
+}
+
 void Game::checkMilestones() {
   const float progression = world.getProgression();
 
@@ -197,8 +206,10 @@ void Game::openPauseMenu() {
     modal.close();
     if (saveGame()) {
       ui.toast("Game saved");
+      world.getSounds().play("three_tone_2");
     } else {
       ui.toast({.text = "Could not save", .color = asw::color::red});
+      world.getSounds().play("blocked");
     }
   });
 

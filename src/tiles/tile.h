@@ -34,7 +34,8 @@ class Tile {
   void draw(const asw::Vec2<float>& offset,
             bool left_border,
             bool right_border,
-            bool selected) const;
+            bool selected,
+            float scale = 1.0F) const;
 
  private:
   int meta{0};

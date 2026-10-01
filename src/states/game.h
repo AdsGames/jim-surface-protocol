@@ -14,6 +14,7 @@ class Game : public asw::scene::Scene<ProgramState> {
   void init() override;
   void update(float dt) override;
   void draw() override;
+  void cleanup() override;
 
  private:
   // Toast when the world passes a purity milestone

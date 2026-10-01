@@ -36,6 +36,8 @@ class Menu : public asw::scene::Scene<ProgramState> {
 
   asw::ui::Root ui;
 
+  asw::Music music;
+
   float timer{0.0F};
   int frame{0};
   bool fullscreen{false};

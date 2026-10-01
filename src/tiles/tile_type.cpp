@@ -44,6 +44,25 @@ const int RENDER_ORDER[] = {0, 1, 2, 2, 3, 0};
 TileType::TileType(short id, const std::string& name, const std::string& id_str)
     : id(id), name(name), id_str(id_str) {}
 
+void TileType::drawGhost(const asw::Vec3<int>& position,
+                         const asw::Vec2<float>& offset,
+                         asw::Color tint,
+                         float alpha) {
+  if (image == nullptr) {
+    return;
+  }
+
+  const auto iso_pos =
+      asw::Vec2(isoX(position) * TILE_HEIGHT_F, isoY(position) * TILE_HEIGHT_F) -
+      offset + asw::Vec2(0.0F, surfaceDrop());
+
+  asw::draw::set_tint(image, tint);
+  asw::draw::set_alpha(image, base_alpha * alpha);
+  asw::draw::sprite(image, iso_pos);
+  asw::draw::set_tint(image, asw::color::white);
+  asw::draw::set_alpha(image, base_alpha);
+}
+
 short TileType::getId() const {
   return id;
 }
@@ -83,7 +102,8 @@ void TileType::draw(const asw::Vec3<int>& position,
                     const asw::Vec2<float>& offset,
                     bool left_border,
                     bool right_border,
-                    bool selected) {
+                    bool selected,
+                    float scale) {
   // Render image
   if (image == nullptr) {
     return;
@@ -103,8 +123,16 @@ void TileType::draw(const asw::Vec3<int>& position,
 
   auto iso_pos = asw::Vec2(iso_x, iso_y);
 
-  if (render_mode == TileRenderMode::CUBE_TOP_ONLY) {
-    iso_pos.y += TILE_SIZE * 0.2F;
+  iso_pos.y += surfaceDrop();
+
+  // Scaled tiles grow from the middle of their base, e.g. a new building
+  // popping in. They skip the edge lines, which would not match
+  if (scale != 1.0F) {
+    const float size = TILE_SIZE * scale;
+    asw::draw::stretch_sprite(
+        image, asw::Quad(iso_pos.x + ((TILE_SIZE - size) / 2.0F),
+                         iso_pos.y + (TILE_SIZE - size), size, size));
+    return;
   }
 
   asw::draw::sprite(image, iso_pos);
@@ -170,6 +198,7 @@ void TileType::bakeTexture(TileRenderMode mode, float alpha) {
   // Reset the render target to the default
   asw::display::set_render_target(nullptr);
 
+  base_alpha = alpha;
   if (alpha < 1.0F) {
     asw::draw::set_alpha(image, alpha);
   }

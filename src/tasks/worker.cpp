@@ -1,8 +1,18 @@
 #include "worker.h"
 
+#include <algorithm>
+#include <cmath>
 #include <numbers>
 
 #include "../world/world.h"
+
+namespace {
+// How fast the worker eases up and down steps, per second
+constexpr float HEIGHT_EASE_RATE = 18.0F;
+
+// Height changes bigger than this, in blocks, snap, e.g. after a rescue
+constexpr float MAX_EASED_STEP = 2.0F;
+}  // namespace
 
 WorkerId Worker::idCounter = 0;
 
@@ -25,6 +35,8 @@ void Worker::setPosition(const asw::Vec3<int>& pos) {
   asw::Vec3<float> posF(static_cast<float>(pos.x), static_cast<float>(pos.y),
                         static_cast<float>(pos.z));
   position = posF;
+  path.clear();
+  moving = false;
 }
 
 const asw::Vec3<float>& Worker::getPosition() const {
@@ -35,59 +47,77 @@ WorkerId Worker::getId() const {
   return id;
 }
 
+void Worker::setPath(const std::vector<asw::Vec2<int>>& columns) {
+  path.assign(columns.begin(), columns.end());
+}
+
+std::vector<asw::Vec2<int>> Worker::getColumns() const {
+  std::vector<asw::Vec2<int>> columns = {
+      {static_cast<int>(std::round(position.x)),
+       static_cast<int>(std::round(position.y))}};
+  columns.insert(columns.end(), path.begin(), path.end());
+  return columns;
+}
+
 void Worker::update(float dt, World& world) {
-  auto waypoint = world.getPlayerWaypoint();
-  auto& player = world.getPlayer();
   auto& tile_map = world.getTileMap();
 
-  // Move to waypoint
-  const auto waypoint_xy = asw::Vec2<float>(waypoint.x, waypoint.y);
-  const auto position_xy = asw::Vec2<float>(position.x, position.y);
-  const float speed = 3.0F * player.getMoveSpeed();
-  const float move = speed * dt;
+  // Drive along the route, through as many columns as this frame allows
+  float left = 3.0F * static_cast<float>(moveSpeed) * dt;
+  moving = false;
+  while (!path.empty() && left > 0.0F) {
+    const auto target = asw::Vec2<float>(static_cast<float>(path.front().x),
+                                         static_cast<float>(path.front().y));
+    const auto here = asw::Vec2<float>(position.x, position.y);
+    const float distance = here.distance(target);
 
-  if (position_xy.distance(waypoint_xy) > 0.1F) {
-    auto angle = asw::Vec2(position.x, position.y).angle(waypoint_xy);
-    if (angle < 0) {
-      angle += std::numbers::pi_v<float> * 2;
+    if (distance > 0.001F) {
+      auto angle = here.angle(target);
+      if (angle < 0) {
+        angle += std::numbers::pi_v<float> * 2;
+      }
+      direction = static_cast<int>(
+                      std::round(angle / (std::numbers::pi_v<float> / 4))) %
+                  8;
     }
 
-    direction =
-        static_cast<int>(std::round(angle / (std::numbers::pi_v<float> / 4))) %
-        8;
-
-    auto dir = asw::Vec3<float>(0, 0, 0);
-
-    if (std::abs(position.x - waypoint_xy.x) < move) {
-      position.x = waypoint_xy.x;
-    } else if (position.x < waypoint.x) {
-      dir.x = move;
-    } else if (position.x > waypoint_xy.x) {
-      dir.x = -move;
+    if (distance <= left) {
+      position.x = target.x;
+      position.y = target.y;
+      left -= distance;
+      path.pop_front();
+    } else {
+      const auto step = (target - here) * (left / distance);
+      position.x += step.x;
+      position.y += step.y;
+      left = 0.0F;
     }
+    moving = true;
+  }
 
-    if (std::abs(position.y - waypoint_xy.y) < move) {
-      position.y = waypoint_xy.y;
-    } else if (position.y < waypoint_xy.y) {
-      dir.y = move;
-    } else if (position.y > waypoint_xy.y) {
-      dir.y = -move;
-    }
-
-    position += dir;
-  } else {
-    position.x = waypoint_xy.x;
-    position.y = waypoint_xy.y;
+  if (moving) {
+    bob_time += dt;
+  } else if (world.getWaypointActive()) {
     world.setWaypointActive(false);
   }
 
-  // Snap z to top tile
-  const auto* top_tile = tile_map.getTopTileAt(
-      asw::Vec2(static_cast<int>(std::round(position.x)),
-                static_cast<int>(std::round(position.y))));
+  // Stand on the ground: on top of blocks and water, not on items, which
+  // the worker drives through
+  const auto surface =
+      tile_map.getSurface(asw::Vec2(static_cast<int>(std::round(position.x)),
+                                    static_cast<int>(std::round(position.y))));
 
-  if (top_tile != nullptr) {
-    position.z = top_tile->getPosition().z + 1.0F;
+  // Ease up and down steps, so the worker does not pop between heights
+  if (surface) {
+    const float target_z = static_cast<float>(surface->index.z) + 1.0F;
+    const float ease = std::min(1.0F, dt * HEIGHT_EASE_RATE);
+    if (std::abs(target_z - position.z) > MAX_EASED_STEP) {
+      position.z = target_z;
+      surface_drop = surface->drop;
+    } else {
+      position.z += (target_z - position.z) * ease;
+      surface_drop += (surface->drop - surface_drop) * ease;
+    }
   }
 }
 
@@ -95,11 +125,17 @@ void Worker::draw(const asw::Vec2<float>& offset) {
   auto iso_x = isoXf(position);
   auto iso_y = isoYf(position);
 
-  auto screen_size =
-      asw::Quad(iso_x * TILE_HEIGHT_F - offset.x,
-                iso_y * TILE_HEIGHT_F - offset.y + TILE_HEIGHT_F * 0.25F,
-                TILE_WIDTH_F, TILE_WIDTH_F);
+  auto screen_size = asw::Quad(
+      iso_x * TILE_HEIGHT_F - offset.x,
+      iso_y * TILE_HEIGHT_F - offset.y + TILE_HEIGHT_F * 0.25F + surface_drop,
+      TILE_WIDTH_F, TILE_WIDTH_F);
 
   asw::draw::stretch_sprite(shadow, screen_size);
-  asw::draw::stretch_sprite(textures[direction], screen_size);
+
+  // Bob on the tracks while walking. The shadow stays on the ground
+  auto body = screen_size;
+  if (moving) {
+    body.position.y -= std::abs(std::sin(bob_time * 14.0F)) * 3.0F;
+  }
+  asw::draw::stretch_sprite(textures[direction], body);
 }

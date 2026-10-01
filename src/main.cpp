@@ -17,6 +17,9 @@ int main() {
 
   controls::bind();
 
+  // Every UI click plays on this bus, from the menus and the toolbar
+  asw::sound::set_bus_volume(asw::sound::Bus::Ui, 0.5F);
+
   auto app = asw::scene::SceneManager<ProgramState>();
   app.register_scene<Init>(ProgramState::Init, app);
   app.register_scene<Game>(ProgramState::Game, app);
