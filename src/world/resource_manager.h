@@ -1,11 +1,11 @@
 #pragma once
 
 #include <asw/asw.h>
-#include <array>
-#include <fstream>
 #include <map>
-#include <nlohmann/json.hpp>
+#include <memory>
 #include <string>
+
+#include "../lib/json_util.h"
 
 class ResourceType {
  public:
@@ -22,48 +22,42 @@ class ResourceManager {
   ResourceManager() = default;
 
   void load(const std::string& path) {
-    // Open file or abort if it does not exist
-    std::ifstream file(path);
-    if (!file.is_open()) {
-      asw::log::error("Could not open file {}", path);
+    resources.clear();
+
+    const auto data = json_util::parse_file(path);
+    if (!data || !data->is_array()) {
+      asw::log::error("Resources in {} must be a list", path);
       return;
     }
 
-    // Get first node
     asw::log::info("Loading resources...");
 
-    for (auto const& cTile : nlohmann::json::parse(file)) {
-      // Numeric identifier
-      const short id = cTile["id"];
-      std::string name = cTile["name"];
-      std::string description = cTile["description"];
-      std::string icon_path = cTile["icon"];
+    for (const auto& cResource : *data) {
+      const auto name = json_util::get_string(cResource, "name");
+      if (name.empty()) {
+        asw::log::error("Resource has no name, skipped");
+        continue;
+      }
 
-      // Parse name
-      std::string id_str = name;
-      std::transform(id_str.begin(), id_str.end(), id_str.begin(), ::tolower);
-      std::replace(id_str.begin(), id_str.end(), ' ', '_');
-
-      asw::log::debug("Resource {} ({}): {}, icon {}", id, id_str, name,
-                      icon_path);
-
-      // Create resource
       auto resource = std::make_shared<ResourceType>();
+      resource->id = json_util::get_number(cResource, "id", 0);
+      resource->id_str = json_util::to_id_string(name);
       resource->name = name;
-      resource->description = description;
-      resource->icon = asw::assets::load_texture(icon_path);
-      resource->id = id;
-      resource->id_str = id_str;
+      resource->description = json_util::get_string(cResource, "description");
       resource->amount = 0;
 
-      // Add to types
-      resources[id_str] = resource;
+      const auto icon_path = json_util::get_string(cResource, "icon");
+      if (!icon_path.empty()) {
+        resource->icon = asw::assets::load_texture(icon_path);
+      }
+
+      asw::log::debug("Resource {} ({}): {}, icon {}", resource->id,
+                      resource->id_str, name, icon_path);
+
+      resources[resource->id_str] = resource;
     }
 
     asw::log::info("Loaded {} resources", resources.size());
-
-    // Close
-    file.close();
   }
 
   void addResourceCount(const std::string& type, int amount) {

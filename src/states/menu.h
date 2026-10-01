@@ -2,6 +2,8 @@
 
 #include <asw/asw.h>
 #include <array>
+#include <functional>
+#include <string>
 
 #include "state.h"
 
@@ -15,6 +17,15 @@ class Menu : public asw::scene::Scene<ProgramState> {
   void cleanup() override;
 
  private:
+  // Start a new map, with sizes and seed from the config file if it has them
+  void startNewGame(int size, float seed);
+
+  void toggleFullscreen();
+
+  asw::ui::Button& addButton(asw::ui::Stack& list,
+                             const std::string& text,
+                             std::function<void()> on_click);
+
   asw::Texture background;
   asw::Texture jim;
   std::array<asw::Texture, 6> jims;
@@ -23,10 +34,7 @@ class Menu : public asw::scene::Scene<ProgramState> {
   asw::Font font_small;
   asw::Font font_button;
 
-  asw::Quad<float> start_easy_transform{40.0F, 740.0F, 300.0F, 50.0F};
-  asw::Quad<float> start_hard_transform{40.0F, 780.0F, 300.0F, 50.0F};
-  asw::Quad<float> fullscreen_transform{40.0F, 820.0F, 300.0F, 50.0F};
-  asw::Quad<float> exit_transform{40.0F, 860.0F, 300.0F, 50.0F};
+  asw::ui::Root ui;
 
   float timer{0.0F};
   int frame{0};

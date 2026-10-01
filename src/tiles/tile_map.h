@@ -2,6 +2,7 @@
 
 #include <asw/asw.h>
 #include <array>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
@@ -36,6 +37,10 @@ class TileMap {
   void setSelectedIndex(const asw::Vec3<int>& index) { selected_index = index; }
 
   int countByType(int type) const;
+
+  // Map size, seed and tile types. Structure links are not kept
+  nlohmann::json save() const;
+  void load(const nlohmann::json& data);
 
   static int MAP_WIDTH;
   static int MAP_DEPTH;

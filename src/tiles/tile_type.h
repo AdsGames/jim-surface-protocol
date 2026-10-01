@@ -40,6 +40,7 @@ class TileType {
   const asw::Quad<float>& getBoundingBox() const;
 
   void addImage(asw::Texture image);
+  std::size_t getImageCount() const { return images.size(); }
 
   // Action Zone
   void addAction(const ActionResult& action);

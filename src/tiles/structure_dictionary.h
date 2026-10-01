@@ -3,6 +3,7 @@
 #include <asw/asw.h>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class StructureType {
@@ -13,7 +14,7 @@ class StructureType {
   std::string description;
   asw::Vec3<int> dimensions;
   std::vector<int> tiles;
-  int tile_count;
+  int tile_count{0};
 };
 
 class Structure {
@@ -21,6 +22,7 @@ class Structure {
   Structure();
 
   void setPosition(const asw::Vec3<int>& position);
+  const asw::Vec3<int>& getPosition() const { return position; }
 
   std::shared_ptr<StructureType> getType() const;
 
@@ -46,4 +48,6 @@ class StructureDictionary {
 
  private:
   static std::vector<std::shared_ptr<StructureType>> structures;
+  static std::unordered_map<std::string, std::shared_ptr<StructureType>>
+      structures_by_name;
 };

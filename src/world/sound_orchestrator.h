@@ -19,4 +19,7 @@ class SoundOrchestrator {
 
   float last_progression{0.0F};
   float progression_timer{0.0F};
+
+  // False until the first update, so a loaded world plays no old stings
+  bool primed{false};
 };

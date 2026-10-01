@@ -2,9 +2,10 @@
 
 #include <asw/asw.h>
 #include <algorithm>
-#include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
+
+#include "../lib/json_util.h"
 
 /// Structure Instance
 ///
@@ -31,6 +32,8 @@ int Structure::getId() const {
 /// Structure Type
 ///
 std::vector<std::shared_ptr<StructureType>> StructureDictionary::structures;
+std::unordered_map<std::string, std::shared_ptr<StructureType>>
+    StructureDictionary::structures_by_name;
 
 /// Structure Dictionary
 ///
@@ -49,11 +52,9 @@ std::shared_ptr<StructureType> StructureDictionary::getStructure(int id) {
 
 std::shared_ptr<StructureType> StructureDictionary::getStructure(
     const std::string& id_str) {
-  auto found = std::find_if(structures.begin(), structures.end(),
-                            [&id_str](auto& t) { return t->id_str == id_str; });
-
-  if (found != structures.end()) {
-    return *found;
+  const auto found = structures_by_name.find(id_str);
+  if (found != structures_by_name.end()) {
+    return found->second;
   }
 
   asw::log::warn("Structure {} not found", id_str);
@@ -62,62 +63,79 @@ std::shared_ptr<StructureType> StructureDictionary::getStructure(
 }
 
 void StructureDictionary::load(const std::string& path) {
-  // Open file or abort if it does not exist
-  std::ifstream file(path);
-  if (!file.is_open()) {
-    asw::log::error("Could not open file {}", path);
+  const auto data = json_util::parse_file(path);
+  if (!data || !data->is_array()) {
+    asw::log::error("Structures in {} must be a list", path);
     return;
   }
 
-  // Get first node
   asw::log::info("Loading structures...");
 
-  for (auto const& cTile : nlohmann::json::parse(file)) {
-    // Numeric identifier
-    const short id = cTile["id"];
-    std::string name = cTile["name"];
+  structures.clear();
+  structures_by_name.clear();
 
-    // Parse name
-    std::string id_str = name;
-    std::transform(id_str.begin(), id_str.end(), id_str.begin(), ::tolower);
-    std::replace(id_str.begin(), id_str.end(), ' ', '_');
+  for (const auto& cStructure : *data) {
+    const int id = json_util::get_number(cStructure, "id", 0);
+    const auto name = json_util::get_string(cStructure, "name");
+    if (name.empty()) {
+      asw::log::error("Structure {} has no name, skipped", id);
+      continue;
+    }
 
-    // Create structure
     auto structure = std::make_shared<StructureType>();
     structure->id = id;
-    structure->id_str = id_str;
+    structure->id_str = json_util::to_id_string(name);
     structure->name = name;
-    structure->description = cTile["description"];
+    structure->description = json_util::get_string(cStructure, "description");
 
-    // Load tile ids (3d array) into 1d vector with height and width markers
-    structure->dimensions.z = cTile["layout"].size();
+    // Load tile ids (3d array) into 1d vector. Every row and layer must be
+    // the same size, since the ids are read back by position
+    const auto layout = json_util::get_array(cStructure, "layout");
+    bool valid = !layout.empty();
+    structure->dimensions.z = static_cast<int>(layout.size());
 
-    for (auto const& zLayer : cTile["layout"]) {
-      structure->dimensions.y = zLayer.size();
+    for (const auto& z_layer : layout) {
+      if (!z_layer.is_array() || z_layer.empty()) {
+        valid = false;
+        break;
+      }
+      structure->dimensions.y = static_cast<int>(z_layer.size());
 
-      for (auto const& yLayer : zLayer) {
-        structure->dimensions.x = yLayer.size();
+      for (const auto& y_layer : z_layer) {
+        if (!y_layer.is_array() ||
+            (structure->dimensions.x != 0 &&
+             static_cast<int>(y_layer.size()) != structure->dimensions.x)) {
+          valid = false;
+          break;
+        }
+        structure->dimensions.x = static_cast<int>(y_layer.size());
 
-        for (int const id : yLayer) {
-          structure->tiles.push_back(id);
-
-          if (id != 0) {
+        for (const auto& value : y_layer) {
+          const int tile = value.is_number_integer() ? value.get<int>() : 0;
+          structure->tiles.push_back(tile);
+          if (tile != 0) {
             structure->tile_count++;
           }
         }
       }
     }
 
-    asw::log::debug("Structure {} ({}): {}, {}x{}x{}", id, id_str, name,
-                    structure->dimensions.x, structure->dimensions.y,
+    const auto expected = static_cast<std::size_t>(structure->dimensions.x) *
+                          structure->dimensions.y * structure->dimensions.z;
+    if (!valid || structure->tiles.size() != expected) {
+      asw::log::error("Structure {} has a bad layout, skipped",
+                      structure->id_str);
+      continue;
+    }
+
+    asw::log::debug("Structure {} ({}): {}, {}x{}x{}", id, structure->id_str,
+                    name, structure->dimensions.x, structure->dimensions.y,
                     structure->dimensions.z);
 
     // Add to types
     structures.push_back(structure);
+    structures_by_name[structure->id_str] = structure;
   }
 
   asw::log::info("Loaded {} structures", structures.size());
-
-  // Close
-  file.close();
 }
