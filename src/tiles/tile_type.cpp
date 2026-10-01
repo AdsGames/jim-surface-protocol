@@ -89,14 +89,15 @@ void TileType::draw(const asw::Vec3<int>& position,
     return;
   }
 
-  // Calc screen position
+  // Calc screen position, and skip tiles off the screen
+  const auto screen = asw::display::get_logical_size();
   auto iso_x = (isoX(position) * TILE_HEIGHT) - offset.x;
-  if (iso_x < -TILE_SIZE || iso_x > 1280) {
+  if (iso_x < -TILE_SIZE || iso_x > static_cast<float>(screen.x)) {
     return;
   }
 
   auto iso_y = (isoY(position) * TILE_HEIGHT) - offset.y;
-  if (iso_y < -TILE_SIZE || iso_y > 960) {
+  if (iso_y < -TILE_SIZE || iso_y > static_cast<float>(screen.y)) {
     return;
   }
 
@@ -200,14 +201,14 @@ void TileType::renderCube(int texture_count, int face_count) {
 
     // Special top face
     if (f == 0 && texture_count == 2 && images.size() > 1) {
-      SDL_RenderGeometry(asw::display::get_renderer(), images.at(1).get(), verts, 4,
-                         RENDER_ORDER, 6);
+      SDL_RenderGeometry(asw::display::get_renderer(), images.at(1).get(),
+                         verts, 4, RENDER_ORDER, 6);
     }
 
     // Default cube
     else {
-      SDL_RenderGeometry(asw::display::get_renderer(), images.at(0).get(), verts, 4,
-                         RENDER_ORDER, 6);
+      SDL_RenderGeometry(asw::display::get_renderer(), images.at(0).get(),
+                         verts, 4, RENDER_ORDER, 6);
     }
   }
 }

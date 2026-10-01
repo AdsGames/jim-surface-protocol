@@ -1,10 +1,13 @@
 #include "tile_map.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <unordered_map>
 
 #include "../tiles/structure_dictionary.h"
+#include "../tiles/tile_ids.h"
 #include "../vendor/simplex_noise.h"
 
 int TileMap::MAP_WIDTH = MAX_MAP_WIDTH;
@@ -18,8 +21,9 @@ void TileMap::update(float dt) {
     return;
   }
 
-  // Subtract tick timer
-  tick_timer -= TICK_TIME;
+  // Subtract tick timer. Drop the backlog after a long pause, such as a
+  // hidden browser tab, so the world does not race to catch up
+  tick_timer = std::min(tick_timer - TICK_TIME, TICK_TIME);
 
   // Reset tile count
   for (unsigned int i = 0; i < tileCount.size(); i++) {
@@ -142,16 +146,16 @@ void TileMap::generate() {
         if (k < height_val) {
           // Grass if at top of ground, unless water
           if (k + 1 >= height_val && k >= 3) {
-            mapTiles[i][j][k].setType("toxic_grass");
+            mapTiles[i][j][k].setType(tile_id::TOXIC_GRASS);
           } else if (k + 3 >= height_val) {
-            mapTiles[i][j][k].setType("toxic_soil");
+            mapTiles[i][j][k].setType(tile_id::TOXIC_SOIL);
           } else {
-            mapTiles[i][j][k].setType("rocks");
+            mapTiles[i][j][k].setType(tile_id::ROCKS);
           }
         }
 
         else if (k < 4) {
-          mapTiles[i][j][k].setType("toxic_water");
+          mapTiles[i][j][k].setType(tile_id::TOXIC_WATER);
         }
 
         // Structures
@@ -310,17 +314,44 @@ void TileMap::draw_layer(const asw::Quad<float>& camera,
     return;
   }
 
+  // Tiles on screen, from the iso projection. A tile is drawn at
+  // x = (i - j) * TILE_HEIGHT and y = ((i + j) / 2 - layer) * TILE_HEIGHT, and
+  // is at most TILE_SIZE across. One tile of padding covers rounding
+  const float tile = TILE_HEIGHT_F;
+  const auto diff_min =
+      static_cast<int>(std::floor((camera.position.x - TILE_SIZE) / tile)) - 1;
+  const auto diff_max =
+      static_cast<int>(std::ceil((camera.position.x + camera.size.x) / tile)) +
+      1;
+  const auto sum_min =
+      static_cast<int>(
+          std::floor(2.0F * ((camera.position.y - TILE_SIZE) / tile + layer))) -
+      1;
+  const auto sum_max =
+      static_cast<int>(std::ceil(
+          2.0F * ((camera.position.y + camera.size.y) / tile + layer))) +
+      1;
+
   for (int i = 0; i < TileMap::MAP_WIDTH; ++i) {
     if ((start.z == layer && i < start.x)) {
       continue;
     }
 
-    for (int j = 0; j < TileMap::MAP_DEPTH; ++j) {
+    const int j_min = std::max({0, i - diff_max, sum_min - i});
+    const int j_max =
+        std::min({TileMap::MAP_DEPTH - 1, i - diff_min, sum_max - i});
+
+    for (int j = j_min; j <= j_max; ++j) {
       if ((start.z == layer && j < start.y)) {
         continue;
       }
 
-      auto tile = mapTiles[i][j][layer];
+      // The pass after the player draws these, so they cover the player
+      if (end.z == layer && i >= end.x && j >= end.y) {
+        continue;
+      }
+
+      const auto& tile = mapTiles[i][j][layer];
 
       if (tile.getType() == nullptr) {
         continue;
@@ -349,4 +380,148 @@ int TileMap::countByType(int type) const {
     return 0;
   }
   return tileCount[type];
+}
+
+namespace {
+// Writes values as [value, count] runs. Most of a column is one value
+class RunWriter {
+ public:
+  void add(int value) {
+    if (value == run_value && count > 0) {
+      ++count;
+      return;
+    }
+    flush();
+    run_value = value;
+    count = 1;
+  }
+
+  nlohmann::json finish() {
+    flush();
+    return std::move(runs);
+  }
+
+ private:
+  void flush() {
+    if (count > 0) {
+      runs.push_back(run_value);
+      runs.push_back(count);
+    }
+  }
+
+  nlohmann::json runs = nlohmann::json::array();
+  int run_value{0};
+  int count{0};
+};
+
+// Reads [value, count] runs back one value at a time. Gives the fallback
+// once the runs are used up
+class RunReader {
+ public:
+  RunReader(const nlohmann::json& runs, int fallback)
+      : runs(runs), fallback(fallback) {}
+
+  int next() {
+    if (left == 0 && index + 1 < runs.size()) {
+      value = runs[index].get<int>();
+      left = std::max(runs[index + 1].get<int>(), 0);
+      index += 2;
+    }
+    if (left == 0) {
+      return fallback;
+    }
+    --left;
+    return value;
+  }
+
+ private:
+  const nlohmann::json& runs;
+  int fallback;
+  std::size_t index{0};
+  int value{0};
+  int left{0};
+};
+}  // namespace
+
+nlohmann::json TileMap::save() const {
+  RunWriter tiles;
+  RunWriter structure_tiles;
+
+  // Each structure once, then each tile points at it by index + 1, 0 for none
+  auto structures = nlohmann::json::array();
+  std::unordered_map<const Structure*, int> structure_index;
+
+  for (int i = 0; i < MAP_WIDTH; ++i) {
+    for (int j = 0; j < MAP_DEPTH; ++j) {
+      for (int k = 0; k < MAP_HEIGHT; ++k) {
+        const auto& tile = mapTiles[i][j][k];
+        tiles.add(tile.getTypeId());
+
+        const auto structure = tile.getStructure();
+        if (structure == nullptr || structure->getType() == nullptr) {
+          structure_tiles.add(0);
+          continue;
+        }
+
+        auto [found, added] = structure_index.try_emplace(
+            structure.get(), static_cast<int>(structures.size()) + 1);
+        if (added) {
+          const auto& position = structure->getPosition();
+          structures.push_back({structure->getType()->id_str, position.x,
+                                position.y, position.z});
+        }
+        structure_tiles.add(found->second);
+      }
+    }
+  }
+
+  return {
+      {"width", MAP_WIDTH},
+      {"depth", MAP_DEPTH},
+      {"seed", SEED},
+      {"tiles", tiles.finish()},
+      {"structures", structures},
+      {"structure_tiles", structure_tiles.finish()},
+  };
+}
+
+void TileMap::load(const nlohmann::json& data) {
+  MAP_WIDTH = std::clamp(data.at("width").get<int>(), 1, MAX_MAP_WIDTH);
+  MAP_DEPTH = std::clamp(data.at("depth").get<int>(), 1, MAX_MAP_DEPTH);
+  SEED = data.at("seed").get<float>();
+
+  // Saves from before structure links have neither field
+  std::vector<std::shared_ptr<Structure>> structures;
+  for (const auto& entry : data.value("structures", nlohmann::json::array())) {
+    auto structure = std::make_shared<Structure>();
+    structure->setType(entry.at(0).get<std::string>());
+    structure->setPosition({entry.at(1).get<int>(), entry.at(2).get<int>(),
+                            entry.at(3).get<int>()});
+    structures.push_back(structure);
+  }
+
+  const auto structure_runs =
+      data.value("structure_tiles", nlohmann::json::array());
+  RunReader tiles(data.at("tiles"), tile_id::NONE);
+  RunReader structure_tiles(structure_runs, 0);
+
+  for (int i = 0; i < MAP_WIDTH; ++i) {
+    for (int j = 0; j < MAP_DEPTH; ++j) {
+      for (int k = 0; k < MAP_HEIGHT; ++k) {
+        auto& tile = mapTiles[i][j][k];
+        tile = Tile();
+        tile.setPosition({i, j, k});
+        tile.setType(static_cast<short>(tiles.next()));
+
+        const int structure = structure_tiles.next();
+        if (structure > 0 &&
+            static_cast<std::size_t>(structure) <= structures.size()) {
+          tile.setStructure(structures[structure - 1]);
+        }
+      }
+    }
+  }
+
+  // Counts come back on the next tick
+  tick_timer = TICK_TIME;
 }

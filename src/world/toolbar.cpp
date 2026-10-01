@@ -1,508 +1,643 @@
 #include "toolbar.h"
 
 #include <cmath>
+#include <format>
+#include <optional>
+#include <utility>
 
 #include "../lib/controls.h"
+#include "../tiles/tile_ids.h"
 
-void Toolbar::init() {
+namespace {
+// The toolbar art is the bottom of a full screen image, from this row down
+constexpr float BAR_ART_TOP = 799.0F;
+constexpr float BAR_WIDTH = 1280.0F;
+constexpr float BAR_HEIGHT = 161.0F;
+
+constexpr float BUTTON_SIZE = 64.0F;
+constexpr float UPGRADE_SIZE = 32.0F;
+
+// Distance from the worker a tile can be worked, in tiles
+constexpr float WORK_RANGE = 10.0F;
+
+const asw::Color GREEN(128, 255, 128);
+const asw::Color CAN_BUY(150, 255, 150);
+const asw::Color CANT_BUY(255, 150, 150);
+
+std::string need_more(const std::string& resource, int amount) {
+  return "Need " + std::to_string(amount) + " " + resource;
+}
+}  // namespace
+
+void ToolButton::draw(asw::ui::Context& ctx) {
+  Button::draw(ctx);
+  if (selected) {
+    asw::draw::rect(transform, asw::color::yellow);
+  }
+}
+
+void ShadowLabel::draw(asw::ui::Context& ctx) {
+  const auto& f = asw::ui::pick_font(font, ctx.theme);
+  if (!text.empty() && f != nullptr) {
+    asw::draw::text_shadow(f, text, transform.position,
+                           color.value_or(ctx.theme.text));
+  }
+  Widget::draw(ctx);
+}
+
+void ProgressBar::draw(asw::ui::Context& ctx) {
+  asw::draw::rect_fill(transform, background);
+  auto filled = transform;
+  filled.size.x *= std::clamp(value, 0.0F, 1.0F);
+  asw::draw::rect_fill(filled, fill);
+  Widget::draw(ctx);
+}
+
+template <class T>
+T& Toolbar::place(T& widget, float x, float y, float w, float h) {
+  widget.anchor = asw::ui::Anchor::TopLeft;
+  widget.anchor_margin = {x, y};
+  widget.transform.size = {w, h};
+  return widget;
+}
+
+asw::ui::Label& Toolbar::addLabel(float x,
+                                  float y,
+                                  const asw::Font& label_font,
+                                  asw::Color color) {
+  auto& label = place(bar->add_child<asw::ui::Label>(), x, y);
+  label.font = label_font;
+  label.color = color;
+  return label;
+}
+
+void Toolbar::init(asw::ui::Root& ui, World& world) {
+  drill_upgrade_cost = 10;
+  move_upgrade_cost = 10;
+  mode = ToolMode::DRILL;
+  actionProgress = 0.0F;
+
   font = asw::assets::load_font("assets/fonts/syne-mono.ttf", 18);
   fontLarge = asw::assets::load_font("assets/fonts/syne-mono.ttf", 30);
 
-  inspect_button =
-      asw::assets::load_texture("assets/images/ui/inspect-button.png");
-  purifier_button =
+  purifier_texture =
       asw::assets::load_texture("assets/images/ui/purify-button.png");
-  tree_button = asw::assets::load_texture("assets/images/ui/tree-button.png");
-  drill_button = asw::assets::load_texture("assets/images/ui/drill-button.png");
-  toolbar_ui = asw::assets::load_texture("assets/images/ui/toolbar.png");
-
-  upgrade = asw::assets::load_texture("assets/images/ui/upgrade.png");
-
+  tree_texture = asw::assets::load_texture("assets/images/ui/tree-button.png");
+  drill_texture =
+      asw::assets::load_texture("assets/images/ui/drill-button.png");
+  upgrade_texture = asw::assets::load_texture("assets/images/ui/upgrade.png");
   overlay_1 = asw::assets::load_texture("assets/images/ui/overlay_1.png");
-};
 
-void Toolbar::update(float dt, World& world) {
-  // Enabled actions
-  can_take_action = actionEnabled(world);
+  // Cut the bar out of the full screen art, so it can sit at any bottom edge
+  const auto full_art =
+      asw::assets::load_texture("assets/images/ui/toolbar.png");
+  bar_texture = asw::assets::create_texture(static_cast<int>(BAR_WIDTH),
+                                            static_cast<int>(BAR_HEIGHT));
+  asw::draw::set_blend_mode(bar_texture, asw::BlendMode::Blend);
+  asw::display::set_render_target(bar_texture);
+  asw::display::clear(asw::Color(0, 0, 0, 0));
+  asw::draw::stretch_sprite_blit(
+      full_art, asw::Quad(0.0F, BAR_ART_TOP, BAR_WIDTH, BAR_HEIGHT),
+      asw::Quad(0.0F, 0.0F, BAR_WIDTH, BAR_HEIGHT));
+  asw::display::reset_render_target();
 
+  bar = &ui.root.add_child<asw::ui::Panel>();
+  bar->bg_image = bar_texture;
+  bar->anchor = asw::ui::Anchor::Bottom;
+  bar->transform.size = {BAR_WIDTH, BAR_HEIGHT};
+
+  // J1M, who explains the game when pointed at
+  guide_button =
+      &place(bar->add_child<asw::ui::Button>(), 0.0F, 0.0F, 170.0F, BAR_HEIGHT);
+  guide_button->draw_background = false;
+
+  // Info panel
+  for (std::size_t i = 0; i < info_lines.size(); ++i) {
+    info_lines[i] = &addLabel(183.0F, 26.0F + (20.0F * i), font, GREEN);
+  }
+
+  // Tools
+  const std::array<std::pair<const char*, asw::Texture>, 3> tools = {{
+      {"Drill", drill_texture},
+      {"Purifier", purifier_texture},
+      {"Tree", tree_texture},
+  }};
+  for (std::size_t i = 0; i < tools.size(); ++i) {
+    const float x = 620.0F + (80.0F * i);
+    auto& button =
+        place(bar->add_child<ToolButton>(), x, 21.0F, BUTTON_SIZE, BUTTON_SIZE);
+    button.set_images(tools[i].second, nullptr, nullptr, nullptr, false);
+    button.on_click = [this, i]() { selectTool(static_cast<ToolMode>(i)); };
+    tool_buttons[i] = &button;
+
+    auto& label = addLabel(x, 95.0F, font);
+    label.transform.size = {BUTTON_SIZE, 20.0F};
+    label.justify = asw::TextJustify::Center;
+    label.text = tools[i].first;
+  }
+  selectTool(ToolMode::DRILL);
+
+  purification_label = &addLabel(620.0F, 121.0F, font);
+  purification_bar =
+      &place(bar->add_child<ProgressBar>(), 620.0F, 145.0F, 200.0F, 2.0F);
+  purification_bar->fill = GREEN;
+
+  // Upgrades
+  auto& upgrades = place(bar->add_child<ShadowLabel>(), 880.0F, 21.0F);
+  upgrades.font = fontLarge;
+  upgrades.text = "Upgrades";
+
+  drill_speed_label = &addLabel(882.0F, 59.0F, font);
+  drill_cost_label = &addLabel(882.0F, 79.0F, font);
+  move_speed_label = &addLabel(882.0F, 106.0F, font);
+  move_cost_label = &addLabel(882.0F, 126.0F, font);
+
+  upgrade_drill_button = &place(bar->add_child<asw::ui::Button>(), 1040.0F,
+                                69.0F, UPGRADE_SIZE, UPGRADE_SIZE);
+  upgrade_move_button = &place(bar->add_child<asw::ui::Button>(), 1040.0F,
+                               116.0F, UPGRADE_SIZE, UPGRADE_SIZE);
+  for (auto* button : {upgrade_drill_button, upgrade_move_button}) {
+    button->set_images(upgrade_texture, nullptr, nullptr, nullptr, false);
+  }
+  upgrade_drill_button->on_click = [this, &world, &ui]() {
+    buyUpgrade(true, world, ui);
+  };
+  upgrade_move_button->on_click = [this, &world, &ui]() {
+    buyUpgrade(false, world, ui);
+  };
+
+  // Resources
+  auto& resources = place(bar->add_child<ShadowLabel>(), 1110.0F, 21.0F);
+  resources.font = fontLarge;
+  resources.text = "Resources";
+
+  addLabel(1110.0F, 69.0F, font).text = "Scrap";
+  addLabel(1110.0F, 116.0F, font).text = "Biomass";
+  scrap_label = &addLabel(1160.0F, 69.0F, font, GREEN);
+  biomass_label = &addLabel(1160.0F, 116.0F, font, GREEN);
+  for (auto* label : {scrap_label, biomass_label}) {
+    label->transform.size = {100.0F, 20.0F};
+    label->justify = asw::TextJustify::Right;
+  }
+
+  refresh(world, ui);
+}
+
+void Toolbar::update(float dt,
+                     World& world,
+                     asw::ui::Root& ui,
+                     bool pointer_used_by_ui,
+                     bool world_input) {
   // CHEATING ZONE (DOONT LOOK)
   if (asw::input::get_key_down(asw::input::Key::P)) {
     world.getResourceManager().addResourceCount("scrap", 100);
     world.getResourceManager().addResourceCount("biomass", 100);
   }
 
-  auto const& camera = world.getCamera();
+  const auto& camera = world.getCamera();
   auto& tile_map = world.getTileMap();
-  auto const& mouse_pos = asw::input::get_mouse().position;
-  cursor_idx = tile_map.getIndexAt(camera.screen_to_world(mouse_pos));
+  const auto pointer = controls::pointer();
+
+  pointer_in_world = world_input && !pointerOnToolbar() &&
+                     (controls::is_controller_pointer() || !pointer_used_by_ui);
+
+  cursor_idx = pointer_in_world
+                   ? tile_map.getIndexAt(camera.screen_to_world(pointer))
+                   : asw::Vec3<int>(-1, -1, -1);
   tile_map.setSelectedIndex(cursor_idx);
 
   // Find distance to worker
-  auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
-  auto& worker = world.getPlayer();
+  const auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
+  cursor_in_range = false;
   if (selected_tile != nullptr) {
     const auto tile_pos = selected_tile->getPosition();
     const auto distance = asw::Vec3<float>(tile_pos.x, tile_pos.y, tile_pos.z)
-                              .distance(worker.getPosition());
-    cursor_in_range = distance < 10.0F;
+                              .distance(world.getPlayer().getPosition());
+    cursor_in_range = distance < WORK_RANGE;
   }
 
-  // Click buttons
-  if (asw::input::get_mouse_button(asw::input::MouseButton::Left) &&
-      can_take_action && cursor_in_range) {
-    action(world, dt);
+  // Outline colour: the tool the next click or trigger would use
+  can_take_action =
+      controls::is_controller_pointer()
+          ? actionEnabled(world, ToolMode::DRILL) || actionEnabled(world, mode)
+          : actionEnabled(world, mode);
+
+  if (world_input) {
+    // Left click and LT use the chosen tool. RT drills whatever tool is
+    // chosen, so a controller needs no tool switch to dig
+    std::optional<std::pair<ToolMode, float>> active;
+    if (asw::input::get_action(controls::USE)) {
+      active = {mode, 1.0F};
+    } else if (asw::input::get_action(controls::DRILL)) {
+      active = {ToolMode::DRILL,
+                asw::input::get_action_strength(controls::DRILL)};
+    } else if (asw::input::get_action(controls::USE_TOOL)) {
+      active = {mode, 1.0F};
+    }
+
+    if (active && cursor_in_range && pointer_in_world &&
+        actionEnabled(world, active->first)) {
+      action(world, dt, ui, active->first, active->second);
+    } else {
+      actionProgress = 0.0F;
+    }
+
+    if (asw::input::get_action_down(controls::USE)) {
+      explainDisabledAction(world, ui, mode);
+    } else if (asw::input::get_action_down(controls::DRILL)) {
+      explainDisabledAction(world, ui, ToolMode::DRILL);
+    } else if (asw::input::get_action_down(controls::USE_TOOL)) {
+      explainDisabledAction(world, ui, mode);
+    }
+
+    // A moves the worker, or presses the toolbar button under the cursor
+    if (asw::input::get_action_down(controls::WAYPOINT)) {
+      pressButtonUnderControllerPointer();
+    }
+    if (asw::input::get_action(controls::WAYPOINT)) {
+      setWaypoint(world);
+    }
+
+    // Tool select
+    if (asw::input::get_action_down(controls::TOOL_DRILL)) {
+      selectTool(ToolMode::DRILL);
+    } else if (asw::input::get_action_down(controls::TOOL_PURIFIER)) {
+      selectTool(ToolMode::PURIFIER);
+    } else if (asw::input::get_action_down(controls::TOOL_TREE)) {
+      selectTool(ToolMode::TREE);
+    } else if (asw::input::get_action_down(controls::TOOL_NEXT)) {
+      cycleTool(1);
+    } else if (asw::input::get_action_down(controls::TOOL_PREV)) {
+      cycleTool(-1);
+    }
   } else {
     actionProgress = 0.0F;
   }
 
-  if (asw::input::get_mouse_button_down(asw::input::MouseButton::Left)) {
-    toolZoneAction(world);
-  }
-
-  if (asw::input::get_action_down(controls::TOOL_DRILL)) {
-    mode = ToolMode::DRILL;
-  } else if (asw::input::get_action_down(controls::TOOL_PURIFIER)) {
-    mode = ToolMode::PURIFIER;
-  } else if (asw::input::get_action_down(controls::TOOL_TREE)) {
-    mode = ToolMode::TREE;
-  }
-
-  if (asw::input::get_mouse_button(asw::input::MouseButton::Right)) {
-    rightClickAction(world);
-  }
+  refresh(world, ui);
 }
 
-void Toolbar::rightClickAction(World& world) {
-  auto& tile_map = world.getTileMap();
-
-  auto* tile = tile_map.getTileAtIndex(cursor_idx);
-  if (tile != nullptr) {
-    auto type = tile->getTypeId();
-    if (type != 18) {
-      world.setPlayerWaypoint(cursor_idx);
-      world.setWaypointActive(true);
-    }
-  }
+bool Toolbar::pointerOnToolbar() const {
+  return bar != nullptr && bar->transform.contains(controls::pointer());
 }
 
-void Toolbar::toolZoneAction(World& world) {
-  auto const& camera = world.getCamera();
-  auto& resource_manager = world.getResourceManager();
-  auto& player = world.getPlayer();
-  const auto& mouse_pos = asw::input::get_mouse().position;
-
-  // Tool zone (I didn't know danny had a zone) HA GOTTEEEEEEEEEEEEEEM
-  if (mouse_pos.y > camera.get_view().size.y - TOOLBAR_HEIGHT) {
-    if (purifier_button_trans.contains(mouse_pos)) {
-      mode = ToolMode::PURIFIER;
-    } else if (tree_button_trans.contains(mouse_pos)) {
-      mode = ToolMode::TREE;
-    } else if (drill_button_trans.contains(mouse_pos)) {
-      mode = ToolMode::DRILL;
-    } else if (upgrade_drill_trans.contains(mouse_pos)) {
-      if (resource_manager.getResourceCount("scrap") >= drill_upgrade_cost) {
-        player.setDrillSpeed(player.getDrillSpeed() + 1);
-        resource_manager.addResourceCount("scrap", -drill_upgrade_cost);
-        drill_upgrade_cost = drill_upgrade_cost * 1.5F;
-      }
-    } else if (upgrade_move_trans.contains(mouse_pos)) {
-      if (resource_manager.getResourceCount("scrap") >= move_upgrade_cost) {
-        player.setMoveSpeed(player.getMoveSpeed() + 1);
-        resource_manager.addResourceCount("scrap", -move_upgrade_cost);
-        move_upgrade_cost = move_upgrade_cost * 1.5F;
-      }
-    }
+bool Toolbar::isPointedAt(const asw::ui::Widget& widget,
+                          const asw::ui::Root& ui) const {
+  if (controls::is_controller_pointer()) {
+    return widget.transform.contains(controls::pointer()) ||
+           (widget.is_focused() && ui.ctx.show_focus);
   }
+  return widget.is_highlighted(ui.ctx);
 }
 
-void Toolbar::action(World& world, float dt) {
-  auto const& camera = world.getCamera();
-  auto& tile_map = world.getTileMap();
-  auto& resource_manager = world.getResourceManager();
-  auto const& player = world.getPlayer();
-  const auto& mouse_pos = asw::input::get_mouse().position;
-
-  // Toolbar zone
-  if (mouse_pos.y > camera.get_view().size.y - TOOLBAR_HEIGHT) {
+void Toolbar::pressButtonUnderControllerPointer() {
+  if (!controls::is_controller_pointer() || !pointerOnToolbar()) {
     return;
   }
 
-  // Find selected tile
-  auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
-  std::shared_ptr<TileType> select_type = nullptr;
-  if (selected_tile != nullptr) {
-    select_type = selected_tile->getType();
-  }
-
-  if (mode == ToolMode::DRILL && selected_tile != nullptr &&
-      select_type != nullptr) {
-    auto density = select_type->getDensity();
-
-    if (density > 0) {
-      // this is where the drilling begins
-
-      actionProgress += dt * (30.0F / density) * (player.getDrillSpeed() * 3);
-      if (actionProgress > 100.0F) {
-        auto actions = select_type->getActionsOfType(ActionType::DESTROY);
-        for (const auto& action : actions) {
-          if (!action.drop_resource_id.empty()) {
-            resource_manager.addResourceCount(action.drop_resource_id, 1);
-          }
-        }
-        selected_tile->setType(0);
-        actionProgress = 0.0F;
-      }
-    }
-  }
-
-  if (mode == ToolMode::PURIFIER && selected_tile != nullptr &&
-      select_type != nullptr) {
-    auto idx = cursor_idx;
-    idx.z = idx.z + 1;
-
-    auto* tile = tile_map.getTileAtIndex(idx);
-    if (tile != nullptr && tile->getType() == nullptr) {
-      tile->setType("purifier");
-      resource_manager.addResourceCount("biomass", -PURIFIER_COST);
-    }
-  }
-
-  if (mode == ToolMode::TREE) {
-    auto idx = cursor_idx;
-    idx.z = idx.z + 1;
-
-    auto* tile = tile_map.getTileAtIndex(idx);
-    if (tile != nullptr && tile->getType() == nullptr) {
-      tile->setType("sapling");
-      resource_manager.addResourceCount("biomass", -TREE_COST);
+  const auto pointer = controls::pointer();
+  for (auto* button : {static_cast<asw::ui::Button*>(tool_buttons[0]),
+                       static_cast<asw::ui::Button*>(tool_buttons[1]),
+                       static_cast<asw::ui::Button*>(tool_buttons[2]),
+                       upgrade_drill_button, upgrade_move_button}) {
+    if (button->enabled && button->transform.contains(pointer) &&
+        button->on_click) {
+      button->on_click();
+      return;
     }
   }
 }
 
-bool Toolbar::actionEnabled(World& world) {
-  auto const& camera = world.getCamera();
+void Toolbar::selectTool(ToolMode new_mode) {
+  mode = new_mode;
+  for (std::size_t i = 0; i < tool_buttons.size(); ++i) {
+    if (tool_buttons[i] != nullptr) {
+      tool_buttons[i]->selected = static_cast<ToolMode>(i) == mode;
+    }
+  }
+}
+
+void Toolbar::cycleTool(int step) {
+  const int count = static_cast<int>(tool_buttons.size());
+  const int next = (static_cast<int>(mode) + step + count) % count;
+  selectTool(static_cast<ToolMode>(next));
+}
+
+void Toolbar::buyUpgrade(bool drill, World& world, asw::ui::Root& ui) {
+  auto& resource_manager = world.getResourceManager();
+  auto& player = world.getPlayer();
+  int& cost = drill ? drill_upgrade_cost : move_upgrade_cost;
+
+  if (resource_manager.getResourceCount("scrap") < cost) {
+    ui.toast(need_more("scrap", cost));
+    return;
+  }
+
+  resource_manager.addResourceCount("scrap", -cost);
+  cost = static_cast<int>(static_cast<float>(cost) * 1.5F);
+
+  if (drill) {
+    player.setDrillSpeed(player.getDrillSpeed() + 1);
+    ui.toast("Drill speed is now " + std::to_string(player.getDrillSpeed()));
+  } else {
+    player.setMoveSpeed(player.getMoveSpeed() + 1);
+    ui.toast("Move speed is now " + std::to_string(player.getMoveSpeed()));
+  }
+}
+
+void Toolbar::setWaypoint(World& world) {
+  if (!pointer_in_world) {
+    return;
+  }
+
+  const auto* tile = world.getTileMap().getTileAtIndex(cursor_idx);
+  if (tile != nullptr && tile->getTypeId() != tile_id::TOXIC_WATER) {
+    world.setPlayerWaypoint(cursor_idx);
+    world.setWaypointActive(true);
+  }
+}
+
+void Toolbar::explainDisabledAction(World& world,
+                                    asw::ui::Root& ui,
+                                    ToolMode tool) {
+  if ((actionEnabled(world, tool) && cursor_in_range) || !pointer_in_world ||
+      world.getTileMap().getTileAtIndex(cursor_idx) == nullptr) {
+    return;
+  }
+
+  const auto biomass = world.getResourceManager().getResourceCount("biomass");
+  if (tool == ToolMode::PURIFIER && biomass < PURIFIER_COST) {
+    ui.toast(need_more("biomass", PURIFIER_COST));
+  } else if (tool == ToolMode::TREE && biomass < TREE_COST) {
+    ui.toast(need_more("biomass", TREE_COST));
+  } else if (!cursor_in_range) {
+    ui.toast(controls::is_controller_pointer()
+                 ? "Too far away. Press A to move closer"
+                 : "Too far away. Right click to move closer");
+  }
+}
+
+void Toolbar::action(World& world,
+                     float dt,
+                     asw::ui::Root& ui,
+                     ToolMode tool,
+                     float strength) {
   auto& tile_map = world.getTileMap();
-  auto const& resource_manager = world.getResourceManager();
-  const auto& mouse_pos = asw::input::get_mouse().position;
-  cursor_idx = tile_map.getIndexAt(camera.screen_to_world(mouse_pos));
-
-  // Can place purifier
-  const auto can_buy_purifier =
-      resource_manager.getResourceCount("biomass") >= PURIFIER_COST;
-  const auto can_buy_tree =
-      resource_manager.getResourceCount("biomass") >= TREE_COST;
-
-  const auto cant_buy_tint = asw::Color(255, 150, 150);
-  asw::draw::set_tint(purifier_button,
-                      can_buy_purifier ? asw::color::white : cant_buy_tint);
-  asw::draw::set_tint(tree_button,
-                      can_buy_tree ? asw::color::white : cant_buy_tint);
+  auto& resource_manager = world.getResourceManager();
+  const auto& player = world.getPlayer();
 
   // Find selected tile
   auto* selected_tile = tile_map.getTileAtIndex(cursor_idx);
-  std::shared_ptr<TileType> select_type = nullptr;
-  if (selected_tile != nullptr) {
-    select_type = selected_tile->getType();
+  if (selected_tile == nullptr || selected_tile->getType() == nullptr) {
+    return;
+  }
+  const auto select_type = selected_tile->getType();
+
+  if (tool == ToolMode::DRILL) {
+    const auto density = select_type->getDensity();
+    if (density <= 0) {
+      return;
+    }
+
+    // this is where the drilling begins
+    actionProgress += dt * (30.0F / density) * (player.getDrillSpeed() * 3);
+    // Harder trigger, harder rumble. Trigger motors buzz under the finger
+    controls::rumble(0.15F * strength, 0.25F * strength, 100);
+    controls::rumble_triggers(0.0F, 0.3F * strength, 100);
+    if (actionProgress > 100.0F) {
+      controls::rumble(0.6F, 0.8F, 150);
+      controls::rumble_triggers(0.0F, 0.8F, 150);
+      for (const auto& drop :
+           select_type->getActionsOfType(ActionType::DESTROY)) {
+        if (!drop.drop_resource_id.empty()) {
+          resource_manager.addResourceCount(drop.drop_resource_id, 1);
+        }
+      }
+      selected_tile->setType(tile_id::NONE);
+      selected_tile->setStructure(nullptr);
+      actionProgress = 0.0F;
+    }
+    return;
   }
 
-  // Density check
-  if (mode == ToolMode::DRILL && selected_tile != nullptr &&
-      select_type != nullptr) {
-    auto density = select_type->getDensity();
-    if (density > 0) {
-      return true;
-    }
+  // Build on top of the selected tile
+  auto idx = cursor_idx;
+  idx.z = idx.z + 1;
+  auto* tile = tile_map.getTileAtIndex(idx);
+  if (tile == nullptr || tile->getType() != nullptr) {
+    return;
   }
 
-  // Purifier check
-  if (mode == ToolMode::PURIFIER && selected_tile != nullptr &&
-      can_buy_purifier && select_type != nullptr) {
-    if (select_type->getIdString() == "toxic_water" ||
-        select_type->getIdString() == "water") {
-      return true;
-    }
+  if (tool == ToolMode::PURIFIER) {
+    tile->setType(tile_id::PURIFIER);
+    resource_manager.addResourceCount("biomass", -PURIFIER_COST);
+    controls::rumble(0.4F, 0.2F, 120);
+    ui.toast("Purifier placed");
+  } else if (tool == ToolMode::TREE) {
+    tile->setType(tile_id::SAPLING);
+    resource_manager.addResourceCount("biomass", -TREE_COST);
+    controls::rumble(0.2F, 0.4F, 80);
+  }
+}
+
+bool Toolbar::actionEnabled(World& world, ToolMode tool) const {
+  const auto& resource_manager = world.getResourceManager();
+  const auto* selected_tile = world.getTileMap().getTileAtIndex(cursor_idx);
+  if (selected_tile == nullptr || selected_tile->getType() == nullptr) {
+    return false;
   }
 
-  // Tree check
-  if (mode == ToolMode::TREE && selected_tile != nullptr && can_buy_tree &&
-      select_type != nullptr) {
-    if (select_type->getIdString() == "toxic_grass" ||
-        select_type->getIdString() == "ground_grass") {
-      return true;
-    }
+  const auto type = selected_tile->getTypeId();
+  const auto biomass = resource_manager.getResourceCount("biomass");
+
+  switch (tool) {
+    case ToolMode::DRILL:
+      return selected_tile->getType()->getDensity() > 0;
+    case ToolMode::PURIFIER:
+      return biomass >= PURIFIER_COST &&
+             (type == tile_id::TOXIC_WATER || type == tile_id::WATER);
+    case ToolMode::TREE:
+      return biomass >= TREE_COST &&
+             (type == tile_id::TOXIC_GRASS || type == tile_id::GROUND_GRASS);
   }
 
   return false;
 }
 
-void Toolbar::draw(World& world) {
-  const auto view = world.getCamera().get_view();
-  auto& tile_map = world.getTileMap();
-  auto& resource_manager = world.getResourceManager();
-  const auto& mouse_pos = asw::input::get_mouse().position;
-  auto world_pos = view.position + mouse_pos;
-  auto* selected_tile = tile_map.getTileAt(world_pos);
-  auto green = asw::Color(128, 255, 128);
-
-  if (cursor_in_range && can_take_action) {
-    drawWireframe(cursor_idx, view.position, green);
-  } else if (cursor_in_range) {
-    drawWireframe(cursor_idx, view.position, asw::color::white);
-  } else {
-    drawWireframe(cursor_idx, view.position, asw::color::red);
+void Toolbar::setInfo(const std::vector<std::string>& lines) {
+  for (std::size_t i = 0; i < info_lines.size(); ++i) {
+    info_lines[i]->text = i < lines.size() ? lines[i] : "";
   }
+}
 
-  // Overlay
-  asw::draw::sprite(toolbar_ui, asw::Vec2<float>(0, 0));
+void Toolbar::refresh(World& world, const asw::ui::Root& ui) {
+  const auto& resource_manager = world.getResourceManager();
+  const auto& player = world.getPlayer();
+  const int scrap = resource_manager.getResourceCount("scrap");
+  const int biomass = resource_manager.getResourceCount("biomass");
+  const float progression = world.getProgression();
 
-  // Resource window
-  asw::draw::text_shadow(fontLarge, "Resources", asw::Vec2(1110.0F, 820.0F),
-                         asw::color::white);
+  // Resources
+  scrap_label->text = std::to_string(scrap);
+  biomass_label->text = std::to_string(biomass);
 
-  asw::draw::text(font, "Scrap", asw::Vec2(1110.0F, 868.0F), asw::color::white);
-  asw::draw::text(font,
-                  std::to_string(resource_manager.getResourceCount("scrap")),
-                  asw::Vec2(1260.0F, 868.0F), green, asw::TextJustify::Right);
+  // Tools you can not afford are tinted red
+  asw::draw::set_tint(purifier_texture,
+                      biomass >= PURIFIER_COST ? asw::color::white : CANT_BUY);
+  asw::draw::set_tint(tree_texture,
+                      biomass >= TREE_COST ? asw::color::white : CANT_BUY);
 
-  asw::draw::text(font, "Biomass", asw::Vec2(1110.0F, 915.0F),
-                  asw::color::white);
-  asw::draw::text(font,
-                  std::to_string(resource_manager.getResourceCount("biomass")),
-                  asw::Vec2(1260.0F, 915.0F), green, asw::TextJustify::Right);
+  // Upgrades
+  drill_speed_label->text =
+      "Drill Speed: " + std::to_string(player.getDrillSpeed());
+  drill_cost_label->text =
+      "Cost " + std::to_string(drill_upgrade_cost) + " scrap";
+  drill_cost_label->color = scrap >= drill_upgrade_cost ? CAN_BUY : CANT_BUY;
+  move_speed_label->text =
+      "Move Speed: " + std::to_string(player.getMoveSpeed());
+  move_cost_label->text =
+      "Cost " + std::to_string(move_upgrade_cost) + " scrap";
+  move_cost_label->color = scrap >= move_upgrade_cost ? CAN_BUY : CANT_BUY;
 
-  // Upgrade window
-  auto drill_speed = std::to_string(world.getPlayer().getDrillSpeed());
-  auto player_speed = std::to_string(world.getPlayer().getMoveSpeed());
+  // Purification
+  purification_label->text =
+      std::format("Purification: {:.1f}%",
+                  progression > 0.99F ? 100.0F : progression * 100.0F);
+  purification_bar->value = progression;
 
-  auto canBuyDrill = world.getResourceManager().getResourceCount("scrap") >=
-                     drill_upgrade_cost;
-  auto canBuyMove =
-      world.getResourceManager().getResourceCount("scrap") >= move_upgrade_cost;
-  auto canBuyColour = asw::Color(150, 255, 150, 255);
-  auto cantBuyColour = asw::Color(255, 150, 150, 255);
+  // Info panel
+  const auto* selected_tile = world.getTileMap().getTileAtIndex(cursor_idx);
 
-  asw::draw::text_shadow(fontLarge, "Upgrades", asw::Vec2(880.0F, 820.0F),
-                         asw::color::white);
-
-  asw::draw::text(font, "Drill Speed: " + drill_speed,
-                  asw::Vec2(882.0F, 858.0F), asw::color::white);
-
-  asw::draw::text(font, "Cost " + std::to_string(drill_upgrade_cost) + " scrap",
-                  asw::Vec2(882.0F, 878.0F),
-                  canBuyDrill ? canBuyColour : cantBuyColour);
-
-  asw::draw::text(font, "Move Speed: " + player_speed,
-                  asw::Vec2(882.0F, 905.0F), asw::color::white);
-
-  asw::draw::text(font, "Cost " + std::to_string(move_upgrade_cost) + " scrap",
-                  asw::Vec2(882.0F, 925.0F),
-                  canBuyMove ? canBuyColour : cantBuyColour);
-
-  asw::draw::sprite(upgrade, asw::Vec2<float>(upgrade_drill_trans.position.x,
-                                              upgrade_drill_trans.position.y));
-  asw::draw::sprite(upgrade, asw::Vec2<float>(upgrade_move_trans.position.x,
-                                              upgrade_move_trans.position.y));
-
-  // Debuggo
   if (asw::input::get_key(asw::input::Key::Q)) {
-    // X + Y
-    asw::draw::text(font,
-                    std::format("Pos: {}, {}, {}", cursor_idx.x, cursor_idx.y,
-                                cursor_idx.z),
-                    asw::Vec2(183.0F, 845.0F), green);
+    const auto view = world.getCamera().get_view();
+    const auto pointer = controls::pointer();
+    setInfo({
+        "",
+        std::format("Pos: {}, {}, {}", cursor_idx.x, cursor_idx.y,
+                    cursor_idx.z),
+        std::format("Cam: {}, {}", view.position.x, view.position.y),
+        std::format("Pointer: {}, {}", pointer.x, pointer.y),
+    });
+  } else if (pointer_in_world && selected_tile != nullptr &&
+             selected_tile->getType() != nullptr) {
+    std::vector<std::string> lines = {"Tile: " +
+                                      selected_tile->getType()->getName()};
 
-    // Camera pos
-    asw::draw::text(
-        font, std::format("Cam: {}, {}", view.position.x, view.position.y),
-        asw::Vec2(183.0F, 865.0F), green);
-
-    // Mouse pos
-    asw::draw::text(font,
-                    std::format("Mouse: {}, {}", mouse_pos.x, mouse_pos.y),
-                    asw::Vec2(183.0F, 885.0F), green);
-  }
-
-  // Inspect window
-  else if (mouse_pos.y < view.size.y - TOOLBAR_HEIGHT &&
-           selected_tile != nullptr) {
-    auto tile_type = selected_tile->getType();
-    auto tile_structure = selected_tile->getStructure();
-
-    if (tile_type != nullptr) {
-      asw::draw::text(font, "Tile: " + tile_type->getName(),
-                      asw::Vec2(183.0F, 825.0F), green);
-    }
-
-    if (tile_structure != nullptr) {
-      asw::draw::text(font, tile_structure->getType()->name,
-                      asw::Vec2(183.0F, 845.0F), green);
-
-      asw::draw::text(font, tile_structure->getType()->description,
-                      asw::Vec2(183.0F, 865.0F), green);
-    }
-
-    // Get resources from actions
-    std::map<std::string, int> resources;
-    int i = 0;
-    for (const auto& [res, count] : tile_type->getResources()) {
-      if (res.empty()) {
-        continue;
-      }
-
-      asw::draw::text(font, "Drop: " + res + " x " + std::to_string(count),
-                      asw::Vec2(183.0F, 885.0F + (i * 20)), green);
-      i++;
-    }
-  }
-
-  // Monkey head
-  else if (mouse_pos.x < 170.0F) {
-    asw::draw::text(font, "J1M Says:", asw::Vec2(183.0F, 825.0F), green);
-
-    if (world.getProgression() < 0.01F) {
-      asw::draw::text(font, "I am J1M, your guide.", asw::Vec2(183.0F, 845.0F),
-                      green);
-      asw::draw::text(font, "I will help you survive.",
-                      asw::Vec2(183.0F, 865.0F), green);
-      asw::draw::text(font, "Right click to set a waypoint.",
-                      asw::Vec2(183.0F, 885.0F), green);
-      asw::draw::text(font, "Left click to interact.",
-                      asw::Vec2(183.0F, 905.0F), green);
-      asw::draw::text(font, "Your goal is to purify the planet.",
-                      asw::Vec2(183.0F, 925.0F), green);
-    } else if (world.getProgression() < 0.5F) {
-      asw::draw::text(font, "You are doing great!", asw::Vec2(183.0F, 845.0F),
-                      green);
-      asw::draw::text(font, "Keep up the good work!", asw::Vec2(183.0F, 865.0F),
-                      green);
-    } else if (world.getProgression() < 0.99F) {
-      asw::draw::text(font, "You are almost there!", asw::Vec2(183.0F, 845.0F),
-                      green);
-      asw::draw::text(font, "Keep going!", asw::Vec2(183.0F, 865.0F), green);
+    const auto structure = selected_tile->getStructure();
+    if (structure != nullptr && structure->getType() != nullptr) {
+      lines.push_back(structure->getType()->name);
+      lines.push_back(structure->getType()->description);
     } else {
-      asw::draw::text(font, "You did it!", asw::Vec2(183.0F, 845.0F), green);
-      asw::draw::text(font, "You have purified the planet!",
-                      asw::Vec2(183.0F, 865.0F), green);
-      asw::draw::text(font, "Congratulations!", asw::Vec2(183.0F, 885.0F),
-                      green);
+      lines.insert(lines.end(), {"", ""});
     }
-  } else if (drill_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "[Key 1] Drill", asw::Vec2(183.0F, 825.0F), green);
 
-    asw::draw::text(font, "This tool is used to destroy scrap.",
-                    asw::Vec2(183.0F, 845.0F), green);
-    asw::draw::text(font, "It is very useful for clearing the area ",
-                    asw::Vec2(183.0F, 865.0F), green);
-    asw::draw::text(font, "and collecting resources.",
-                    asw::Vec2(183.0F, 885.0F), green);
-  } else if (purifier_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "[Key 2] Purifier", asw::Vec2(183.0F, 825.0F), green);
+    for (const auto& [res, count] : selected_tile->getType()->getResources()) {
+      if (!res.empty()) {
+        lines.push_back("Drop: " + res + " x " + std::to_string(count));
+      }
+    }
+    setInfo(lines);
+  } else if (isPointedAt(*guide_button, ui)) {
+    if (progression < 0.01F) {
+      setInfo({"J1M Says:", "I am J1M, your guide.",
+               "Right click or A to set a waypoint.",
+               "Left click to use a tool.",
+               "RT drills, LT uses the chosen tool.",
+               "Your goal is to purify the planet."});
+    } else if (progression < 0.5F) {
+      setInfo({"J1M Says:", "You are doing great!", "Keep up the good work!"});
+    } else if (progression < 0.99F) {
+      setInfo({"J1M Says:", "You are almost there!", "Keep going!"});
+    } else {
+      setInfo({"J1M Says:", "You did it!", "You have purified the planet!",
+               "Congratulations!"});
+    }
+  } else if (isPointedAt(*tool_buttons[0], ui)) {
+    setInfo({"[Key 1] Drill. Hold RT any time",
+             "This tool is used to destroy scrap.",
+             "It is very useful for clearing the area ",
+             "and collecting resources."});
+  } else if (isPointedAt(*tool_buttons[1], ui)) {
+    setInfo({"[Key 2] Purifier", "This tool is used to place a water ",
+             "purifier. Water purifiers slowly ",
+             "purify water and must be placed on water.",
+             "Cost: " + std::to_string(PURIFIER_COST) + " biomass"});
+  } else if (isPointedAt(*tool_buttons[2], ui)) {
+    setInfo({"[Key 3] Tree", "This tool is used to plant trees.",
+             "Trees will slowly purify soil.", "",
+             "Cost: " + std::to_string(TREE_COST) + " biomass"});
+  } else if (isPointedAt(*upgrade_drill_button, ui)) {
+    setInfo({"Upgrade Drill", "Drill through tiles faster.",
+             "Cost: " + std::to_string(drill_upgrade_cost) + " scrap"});
+  } else if (isPointedAt(*upgrade_move_button, ui)) {
+    setInfo({"Upgrade Move", "Walk to waypoints faster.",
+             "Cost: " + std::to_string(move_upgrade_cost) + " scrap"});
+  } else {
+    setInfo({});
+  }
+}
 
-    asw::draw::text(font, "This tool is used to place a water ",
-                    asw::Vec2(183.0F, 845.0F), green);
-    asw::draw::text(font, "purifier. Water purifiers slowly ",
-                    asw::Vec2(183.0F, 865.0F), green);
-    asw::draw::text(font, "purify water and must be placed on water.",
-                    asw::Vec2(183.0F, 885.0F), green);
+void Toolbar::drawWorld(World& world) {
+  const auto view = world.getCamera().get_view();
+  const auto screen = asw::display::get_logical_size();
+  const auto pointer = controls::pointer();
 
-    asw::draw::text(font, "Cost: 10 biomass", asw::Vec2(183.0F, 905.0F), green);
-  } else if (tree_button_trans.contains(mouse_pos)) {
-    asw::draw::text(font, "[Key 3] Tree", asw::Vec2(183.0F, 825.0F), green);
-
-    asw::draw::text(font, "This tool is used to plant trees.",
-                    asw::Vec2(183.0F, 845.0F), green);
-    asw::draw::text(font, "Trees will slowly purify soil.",
-                    asw::Vec2(183.0F, 865.0F), green);
-
-    asw::draw::text(font, "Cost: 10 biomass", asw::Vec2(183.0F, 905.0F), green);
+  // Tile under the pointer
+  if (pointer_in_world) {
+    if (cursor_in_range && can_take_action) {
+      drawWireframe(cursor_idx, view.position, GREEN);
+    } else if (cursor_in_range) {
+      drawWireframe(cursor_idx, view.position, asw::color::white);
+    } else {
+      drawWireframe(cursor_idx, view.position, asw::color::red);
+    }
   }
 
-  // Buttons
-  asw::draw::stretch_sprite(purifier_button, purifier_button_trans);
-  asw::draw::text(font, "Purifier",
-                  purifier_button_trans.position + asw::Vec2(32.0F, 74.0F),
-                  asw::color::white, asw::TextJustify::Center);
-
-  asw::draw::stretch_sprite(tree_button, tree_button_trans);
-  asw::draw::text(font, "Tree",
-                  tree_button_trans.position + asw::Vec2(32.0F, 74.0F),
-                  asw::color::white, asw::TextJustify::Center);
-
-  asw::draw::stretch_sprite(drill_button, drill_button_trans);
-  asw::draw::text(font, "Drill",
-                  drill_button_trans.position + asw::Vec2(32.0F, 74.0F),
-                  asw::color::white, asw::TextJustify::Center);
-
-  // Percent purified
-  auto percent_purified = std::to_string(world.getProgression() * 100.0F);
-  if (world.getProgression() > 0.99F) {
-    percent_purified = "100.0";
-  }
-  if (percent_purified.size() > 5) {
-    percent_purified = percent_purified.substr(0, 4);
-  }
-  asw::draw::text(font, "Purification: " + percent_purified + "%",
-                  asw::Vec2(620.0F, 920.0F), asw::color::white);
-
-  asw::draw::rect_fill(asw::Quad(620.0F, 944.0F, 200.0F, 2.0F),
-                       asw::Color(32, 32, 32));
-  asw::draw::rect_fill(
-      asw::Quad(620.0F, 944.0F, 200.0F * world.getProgression(), 2.0F), green);
-
-  if (mode == ToolMode::PURIFIER) {
-    asw::draw::rect(purifier_button_trans, asw::color::yellow);
-  } else if (mode == ToolMode::TREE) {
-    asw::draw ::rect(tree_button_trans, asw::color::yellow);
-  } else if (mode == ToolMode::DRILL) {
-    asw::draw::rect(drill_button_trans, asw::color::yellow);
+  // Toxic haze over the play area, lighter as the world is purified
+  const float progression = world.getProgression();
+  if (progression < 0.66F) {
+    asw::draw::set_alpha(overlay_1, progression < 0.33F ? 1.0F : 0.5F);
+    asw::draw::stretch_sprite(
+        overlay_1, asw::Quad(0.0F, 0.0F, static_cast<float>(screen.x),
+                             static_cast<float>(screen.y) - BAR_HEIGHT));
   }
 
+  // Drill progress
   if (actionProgress > 0) {
-    asw::draw::rect_fill(
-        asw::Quad(mouse_pos.x, mouse_pos.y - 60, 208.0F, 38.0F),
-        asw::color::black);
+    asw::draw::rect_fill(asw::Quad(pointer.x, pointer.y - 60, 208.0F, 38.0F),
+                         asw::color::black);
 
-    asw::draw::rect_fill(asw::Quad(mouse_pos.x + 4.0F, mouse_pos.y + 4 - 60,
+    asw::draw::rect_fill(asw::Quad(pointer.x + 4.0F, pointer.y + 4 - 60,
                                    actionProgress * 2, 30.0F),
                          asw::color::yellow.lerp(asw::Color(55, 255, 0),
                                                  actionProgress / 100.0F));
 
     asw::draw::text(font, "Drilling...",
-                    asw::Vec2(mouse_pos.x + 4.0F, mouse_pos.y - 60 + 4.0F),
+                    asw::Vec2(pointer.x + 4.0F, pointer.y - 60 + 4.0F),
                     asw::color::white);
-  }
-
-  if (world.getProgression() < 0.33F) {
-    asw::draw::set_alpha(overlay_1, 1);
-    asw::draw::sprite(overlay_1, asw::Vec2<float>(0, 0));
-  }
-
-  if (world.getProgression() >= 0.33F && world.getProgression() < 0.66F) {
-    asw::draw::set_alpha(overlay_1, 0.5F);
-    asw::draw::sprite(overlay_1, asw::Vec2<float>(0, 0));
   }
 }
 
 void Toolbar::drawWireframe(const asw::Vec3<int>& position,
                             const asw::Vec2<float>& offset,
                             asw::Color colour) {
-  // Calc screen position
-  auto iso_x = isoX(position);
-  auto iso_y = isoY(position);
-  auto screen_pos = asw::Vec2(iso_x, iso_y) * TILE_HEIGHT - offset;
+  // Top of the tile, in screen space
+  auto face = isoDiamond(position, TILE_HEIGHT_F);
+  for (auto& point : face) {
+    point -= offset;
+  }
 
-  // Draw of top of tile
-  asw::draw::line(screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2),
-                  screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F), colour);
+  asw::draw::polygon_fill(face, asw::Color(colour.r, colour.g, colour.b, 60));
+  asw::draw::polygon(face, colour);
+}
 
-  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F / 2, 0.0F),
-                  screen_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
-                  colour);
+void Toolbar::save(nlohmann::json& data) const {
+  data["upgrade_costs"] = {{"drill", drill_upgrade_cost},
+                           {"move", move_upgrade_cost}};
+}
 
-  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F, TILE_HEIGHT_F / 2),
-                  screen_pos + asw::Vec2(TILE_WIDTH_F / 2, TILE_HEIGHT_F),
-                  colour);
-
-  asw::draw::line(screen_pos + asw::Vec2(TILE_WIDTH_F / 2, TILE_HEIGHT_F),
-                  screen_pos + asw::Vec2(0.0F, TILE_HEIGHT_F / 2), colour);
+void Toolbar::load(const nlohmann::json& data) {
+  const auto& costs = data.at("upgrade_costs");
+  drill_upgrade_cost = costs.at("drill").get<int>();
+  move_upgrade_cost = costs.at("move").get<int>();
 }
