@@ -2,10 +2,12 @@
 
 #include <cmath>
 #include <format>
+#include <map>
 #include <optional>
 #include <utility>
 
 #include "../lib/controls.h"
+#include "../tiles/tile_dictionary.h"
 #include "../tiles/tile_ids.h"
 
 namespace {
@@ -222,6 +224,8 @@ void Toolbar::update(float dt,
           ? actionEnabled(world, ToolMode::DRILL) || actionEnabled(world, mode)
           : actionEnabled(world, mode);
 
+  drilling = false;
+
   if (world_input) {
     // Left click and LT use the chosen tool. RT drills whatever tool is
     // chosen, so a controller needs no tool switch to dig
@@ -233,6 +237,14 @@ void Toolbar::update(float dt,
                 asw::input::get_action_strength(controls::DRILL)};
     } else if (asw::input::get_action(controls::USE_TOOL)) {
       active = {mode, 1.0F};
+    }
+
+    // Drilling works while held. Buildings place once per press, so a drag
+    // or a long press does not place a row of them by accident
+    const bool pressed = asw::input::get_action_down(controls::USE) ||
+                         asw::input::get_action_down(controls::USE_TOOL);
+    if (active && active->first != ToolMode::DRILL && !pressed) {
+      active.reset();
     }
 
     if (active && cursor_in_range && pointer_in_world &&
@@ -252,13 +264,14 @@ void Toolbar::update(float dt,
 
     // A moves the worker, or presses the toolbar button under the cursor
     if (asw::input::get_action_down(controls::WAYPOINT)) {
-      pressButtonUnderControllerPointer();
+      pressButtonUnderControllerPointer(world);
     }
     if (asw::input::get_action(controls::WAYPOINT)) {
-      setWaypoint(world);
+      setWaypoint(world, ui, asw::input::get_action_down(controls::WAYPOINT));
     }
 
-    // Tool select
+    // Tool select. Clicks on the tool buttons get the UI sound already
+    const auto old_mode = mode;
     if (asw::input::get_action_down(controls::TOOL_DRILL)) {
       selectTool(ToolMode::DRILL);
     } else if (asw::input::get_action_down(controls::TOOL_PURIFIER)) {
@@ -270,9 +283,14 @@ void Toolbar::update(float dt,
     } else if (asw::input::get_action_down(controls::TOOL_PREV)) {
       cycleTool(-1);
     }
+    if (mode != old_mode) {
+      world.getSounds().play("ui");
+    }
   } else {
     actionProgress = 0.0F;
   }
+
+  world.getSounds().setDrilling(drilling, actionProgress / 100.0F);
 
   refresh(world, ui);
 }
@@ -290,7 +308,7 @@ bool Toolbar::isPointedAt(const asw::ui::Widget& widget,
   return widget.is_highlighted(ui.ctx);
 }
 
-void Toolbar::pressButtonUnderControllerPointer() {
+void Toolbar::pressButtonUnderControllerPointer(World& world) {
   if (!controls::is_controller_pointer() || !pointerOnToolbar()) {
     return;
   }
@@ -300,8 +318,10 @@ void Toolbar::pressButtonUnderControllerPointer() {
                        static_cast<asw::ui::Button*>(tool_buttons[1]),
                        static_cast<asw::ui::Button*>(tool_buttons[2]),
                        upgrade_drill_button, upgrade_move_button}) {
+    // Click sound by hand, the UI only plays it for its own presses
     if (button->enabled && button->transform.contains(pointer) &&
         button->on_click) {
+      world.getSounds().play("ui");
       button->on_click();
       return;
     }
@@ -330,6 +350,7 @@ void Toolbar::buyUpgrade(bool drill, World& world, asw::ui::Root& ui) {
 
   if (resource_manager.getResourceCount("scrap") < cost) {
     ui.toast(need_more("scrap", cost));
+    world.getSounds().play("blocked");
     return;
   }
 
@@ -345,15 +366,18 @@ void Toolbar::buyUpgrade(bool drill, World& world, asw::ui::Root& ui) {
   }
 }
 
-void Toolbar::setWaypoint(World& world) {
-  if (!pointer_in_world) {
+void Toolbar::setWaypoint(World& world, asw::ui::Root& ui, bool pressed) {
+  if (!pointer_in_world ||
+      world.getTileMap().getTileAtIndex(cursor_idx) == nullptr) {
     return;
   }
 
-  const auto* tile = world.getTileMap().getTileAtIndex(cursor_idx);
-  if (tile != nullptr && tile->getTypeId() != tile_id::TOXIC_WATER) {
-    world.setPlayerWaypoint(cursor_idx);
+  if (world.setPlayerWaypoint(cursor_idx)) {
     world.setWaypointActive(true);
+  } else if (pressed) {
+    // Only on the press, since a held button sets the waypoint each frame
+    ui.toast("J1M can't get there");
+    world.getSounds().play("blocked", controls::pointer().x);
   }
 }
 
@@ -365,9 +389,14 @@ void Toolbar::explainDisabledAction(World& world,
     return;
   }
 
+  // Every refused action buzzes, even where there is nothing to explain
+  world.getSounds().play("blocked", controls::pointer().x);
+
   const auto biomass = world.getResourceManager().getResourceCount("biomass");
   if (tool == ToolMode::PURIFIER && biomass < PURIFIER_COST) {
     ui.toast(need_more("biomass", PURIFIER_COST));
+  } else if (tool == ToolMode::PURIFIER && isUnderPlayer(world, cursor_idx)) {
+    ui.toast("J1M is in the way");
   } else if (tool == ToolMode::TREE && biomass < TREE_COST) {
     ui.toast(need_more("biomass", TREE_COST));
   } else if (!cursor_in_range) {
@@ -401,18 +430,34 @@ void Toolbar::action(World& world,
 
     // this is where the drilling begins
     actionProgress += dt * (30.0F / density) * (player.getDrillSpeed() * 3);
+    world.getEffects().drilling(cursor_idx, dt);
+    drilling = true;
     // Harder trigger, harder rumble. Trigger motors buzz under the finger
     controls::rumble(0.15F * strength, 0.25F * strength, 100);
     controls::rumble_triggers(0.0F, 0.3F * strength, 100);
     if (actionProgress > 100.0F) {
       controls::rumble(0.6F, 0.8F, 150);
       controls::rumble_triggers(0.0F, 0.8F, 150);
+      std::map<std::string, int> drops;
       for (const auto& drop :
            select_type->getActionsOfType(ActionType::DESTROY)) {
         if (!drop.drop_resource_id.empty()) {
           resource_manager.addResourceCount(drop.drop_resource_id, 1);
+          ++drops[drop.drop_resource_id];
         }
       }
+
+      // Show what the tile gave, e.g. "+1 scrap  +2 biomass"
+      std::string gained;
+      for (const auto& [resource, count] : drops) {
+        gained += std::format("{}+{} {}", gained.empty() ? "" : "  ", count,
+                              resource);
+      }
+      if (!gained.empty()) {
+        world.getEffects().popup(cursor_idx, gained, GREEN);
+      }
+      world.getEffects().tileBroken(cursor_idx, world.getCamera());
+      world.getSounds().play("destroy", controls::pointer().x);
       selected_tile->setType(tile_id::NONE);
       selected_tile->setStructure(nullptr);
       actionProgress = 0.0F;
@@ -431,13 +476,25 @@ void Toolbar::action(World& world,
   if (tool == ToolMode::PURIFIER) {
     tile->setType(tile_id::PURIFIER);
     resource_manager.addResourceCount("biomass", -PURIFIER_COST);
+    tile_map.addPop(idx);
+    world.getEffects().built(idx);
     controls::rumble(0.4F, 0.2F, 120);
+    world.getSounds().play("human-impact", controls::pointer().x);
     ui.toast("Purifier placed");
   } else if (tool == ToolMode::TREE) {
     tile->setType(tile_id::SAPLING);
     resource_manager.addResourceCount("biomass", -TREE_COST);
+    tile_map.addPop(idx);
+    world.getEffects().built(idx);
     controls::rumble(0.2F, 0.4F, 80);
+    world.getSounds().play("human-impact", controls::pointer().x);
   }
+}
+
+bool Toolbar::isUnderPlayer(World& world, const asw::Vec3<int>& tile) {
+  const auto& position = world.getPlayer().getPosition();
+  return static_cast<int>(std::round(position.x)) == tile.x &&
+         static_cast<int>(std::round(position.y)) == tile.y;
 }
 
 bool Toolbar::actionEnabled(World& world, ToolMode tool) const {
@@ -454,8 +511,10 @@ bool Toolbar::actionEnabled(World& world, ToolMode tool) const {
     case ToolMode::DRILL:
       return selected_tile->getType()->getDensity() > 0;
     case ToolMode::PURIFIER:
+      // Not on the worker, which would be trapped inside it
       return biomass >= PURIFIER_COST &&
-             (type == tile_id::TOXIC_WATER || type == tile_id::WATER);
+             (type == tile_id::TOXIC_WATER || type == tile_id::WATER) &&
+             !isUnderPlayer(world, cursor_idx);
     case ToolMode::TREE:
       return biomass >= TREE_COST &&
              (type == tile_id::TOXIC_GRASS || type == tile_id::GROUND_GRASS);
@@ -582,21 +641,28 @@ void Toolbar::drawWorld(World& world) {
   const auto screen = asw::display::get_logical_size();
   const auto pointer = controls::pointer();
 
+  drawPlacement(world);
+
   // Tile under the pointer
-  if (pointer_in_world) {
+  if (pointer_in_world &&
+      world.getTileMap().getTileAtIndex(cursor_idx) != nullptr) {
+    const auto surface = world.getTileMap().getSurfaceOf(cursor_idx);
     if (cursor_in_range && can_take_action) {
-      drawWireframe(cursor_idx, view.position, GREEN);
+      drawWireframe(surface, view.position, GREEN);
     } else if (cursor_in_range) {
-      drawWireframe(cursor_idx, view.position, asw::color::white);
+      drawWireframe(surface, view.position, asw::color::white);
     } else {
-      drawWireframe(cursor_idx, view.position, asw::color::red);
+      drawWireframe(surface, view.position, asw::color::red);
     }
   }
 
-  // Toxic haze over the play area, lighter as the world is purified
+  // Toxic haze over the play area. It fades out smoothly as the world is
+  // purified, and is gone at two thirds
   const float progression = world.getProgression();
-  if (progression < 0.66F) {
-    asw::draw::set_alpha(overlay_1, progression < 0.33F ? 1.0F : 0.5F);
+  const float haze =
+      1.0F - asw::easing::smoothstep(std::min(progression / 0.66F, 1.0F));
+  if (haze > 0.0F) {
+    asw::draw::set_alpha(overlay_1, haze);
     asw::draw::stretch_sprite(
         overlay_1, asw::Quad(0.0F, 0.0F, static_cast<float>(screen.x),
                              static_cast<float>(screen.y) - BAR_HEIGHT));
@@ -618,11 +684,76 @@ void Toolbar::drawWorld(World& world) {
   }
 }
 
-void Toolbar::drawWireframe(const asw::Vec3<int>& position,
+void Toolbar::drawPlacement(World& world) {
+  if (mode == ToolMode::DRILL || !pointer_in_world) {
+    return;
+  }
+
+  auto& tile_map = world.getTileMap();
+  if (tile_map.getTileAtIndex(cursor_idx) == nullptr) {
+    return;
+  }
+
+  // Buildings go on top of the tile under the pointer
+  auto build_idx = cursor_idx;
+  build_idx.z += 1;
+  const auto* build_tile = tile_map.getTileAtIndex(build_idx);
+  const bool placeable = cursor_in_range && actionEnabled(world, mode) &&
+                         build_tile != nullptr &&
+                         build_tile->getType() == nullptr;
+  const auto colour = placeable ? GREEN : CANT_BUY;
+  const auto offset = world.getCamera().get_view().position;
+
+  // A tree's purifying trunk grows over its sapling
+  const auto centre = asw::Vec2(cursor_idx.x, cursor_idx.y);
+
+  // Tint the ground in range, and outline its outer edge. The edge follows
+  // the ground up and down
+  for (int i = centre.x - PURIFY_RANGE; i <= centre.x + PURIFY_RANGE; ++i) {
+    for (int j = centre.y - PURIFY_RANGE; j <= centre.y + PURIFY_RANGE; ++j) {
+      const auto surface = tile_map.getSurface(asw::Vec2(i, j));
+      if (!surface) {
+        continue;
+      }
+
+      // Left, top, right and bottom corners, on screen
+      auto face = surface->face();
+      for (auto& point : face) {
+        point -= offset;
+      }
+      asw::draw::polygon_fill(face,
+                              asw::Color(colour.r, colour.g, colour.b, 22));
+
+      const auto edge = asw::Color(colour.r, colour.g, colour.b, 200);
+      if (i == centre.x - PURIFY_RANGE) {
+        asw::draw::line(face[0], face[1], edge);
+      }
+      if (j == centre.y - PURIFY_RANGE) {
+        asw::draw::line(face[1], face[2], edge);
+      }
+      if (i == centre.x + PURIFY_RANGE) {
+        asw::draw::line(face[2], face[3], edge);
+      }
+      if (j == centre.y + PURIFY_RANGE) {
+        asw::draw::line(face[3], face[0], edge);
+      }
+    }
+  }
+
+  // Ghost of the building, red where it can not go
+  const auto type = TileDictionary::getTile(
+      mode == ToolMode::PURIFIER ? tile_id::PURIFIER : tile_id::SAPLING);
+  if (type != nullptr && build_tile != nullptr) {
+    type->drawGhost(build_idx, offset,
+                    placeable ? asw::color::white : CANT_BUY, 0.55F);
+  }
+}
+
+void Toolbar::drawWireframe(const Surface& surface,
                             const asw::Vec2<float>& offset,
                             asw::Color colour) {
-  // Top of the tile, in screen space
-  auto face = isoDiamond(position, TILE_HEIGHT_F);
+  // Top of the ground, in screen space
+  auto face = surface.face();
   for (auto& point : face) {
     point -= offset;
   }

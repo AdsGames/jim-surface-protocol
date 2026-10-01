@@ -7,6 +7,7 @@
 #include "../tiles/tile_map.h"
 #include "./resource_manager.h"
 #include "./sound_orchestrator.h"
+#include "./world_effects.h"
 #include "./world_lighting.h"
 
 class World {
@@ -35,18 +36,28 @@ class World {
   TileMap& getTileMap() { return tile_map; }
 
   asw::Vec3<int> getPlayerWaypoint() { return playerWaypoint; }
-  void setPlayerWaypoint(const asw::Vec3<int>& waypoint) {
-    playerWaypoint = waypoint;
-  }
+  // Send the worker to a tile, or next to it if it is blocked. False if
+  // there is no route, and the worker keeps its old one
+  bool setPlayerWaypoint(const asw::Vec3<int>& waypoint);
+
+  /// Effect Utils
+  WorldEffects& getEffects() { return effects; }
+  SoundOrchestrator& getSounds() { return sound_orchestrator; }
 
   // Resource Utils
   ResourceManager& getResourceManager() { return resource_manager; }
 
   bool getWaypointActive() const { return waypointActive; }
-  void setWaypointActive(bool active) { waypointActive = active; }
+  void setWaypointActive(bool active) {
+    if (active && !waypointActive) {
+      waypoint_age = 0.0F;
+    }
+    waypointActive = active;
+  }
 
   // Purity Progression
   float getProgression() const { return progression; }
+  void updateProgression();
 
  private:
   asw::Vec3<int> playerWaypoint{0, 0, 0};
@@ -73,4 +84,26 @@ class World {
   float pan_ramp{0.0F};
 
   float progression{0.0F};
+
+  WorldEffects effects;
+
+  // Seconds since the waypoint marker was placed, for its drop in
+  float waypoint_age{0.0F};
+
+  // Sky behind the map
+  void drawSky(const asw::Quad<float>& view);
+
+  // Move the worker to the nearest land if its column can not be driven on,
+  // e.g. a tree grew there or an old save left it stuck
+  void rescuePlayer();
+
+  // Dots on the ground from the worker to the waypoint
+  void drawRoute();
+
+  struct Star {
+    asw::Vec2<float> position;  // 0 to 1 across the screen
+    float size;
+    float phase;
+  };
+  std::vector<Star> stars;
 };

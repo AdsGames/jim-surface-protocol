@@ -86,7 +86,7 @@ class Toolbar {
 
   // The controller cursor presses toolbar buttons itself, since the UI only
   // follows the mouse
-  void pressButtonUnderControllerPointer();
+  void pressButtonUnderControllerPointer(World& world);
 
   // strength: how hard the trigger is held, from 0 to 1, for rumble
   void action(World& world,
@@ -95,16 +95,25 @@ class Toolbar {
               ToolMode tool,
               float strength);
   bool actionEnabled(World& world, ToolMode tool) const;
+
+  // True if the worker is on the tile's column
+  static bool isUnderPlayer(World& world, const asw::Vec3<int>& tile);
   void explainDisabledAction(World& world, asw::ui::Root& ui, ToolMode tool);
-  void setWaypoint(World& world);
+  // pressed: the button went down this frame, so a failure is worth a toast
+  void setWaypoint(World& world, asw::ui::Root& ui, bool pressed);
 
   // Widget text and state from the world
   void refresh(World& world, const asw::ui::Root& ui);
   void setInfo(const std::vector<std::string>& lines);
 
-  void drawWireframe(const asw::Vec3<int>& position,
+  // Outline the ground the tile shows, so items and water outline where
+  // they sit
+  void drawWireframe(const Surface& surface,
                      const asw::Vec2<float>& offset,
                      asw::Color colour);
+
+  // Where the chosen building would go and the area it would purify
+  void drawPlacement(World& world);
 
   asw::Font font;
   asw::Font fontLarge;
@@ -137,6 +146,9 @@ class Toolbar {
   bool pointer_in_world{false};
   bool can_take_action{false};
   float actionProgress{0.0F};
+
+  // True if the drill worked a tile this frame, for the drill loop sound
+  bool drilling{false};
 
   int drill_upgrade_cost{10};
   int move_upgrade_cost{10};

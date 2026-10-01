@@ -50,10 +50,11 @@ std::shared_ptr<Structure> Tile::getStructure() const {
 void Tile::draw(const asw::Vec2<float>& offset,
                 bool left_border,
                 bool right_border,
-                bool selected) const {
+                bool selected,
+                float scale) const {
   if (t_type == nullptr) {
     return;
   }
 
-  t_type->draw(position, offset, left_border, right_border, selected);
+  t_type->draw(position, offset, left_border, right_border, selected, scale);
 }

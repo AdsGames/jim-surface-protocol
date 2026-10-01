@@ -5,6 +5,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <unordered_map>
+#include <utility>
 
 #include "../tiles/structure_dictionary.h"
 #include "../tiles/tile_ids.h"
@@ -14,7 +15,26 @@ int TileMap::MAP_WIDTH = MAX_MAP_WIDTH;
 int TileMap::MAP_DEPTH = MAX_MAP_DEPTH;
 float TileMap::SEED = 0.0F;
 
+namespace {
+// Seconds for a new tile to grow in
+constexpr float POP_TIME = 0.35F;
+}  // namespace
+
+void TileMap::addPop(const asw::Vec3<int>& index) {
+  pops.push_back({index, 0.0F});
+}
+
+std::vector<asw::Vec3<int>> TileMap::takePurified() {
+  return std::exchange(purified, {});
+}
+
 void TileMap::update(float dt) {
+  // Grow tiles in every frame, not only on ticks
+  for (auto& pop : pops) {
+    pop.age += dt;
+  }
+  std::erase_if(pops, [](const Pop& pop) { return pop.age >= POP_TIME; });
+
   // Tick timer
   tick_timer += dt;
   if (tick_timer < TICK_TIME) {
@@ -46,6 +66,18 @@ void TileMap::update(float dt) {
   }
 }
 
+void TileMap::recount() {
+  tileCount.fill(0);
+  for (int i = 0; i < MAP_WIDTH; ++i) {
+    for (int j = 0; j < MAP_DEPTH; ++j) {
+      for (int k = 0; k < MAP_HEIGHT; ++k) {
+        tileCount[mapTiles[i][j][k].getTypeId()] += 1;
+      }
+    }
+  }
+  tileCount[tile_id::NONE] = 0;
+}
+
 void TileMap::tick_tile(const asw::Vec3<int>& index) {
   // Tick actions
   auto type = mapTiles[index.x][index.y][index.z].getType();
@@ -55,8 +87,8 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
 
   // Random point selection
   auto point = index;
-  point.x += asw::random::between(-10, 10);
-  point.y += asw::random::between(-10, 10);
+  point.x += asw::random::between(-PURIFY_RANGE, PURIFY_RANGE);
+  point.y += asw::random::between(-PURIFY_RANGE, PURIFY_RANGE);
 
   for (const auto& action : type->getActions()) {
     if (action.type != ActionType::TICK) {
@@ -82,6 +114,7 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
           if (action2.type == ActionType::PURIFY) {
             mapTiles[point.x][point.y][point.z].setType(
                 action2.transition_tile_id);
+            purified.push_back(point);
           }
         }
       }
@@ -96,7 +129,23 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
         continue;
       }
 
-      generateStructure(action.spawn_structure_id, point);
+      // Centre the structure on the tile, e.g. a tree's trunk over its
+      // sapling
+      const auto structure_def =
+          StructureDictionary::getStructure(action.spawn_structure_id);
+      if (structure_def != nullptr) {
+        point.x -= structure_def->dimensions.x / 2;
+        point.y -= structure_def->dimensions.y / 2;
+      }
+
+      // Wait for the worker to move away. A later tick tries again
+      if (coversReservedColumn(action.spawn_structure_id, point)) {
+        continue;
+      }
+
+      // The tile keeps ticking under its structure, so a tree regrows
+      // leaves that were drilled, without covering anything built since
+      generateStructure(action.spawn_structure_id, point, true);
     }
 
     if (action.tick_type == TickType::GROWTH) {
@@ -117,6 +166,9 @@ void TileMap::tick_tile(const asw::Vec3<int>& index) {
 }
 
 void TileMap::generate() {
+  pops.clear();
+  purified.clear();
+
   // Init map
   for (int i = 0; i < MAX_MAP_WIDTH; ++i) {
     for (int j = 0; j < MAX_MAP_DEPTH; ++j) {
@@ -201,10 +253,14 @@ void TileMap::generate() {
       }
     }
   }
+
+  recount();
+  tick_timer = 0.0F;
 }
 
 void TileMap::generateStructure(const std::string& id_str,
-                                const asw::Vec3<int>& position) {
+                                const asw::Vec3<int>& position,
+                                bool only_empty) {
   auto structure_def = StructureDictionary::getStructure(id_str);
   if (structure_def == nullptr) {
     return;
@@ -232,7 +288,7 @@ void TileMap::generateStructure(const std::string& id_str,
         tile_offset.x = k;
 
         auto tile = getTileAtIndex(position + tile_offset);
-        if (tile == nullptr) {
+        if (tile == nullptr || (only_empty && tile->getType() != nullptr)) {
           continue;
         }
 
@@ -241,6 +297,20 @@ void TileMap::generateStructure(const std::string& id_str,
       }
     }
   }
+}
+
+bool TileMap::coversReservedColumn(const std::string& id_str,
+                                   const asw::Vec3<int>& position) const {
+  const auto structure_def = StructureDictionary::getStructure(id_str);
+  if (structure_def == nullptr) {
+    return false;
+  }
+
+  const auto& size = structure_def->dimensions;
+  return std::ranges::any_of(reserved_columns, [&](const auto& column) {
+    return column.x >= position.x && column.x < position.x + size.x &&
+           column.y >= position.y && column.y < position.y + size.y;
+  });
 }
 
 Tile* TileMap::getTileAt(const asw::Vec2<float>& position) {
@@ -267,6 +337,35 @@ Tile* TileMap::getTopTileAt(const asw::Vec2<int>& index) {
   }
 
   return nullptr;
+}
+
+std::optional<Surface> TileMap::getSurface(const asw::Vec2<int>& column) {
+  for (int k = MAP_HEIGHT - 1; k >= 0; --k) {
+    const auto* tile = getTileAtIndex({column.x, column.y, k});
+    if (tile != nullptr && tile->getType() != nullptr &&
+        !tile->getType()->isItem()) {
+      return Surface{tile->getPosition(), tile->getType()->surfaceDrop()};
+    }
+  }
+  return std::nullopt;
+}
+
+Surface TileMap::getSurfaceOf(const asw::Vec3<int>& index) {
+  const auto* tile = getTileAtIndex(index);
+  if (tile == nullptr || tile->getType() == nullptr) {
+    return {index, 0.0F};
+  }
+
+  // Items stand on the tile below
+  if (tile->getType()->isItem()) {
+    const auto* below = getTileAtIndex({index.x, index.y, index.z - 1});
+    const float drop = below != nullptr && below->getType() != nullptr
+                           ? below->getType()->surfaceDrop()
+                           : 0.0F;
+    return {{index.x, index.y, index.z - 1}, drop};
+  }
+
+  return {index, tile->getType()->surfaceDrop()};
 }
 
 asw::Vec3<int> TileMap::getIndexAt(const asw::Vec2<float>& position) {
@@ -365,12 +464,17 @@ void TileMap::draw_layer(const asw::Quad<float>& camera,
                          mapTiles[i][j - 1][layer].getType() == nullptr ||
                          !mapTiles[i][j - 1][layer].getType()->isOpaque();
 
-      if (i == selected_index.x && j == selected_index.y &&
-          layer == selected_index.z) {
-        tile.draw(camera.position, empty_left, empty_right, true);
-      } else {
-        tile.draw(camera.position, empty_left, empty_right, false);
+      // Tiles growing in overshoot a little, then settle
+      float scale = 1.0F;
+      for (const auto& pop : pops) {
+        if (pop.index.x == i && pop.index.y == j && pop.index.z == layer) {
+          scale = asw::easing::ease_out_back(pop.age / POP_TIME);
+        }
       }
+
+      const bool selected = i == selected_index.x && j == selected_index.y &&
+                            layer == selected_index.z;
+      tile.draw(camera.position, empty_left, empty_right, selected, scale);
     }
   }
 }
@@ -486,6 +590,9 @@ nlohmann::json TileMap::save() const {
 }
 
 void TileMap::load(const nlohmann::json& data) {
+  pops.clear();
+  purified.clear();
+
   MAP_WIDTH = std::clamp(data.at("width").get<int>(), 1, MAX_MAP_WIDTH);
   MAP_DEPTH = std::clamp(data.at("depth").get<int>(), 1, MAX_MAP_DEPTH);
   SEED = data.at("seed").get<float>();
@@ -522,6 +629,6 @@ void TileMap::load(const nlohmann::json& data) {
     }
   }
 
-  // Counts come back on the next tick
-  tick_timer = TICK_TIME;
+  recount();
+  tick_timer = 0.0F;
 }

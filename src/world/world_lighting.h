@@ -2,7 +2,10 @@
 
 #include <asw/asw.h>
 #include <memory>
+#include <optional>
 #include <vector>
+
+#include "../tiles/tile_map.h"
 
 class World;
 
@@ -21,6 +24,9 @@ class WorldLighting {
   float getTime() const { return time; }
   void setTime(float new_time) { time = new_time; }
 
+  // How dark it is, from 0 at noon to 1 on the darkest night
+  float getDarkness() const { return darkness; }
+
  private:
   // Spread light from glowing tiles across the map
   void computeGlow(World& world);
@@ -35,12 +41,14 @@ class WorldLighting {
 
   std::unique_ptr<asw::lighting::TileLight> tile_light;
 
-  // Height of the top tile in each column, x major
-  std::vector<int> top_z;
+  // Ground of each column, x major. Glow lies on it, under items and on
+  // the water surface
+  std::vector<std::optional<Surface>> surfaces;
 
   asw::Texture glow;
   asw::Quad<float> glow_bounds;
 
   float time{0.0F};
+  float darkness{0.0F};
   float glow_timer{0.0F};
 };

@@ -15,6 +15,9 @@ constexpr int TILE_HEIGHT = TILE_SIZE / 2;
 constexpr float TILE_WIDTH_F = static_cast<float>(TILE_WIDTH);
 constexpr float TILE_HEIGHT_F = static_cast<float>(TILE_HEIGHT);
 
+// Tiles drawn as only a top, e.g. water, sit this far below a full cube
+constexpr float TOP_ONLY_DROP = TILE_SIZE * 0.2F;
+
 enum class TileRenderMode {
   NONE,
   CUBE,
@@ -31,7 +34,14 @@ class TileType {
             const asw::Vec2<float>& offset,
             bool left_border,
             bool right_border,
-            bool selected);
+            bool selected,
+            float scale = 1.0F);
+
+  // See-through preview, e.g. where a building would go
+  void drawGhost(const asw::Vec3<int>& position,
+                 const asw::Vec2<float>& offset,
+                 asw::Color tint,
+                 float alpha);
 
   short getId() const;
   const std::string& getName() const;
@@ -69,6 +79,16 @@ class TileType {
 
   void bakeTexture(TileRenderMode mode, float alpha);
 
+  // Items, e.g. plants and junk, are drawn flat in their cell. They have no
+  // top face, and stand on the tile below
+  bool isItem() const { return render_mode == TileRenderMode::FLAT; }
+
+  // How far the visible top sits below a full cube's top, in pixels. Water
+  // is drawn lower than a full block
+  float surfaceDrop() const {
+    return render_mode == TileRenderMode::CUBE_TOP_ONLY ? TOP_ONLY_DROP : 0.0F;
+  }
+
   bool isOpaque() const {
     return render_mode == TileRenderMode::CUBE ||
            render_mode == TileRenderMode::CUBE_UNIQUE_TOP ||
@@ -103,6 +123,9 @@ class TileType {
   std::vector<asw::Texture> images;
   std::vector<asw::Texture> rendered_images;
   asw::Texture image;
+
+  // Alpha the texture was baked with, e.g. for see-through water
+  float base_alpha{1.0F};
   TileRenderMode render_mode{TileRenderMode::NONE};
   std::vector<ActionResult> actions;
 };

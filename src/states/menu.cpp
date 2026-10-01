@@ -28,9 +28,17 @@ void Menu::init() {
   jims[4] = asw::assets::load_texture("assets/images/player/full/5.png");
   jims[5] = asw::assets::load_texture("assets/images/player/full/4.png");
 
+  // The intro hands over with this track already playing, so only start it
+  // when coming back from a game
+  music = asw::assets::load_music("assets/music/intro.ogg");
+  if (!asw::sound::is_music_playing()) {
+    asw::sound::play_music(music);
+  }
+
   // The scene is reused, so rebuild the UI from nothing
   ui.root.clear_children();
   ui.ctx.theme.font = font_button;
+  ui.ctx.theme.sound_activate = asw::assets::load_sample("assets/sfx/ui.ogg");
   ui.ctx.navigation = controls::menu_navigation(controls::BACK);
   ui.on_back = []() { asw::core::exit(); };
 
